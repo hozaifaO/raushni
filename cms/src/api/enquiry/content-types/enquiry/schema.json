@@ -1,0 +1,50 @@
+{
+  "kind": "collectionType",
+  "collectionName": "enquiries",
+  "info": {
+    "singularName": "enquiry",
+    "pluralName": "enquiries",
+    "displayName": "Enquiry",
+    "description": "Public enquiries from contact, volunteer, and program forms"
+  },
+  "options": {
+    "draftAndPublish": false,
+    "populateCreatorFields": true
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "email": {
+      "type": "email"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "subject": {
+      "type": "string",
+      "required": true
+    },
+    "message": {
+      "type": "text",
+      "required": true
+    },
+    "source": {
+      "type": "enumeration",
+      "enum": ["CONTACT", "VOLUNTEER", "DONATION", "CAREER", "GENERAL"],
+      "default": "CONTACT"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["NEW", "IN_PROGRESS", "RESOLVED", "ARCHIVED"],
+      "default": "NEW"
+    },
+    "assignedTo": {
+      "type": "string"
+    },
+    "resolvedAt": {
+      "type": "datetime"
+    }
+  }
+}

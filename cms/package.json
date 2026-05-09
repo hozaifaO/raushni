@@ -14,6 +14,8 @@
     "format": "prettier --write .",
     "seed": "node scripts/seed.js",
     "test": "jest",
+    "test:ci": "jest --ci --runInBand",
+    "test:e2e": "RUN_CMS_E2E=true jest tests/e2e --runInBand",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
   },
@@ -38,7 +40,7 @@
     "supertest": "^6.3.3"
   },
   "engines": {
-    "node": ">=18.0.0",
+    "node": ">=18.0.0 <=20.x.x",
     "npm": ">=9.0.0"
   },
   "strapi": {

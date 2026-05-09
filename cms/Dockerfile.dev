@@ -9,11 +9,11 @@ RUN apk add --no-cache \
     vim \
     git
 
-# Copy package files
-COPY package.json package-lock.json ./
+# Copy package files. package-lock.json is optional in this repository.
+COPY package*.json ./
 
 # Install all dependencies
-RUN npm install
+RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
 # Copy source code
 COPY . .
