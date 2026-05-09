@@ -39,7 +39,8 @@ export default function Header({ sidebarOpen, setSidebarOpen }) {
               style={{ width: "1in", height: "1in" }}
             />
             <span className="font-bold text-xl hidden sm:inline bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent">
-              RAUSHNI-ESWT
+              RAUSHNI-ESWT<br/>
+              The Educational & Social Welfare
             </span>
           </Link>
         </div>

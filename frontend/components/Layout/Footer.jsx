@@ -39,14 +39,19 @@ export default function Footer() {
           {/* About Section */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <img
-                src="/assets/images/logo.png"
-                alt="Raushni logo"
-                className="rounded-full object-cover"
-                style={{ width: "1in", height: "1in" }}
-              />
-              <h3 className="text-lg font-semibold text-white">Raushni-ESWT</h3>
+               <img
+                  src="/assets/images/tL1.png"
+                  alt="Techo4u"
+                  className="object-cover"
+                  style={{ 
+                    width: "100%",
+                    maxWidth: "2.5in",
+                    height: "2in",
+                    borderRadius: "8px"
+                  }}
+                />
             </div>
+            <div><p>Powered By Owais4u LLC</p><br/></div>
             <p className="text-sm leading-relaxed">
               Empowering communities through education and social welfare.
               Together we can make a difference in the lives of those who need it most.
@@ -99,7 +104,7 @@ export default function Footer() {
             <h3 className="text-lg font-semibold text-white mb-4">Contact Us</h3>
             <div className="space-y-3">
               <div className="flex items-start gap-3">
-                <MapPin size={18} className="text-orange-400 mt-0.5" />
+                <MapPin size={50} className="text-orange-400 mt-0.5" />
                 <p className="text-sm">Rauzah Aparment, Bhatauna Road, Marwan Khurd Muzaffarpur Bihar - 843113</p>
               </div>
               <div className="flex items-center gap-3">
@@ -138,7 +143,7 @@ export default function Footer() {
         {/* Copyright */}
         <div className="mt-8 pt-8 border-t border-gray-800 text-center">
           <p className="text-sm">
-            © {currentYear} Raushni Educational & Social Welfare Trust. All rights reserved.
+            © {currentYear} Raushni : Educational & Social Welfare Trust. All rights reserved.
           </p>
           <p className="text-xs mt-2 text-gray-500">
             Registered under Section 8 of Companies Act, 2013 | 12A & 80G Tax Exempted
