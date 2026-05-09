@@ -1,29 +1,58 @@
 # Raushni Frontend
 
-Next.js frontend for the Raushni Educational & Social Welfare Trust management platform.
+[![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-18-61DAFB)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3-38BDF8)](https://tailwindcss.com/)
+[![Jest](https://img.shields.io/badge/Jest-tested-C21325)](https://jestjs.io/)
 
-The app includes public pages, authentication screens, dashboard modules, CMS integrations, API clients, shared UI components, and document-related helpers.
+The Raushni frontend is the web experience for Raushni Educational & Social Welfare Trust. It powers the public website, authentication flows, administrative dashboard, CMS-backed content, document workflows, API integrations, and reusable UI system for the platform.
 
-## Tech Stack
+This app is built with the Next.js App Router and is designed to run both as part of the full Docker Compose stack and as an individual local development service.
 
-- Next.js 16 with the App Router
-- React 18
-- TypeScript
-- Tailwind CSS
-- NextAuth
-- React Query
-- Jest and React Testing Library
-- Cypress for browser/e2e tests
-- Storybook for UI component development
+## At a Glance
+
+| Area | Details |
+| --- | --- |
+| Framework | Next.js 16 App Router |
+| UI runtime | React 18 |
+| Language | TypeScript with strict checks |
+| Styling | Tailwind CSS |
+| Auth | NextAuth and app-level auth contexts |
+| API layer | Service modules under `services/api` and `services/cms` |
+| Testing | Jest, React Testing Library, Cypress |
+| UI development | Storybook |
+| Build output | Next.js standalone production output |
+
+## Product Areas
+
+| Area | Routes and responsibilities |
+| --- | --- |
+| Public site | Home, about, activities, events, blog, gallery, careers, volunteer, contact, and donation entry points. |
+| Authentication | Login, registration, password reset, email verification, and auth route handlers. |
+| Dashboard shell | Shared header, sidebar, footer, navigation, settings context, notifications, and protected workflows. |
+| Management modules | Members, beneficiaries, donations, crowdfunding, internships, projects, enquiries, reports, news, activities, certificates, and settings. |
+| CMS integration | Rich content rendering, media upload, preview mode, SEO metadata, and CMS webhooks. |
+| Documents | Document preview, download helpers, QR generation, upload helpers, and PDF-related workflows. |
 
 ## Prerequisites
 
 - Node.js 18 or newer
 - npm 9 or newer
-- Raushni backend API running locally or reachable by URL
-- CMS service running locally or reachable by URL, when working with content pages
+- Backend API available locally or by URL
+- CMS service available locally or by URL when working with CMS-backed content
+
+Recommended full-stack local services:
+
+| Service | Default URL |
+| --- | --- |
+| Frontend | `http://localhost:3000` |
+| Backend API | `http://localhost:8000` |
+| CMS | `http://localhost:1337` |
 
 ## Quick Start
+
+From the repository root:
 
 ```bash
 cd frontend
@@ -31,17 +60,17 @@ npm install
 npm run dev
 ```
 
-The development server starts at:
+Open:
 
 ```text
 http://localhost:3000
 ```
 
-If port `3000` is already in use, Next.js will choose another available port.
+If port `3000` is already in use, Next.js will print the alternate local URL.
 
-## Environment Variables
+## Environment Configuration
 
-Create or update `frontend/.env.local` for local development.
+Create `frontend/.env.local` for local development:
 
 ```bash
 NEXT_PUBLIC_API_URL=http://localhost:8000
@@ -59,220 +88,248 @@ NEXT_PUBLIC_MAX_FILE_SIZE=10485760
 NEXT_PUBLIC_ALLOWED_FILE_TYPES=image/jpeg,image/png,application/pdf
 ```
 
-Common variables:
+Environment variables:
 
-| Variable | Purpose |
-| --- | --- |
-| `NEXT_PUBLIC_API_URL` | Base URL for backend API requests and `/api/:path*` rewrites. |
-| `NEXT_PUBLIC_CMS_URL` | Base URL for CMS requests and `/cms/api/:path*` rewrites. |
-| `NEXT_PUBLIC_PYTHON_URL` | URL for Python/document-generation service integrations. |
-| `NEXT_PUBLIC_APP_URL` | Public app URL used by frontend flows. |
-| `NEXTAUTH_URL` | Base URL used by NextAuth. |
-| `NEXTAUTH_SECRET` | Local signing secret for NextAuth. |
-| `NEXT_PUBLIC_ENABLE_ANALYTICS` | Enables or disables frontend analytics code paths. |
-| `NEXT_PUBLIC_ENABLE_DEBUG_MODE` | Enables extra debug behavior in development. |
-| `NEXT_PUBLIC_MAX_FILE_SIZE` | Maximum upload size in bytes. |
-| `NEXT_PUBLIC_ALLOWED_FILE_TYPES` | Comma-separated list of allowed MIME types. |
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `NEXT_PUBLIC_API_URL` | Yes | Backend API base URL used by clients and `/api/:path*` rewrites. |
+| `NEXT_PUBLIC_CMS_URL` | Yes | CMS base URL used by clients and `/cms/api/:path*` rewrites. |
+| `NEXT_PUBLIC_PYTHON_URL` | Optional | Python/document service URL for document-related integrations. |
+| `NEXT_PUBLIC_APP_URL` | Recommended | Canonical frontend URL for app flows and links. |
+| `NEXTAUTH_URL` | Yes for auth | Base URL used by NextAuth. |
+| `NEXTAUTH_SECRET` | Yes for auth | Secret used by NextAuth signing/encryption. |
+| `NEXT_PUBLIC_ENABLE_ANALYTICS` | Optional | Enables analytics-related frontend behavior. |
+| `NEXT_PUBLIC_ENABLE_DEBUG_MODE` | Optional | Enables extra debug behavior in development. |
+| `NEXT_PUBLIC_MAX_FILE_SIZE` | Optional | Maximum upload size in bytes. |
+| `NEXT_PUBLIC_ALLOWED_FILE_TYPES` | Optional | Comma-separated list of allowed upload MIME types. |
 
-Do not commit real production secrets.
+Never commit real production secrets.
 
 ## Scripts
 
-```bash
-npm run dev
-```
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start the Next.js development server. |
+| `npm run build` | Create a production build. |
+| `npm run start` | Start the production server after building. |
+| `npm run lint` | Run ESLint across TS, TSX, JS, and JSX files. |
+| `npm run type-check` | Run TypeScript without emitting output. |
+| `npm run test` | Run Jest tests. |
+| `npm run test:ci` | Run Jest in CI mode with no-watch behavior. |
+| `npm run test:watch` | Run Jest in watch mode. |
+| `npm run test:coverage` | Generate Jest coverage output. |
+| `npm run format` | Format files with Prettier. |
+| `npm run format:check` | Check Prettier formatting. |
+| `npm run analyze` | Run a production build with bundle analysis enabled. |
+| `npm run storybook` | Start Storybook on port `6006`. |
+| `npm run build-storybook` | Build Storybook. |
+| `npm run cypress:open` | Open Cypress. |
+| `npm run cypress:run` | Run Cypress headlessly. |
 
-Start the local Next.js development server.
+## Quality Gate
 
-```bash
-npm run build
-```
-
-Create a production build.
-
-```bash
-npm run start
-```
-
-Run the production server after building.
+Run these before opening a pull request or shipping a build:
 
 ```bash
 npm run type-check
-```
-
-Run TypeScript checks without emitting files.
-
-```bash
 npm run lint
-```
-
-Run ESLint for TypeScript, TSX, JavaScript, and JSX files.
-
-```bash
-npm run test
 npm run test:ci
-npm run test:coverage
+npm run build
 ```
 
-Run Jest tests.
-
-```bash
-npm run storybook
-npm run build-storybook
-```
-
-Run or build Storybook.
-
-```bash
-npm run cypress:open
-npm run cypress:run
-```
-
-Run Cypress tests.
-
-## App Routes
-
-Public pages:
-
-- `/`
-- `/about`
-- `/activities`
-- `/blog`
-- `/careers`
-- `/contact`
-- `/donate`
-- `/events`
-- `/gallery`
-- `/volunteer`
-
-Authentication pages:
-
-- `/login`
-- `/register`
-- `/forgot-password`
-- `/reset-password/[token]`
-- `/verify-email/[token]`
-
-Dashboard pages:
-
-- `/dashboard`
-- `/members`
-- `/beneficiaries`
-- `/donations`
-- `/certificates`
-- `/crowdfunding`
-- `/internships`
-- `/projects`
-- `/activities`
-- `/events`
-- `/news`
-- `/enquiries`
-- `/reports`
-- `/settings`
-
-Some dashboard modules currently use a shared coming-soon placeholder while the full workflow screens are being built.
+Current known lint warnings may appear for raw `<img>` usage in layout files. Prefer `next/image` when optimizing those images.
 
 ## Project Structure
 
 ```text
 frontend/
-  app/                 Next.js App Router routes and route groups
-  components/          Reusable UI, layout, CMS, dashboard, and document components
-  config/              Site, API, navigation, and app constants
-  contexts/            React context providers
-  public/              Static assets, icons, images, and PWA files
-  services/            API, CMS, and websocket service clients
-  types/               Shared TypeScript types
-  utils/               Formatters, validators, helpers, and constants
+  app/                     Next.js App Router routes, layouts, route groups, and API routes
+  components/              Shared UI, layout, CMS, dashboard, and document components
+  config/                  Site, API, navigation, and app constants
+  contexts/                React providers for auth, CMS, notifications, settings, and theme
+  public/                  Static assets, favicons, images, PWA assets, and fonts
+  services/                API clients, CMS services, webhooks, and websocket clients
+  types/                   Shared request, response, model, and app TypeScript types
+  utils/                   Formatters, validators, file helpers, QR helpers, and constants
 ```
 
-Important route groups:
+Route groups:
 
 ```text
-app/(public)      Public website pages
-app/(auth)        Login, register, and password flows
-app/(dashboard)   Authenticated dashboard pages
-app/api           Next.js API routes and webhooks
+app/(public)       Public website pages
+app/(auth)         Login, register, and account recovery pages
+app/(dashboard)    Dashboard shell and management modules
+app/api            Next.js API routes, uploads, revalidation, and webhooks
 ```
 
-## API Rewrites
+## Route Map
 
-`next.config.js` proxies local frontend requests:
+Public routes:
+
+| Route | Purpose |
+| --- | --- |
+| `/` | Home page |
+| `/about` | Organization overview |
+| `/activities` | Public activity content |
+| `/blog` | Blog/news-style content |
+| `/careers` | Career and opportunity information |
+| `/contact` | Contact page |
+| `/donate` | Donation entry point |
+| `/events` | Public events |
+| `/gallery` | Media gallery |
+| `/volunteer` | Volunteer entry point |
+
+Authentication routes:
+
+| Route | Purpose |
+| --- | --- |
+| `/login` | Sign in |
+| `/register` | Account registration |
+| `/forgot-password` | Password reset request |
+| `/reset-password/[token]` | Password reset confirmation |
+| `/verify-email/[token]` | Email verification |
+
+Dashboard routes:
+
+| Route | Purpose |
+| --- | --- |
+| `/dashboard` | Dashboard landing area |
+| `/members` | Member management |
+| `/beneficiaries` | Beneficiary management |
+| `/beneficiaries/create` | Beneficiary creation |
+| `/beneficiaries/[id]` | Beneficiary details |
+| `/donations` | Donation management |
+| `/certificates` | Certificate workflows |
+| `/crowdfunding` | Crowdfunding campaigns |
+| `/internships` | Internship workflows |
+| `/projects` | Project management |
+| `/news` | News management |
+| `/enquiries` | Enquiry management |
+| `/reports` | Reports |
+| `/settings` | Settings |
+| `/dashboard/events` | Dashboard event management |
+
+Some dashboard modules currently render a shared coming-soon placeholder while their full workflow screens are implemented.
+
+API routes:
+
+| Route | Purpose |
+| --- | --- |
+| `/api/auth/[...nextauth]` | NextAuth route handler |
+| `/api/upload` | Upload handler |
+| `/api/revalidate` | Revalidation handler |
+| `/api/cms/webhook` | CMS webhook handler |
+| `/api/webhook/stripe` | Stripe webhook handler |
+
+## Frontend Architecture
+
+The frontend keeps route concerns, reusable UI, and integration code separated:
+
+| Layer | Location | Guidance |
+| --- | --- | --- |
+| Pages and layouts | `app/` | Keep route-specific composition here. |
+| Reusable UI | `components/` | Prefer existing common or UI components before adding new patterns. |
+| API access | `services/api/` | Keep backend calls in typed service modules. |
+| CMS access | `services/cms/` | Keep Strapi/content operations isolated from page components. |
+| Shared state | `contexts/` | Use providers for app-wide state such as auth, theme, settings, and notifications. |
+| Domain types | `types/` | Keep request, response, and model contracts explicit. |
+| Helpers | `utils/` | Keep formatting, validation, export, download, file, and QR helpers reusable. |
+
+## API Rewrites and Integrations
+
+`next.config.js` proxies frontend requests to local services:
 
 ```text
 /api/:path*      -> NEXT_PUBLIC_API_URL/api/:path*
 /cms/api/:path*  -> NEXT_PUBLIC_CMS_URL/api/:path*
 ```
 
-When the environment variables are missing, Docker-oriented defaults are used:
+Fallbacks are Docker-oriented:
 
 ```text
 http://backend:8000/api/:path*
 http://strapi:1337/api/:path*
 ```
 
-## Development Notes
+Security headers configured globally:
 
-- Use `@/` imports from the `frontend` root.
-- Prefer shared components from `components/Common` and `components/UI` before adding new one-off UI.
-- Keep API calls in `services/api` or `services/cms` instead of calling `fetch` directly from many components.
-- Keep route-specific UI inside the related `app` route group when it is not reusable elsewhere.
-- Static files should go in `public`.
+| Header | Value |
+| --- | --- |
+| `X-Content-Type-Options` | `nosniff` |
+| `X-Frame-Options` | `DENY` |
+| `X-XSS-Protection` | `1; mode=block` |
 
-## Quality Checks
+Allowed remote image hosts:
 
-Before opening a PR or deploying, run:
-
-```bash
-npm run type-check
-npm run lint
-npm run test:ci
-npm run build
-```
-
-Current known lint warnings may appear for raw `<img>` usage in layout files. Replace those with `next/image` when optimizing images.
+- `localhost`
+- `api.raushni.com`
+- `cms.raushni.com`
 
 ## Docker
 
-Development image:
+Build and run the development image:
 
 ```bash
 docker build -f Dockerfile.dev -t raushni-frontend-dev .
 docker run --rm -p 3000:3000 raushni-frontend-dev
 ```
 
-Production image:
+Build and run the production image:
 
 ```bash
 docker build -t raushni-frontend .
 docker run --rm -p 3000:3000 raushni-frontend
 ```
 
-From the repository root, the full stack can also be started with Docker Compose:
+Run the complete platform from the repository root:
 
 ```bash
 docker-compose up -d
 ```
 
+## Development Standards
+
+- Use `@/` imports from the `frontend` root.
+- Keep API calls in `services/api` or `services/cms`.
+- Keep route-only components inside the relevant `app` route group.
+- Use shared `components/Common` and `components/UI` patterns before adding new primitives.
+- Keep business display formatting inside `utils/formatters`.
+- Keep validation logic inside `utils/validators` or schema-specific modules.
+- Store static assets in `public`.
+- Avoid committing generated output such as `.next/`, coverage folders, screenshots, and local build artifacts.
+
 ## Troubleshooting
 
-If Next.js says another dev server is already running, stop the existing process or use the URL shown in the terminal.
+If the dev server reports that another Next.js process is already running, use the URL shown by Next.js or stop the existing process.
 
-If Jest reports a haste module naming collision with `.next/standalone/package.json`, remove the generated `.next` directory and run tests again:
+If API calls fail locally, check the backend health endpoint:
+
+```bash
+curl http://localhost:8000/health
+```
+
+If CMS requests fail, confirm Strapi is running:
+
+```bash
+curl http://localhost:1337
+```
+
+If Jest reports a haste module naming collision with `.next/standalone/package.json`, remove the generated build directory and rerun tests:
 
 ```bash
 rm -rf .next
 npm run test:ci
 ```
 
-If API calls fail locally, confirm the backend URL in `.env.local` and verify the backend is running:
+If a production build fails only inside a restricted sandbox because Turbopack cannot bind a local port, rerun the build in a normal local shell:
 
 ```bash
-curl http://localhost:8000/health
+npm run build
 ```
 
-If CMS content is missing, confirm `NEXT_PUBLIC_CMS_URL` and verify Strapi is running:
+## Related Documentation
 
-```bash
-curl http://localhost:1337
-```
+- [Root project README](../README.md)
+- [Next.js Documentation](https://nextjs.org/docs)
+- [React Documentation](https://react.dev/)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
