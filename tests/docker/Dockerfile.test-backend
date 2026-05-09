@@ -30,5 +30,5 @@ ENV PYTHONPATH=/app
 ENV ENVIRONMENT=testing
 ENV DATABASE_URL=postgresql://test_user:test_pass@test-db:5432/raushni_test
 
-# Run tests
-CMD ["pytest", "tests/", "-v", "--cov=app", "--cov-report=term-missing", "--cov-report=html"]
+# Run tests and write machine-readable reports for CI/container runs.
+CMD ["pytest", "tests/", "-v", "--cov=app", "--cov-report=term-missing", "--cov-report=html:/app/reports/backend/htmlcov", "--cov-report=xml:/app/reports/backend/coverage.xml", "--junitxml=/app/reports/backend/junit.xml"]

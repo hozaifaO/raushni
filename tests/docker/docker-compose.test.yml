@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Test Database
   test-db:
@@ -52,7 +50,7 @@ services:
     volumes:
       - ../../backend:/app
       - ../../tests/backend:/app/tests
-      - test-reports:/app/reports
+      - ../../reports/backend:/app/reports/backend
 
   # Frontend Tests
   frontend-tests:

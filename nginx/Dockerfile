@@ -1,17 +1,18 @@
 FROM nginx:alpine
 
+RUN apk add --no-cache curl openssl
+
 # Remove default configuration
 RUN rm /etc/nginx/conf.d/default.conf
 
 # Copy custom configuration
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY default.conf /etc/nginx/conf.d/default.conf
+COPY docker-entrypoint.sh /docker-entrypoint.d/40-raushni-certificates.sh
 
-# Create SSL directory
-RUN mkdir -p /etc/nginx/ssl
-
-# Copy SSL certificates (if in production)
-COPY ssl/ /etc/nginx/ssl/ 2>/dev/null || true
+# Create runtime directories
+RUN mkdir -p /etc/nginx/ssl /var/www/certbot \
+    && chmod +x /docker-entrypoint.d/40-raushni-certificates.sh
 
 # Expose ports
 EXPOSE 80 443

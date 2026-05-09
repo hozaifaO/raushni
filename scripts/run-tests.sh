@@ -13,9 +13,13 @@ echo -e "${GREEN}🚀 Running Raushni Test Suite${NC}\n"
 # Function to run backend tests
 run_backend_tests() {
     echo -e "${YELLOW}📦 Running Backend Tests...${NC}"
-    cd backend
-    pytest tests/ -v --cov=app --cov-report=term --cov-report=html
-    cd ..
+    mkdir -p reports/backend
+    PYTHONPATH=backend pytest tests/backend -v \
+        --cov=backend/app \
+        --cov-report=term-missing \
+        --cov-report=html:reports/backend/htmlcov \
+        --cov-report=xml:reports/backend/coverage.xml \
+        --junitxml=reports/backend/junit.xml
     echo -e "${GREEN}✅ Backend Tests Complete${NC}\n"
 }
 

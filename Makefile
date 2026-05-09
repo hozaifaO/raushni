@@ -6,7 +6,8 @@ test: test-backend test-frontend
 # Run backend tests
 test-backend:
 	@echo "Running backend tests..."
-	cd backend && pytest tests/ -v --cov=app
+	mkdir -p reports/backend
+	PYTHONPATH=backend pytest tests/backend -v --cov=backend/app --cov-report=term-missing --cov-report=html:reports/backend/htmlcov --cov-report=xml:reports/backend/coverage.xml --junitxml=reports/backend/junit.xml
 
 # Run frontend tests
 test-frontend:
@@ -33,3 +34,7 @@ coverage:
 # Run tests in Docker
 test-docker:
 	docker-compose -f tests/docker/docker-compose.test.yml up --build --abort-on-container-exit
+
+# Run only backend tests in Docker and keep reports in the test volume.
+test-backend-docker:
+	docker-compose -f tests/docker/docker-compose.test.yml up --build --abort-on-container-exit backend-tests
