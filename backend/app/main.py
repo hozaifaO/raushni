@@ -6,6 +6,9 @@ from typing import Any
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.v1.router import api_router
+from app.services.member_service import MemberService
+
 
 APP_NAME = "Raushni NGO API"
 APP_VERSION = "1.0.0"
@@ -13,6 +16,7 @@ APP_VERSION = "1.0.0"
 
 def create_app() -> FastAPI:
     app = FastAPI(title=APP_NAME, version=APP_VERSION)
+    app.state.member_service = MemberService()
 
     app.add_middleware(
         CORSMiddleware,
@@ -37,8 +41,15 @@ def create_app() -> FastAPI:
             "name": APP_NAME,
             "version": APP_VERSION,
             "status": "running",
-            "endpoints": ["GET /health", "GET /api"],
+            "endpoints": [
+                "GET /health",
+                "GET /api",
+                "GET /api/v1/members",
+                "POST /api/v1/members",
+            ],
         }
+
+    app.include_router(api_router)
 
     return app
 

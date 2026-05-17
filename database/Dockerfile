@@ -2,7 +2,7 @@ FROM postgres:15-alpine
 
 # Install additional tools for backup and monitoring
 RUN apk add --no-cache \
-    postgresql15-contrib \
+    postgresql-contrib \
     postgis \
     curl \
     jq \

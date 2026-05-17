@@ -1,0 +1,30 @@
+{
+  "name": "raushni-cms",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=18.0.0 <=20.x.x",
+    "npm": ">=9.0.0"
+  },
+  "scripts": {
+    "develop": "strapi develop",
+    "start": "strapi start",
+    "build": "strapi build",
+    "strapi": "strapi"
+  },
+  "dependencies": {
+    "@strapi/strapi": "4.15.5",
+    "@strapi/plugin-users-permissions": "4.15.5",
+    "@strapi/plugin-i18n": "4.15.5",
+    "@strapi/plugin-graphql": "4.15.5",
+    "@strapi/plugin-email": "4.15.5",
+    "@strapi/plugin-upload": "4.15.5",
+    "pg": "8.11.3",
+    "sharp": "0.32.6",
+    "ajv": "^8.12.0",
+    "ajv-draft-04": "^1.0.0"
+  },
+  "overrides": {
+    "ajv": "^8.12.0"
+  }
+}

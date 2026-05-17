@@ -1,0 +1,65 @@
+{
+  "kind": "collectionType",
+  "collectionName": "members",
+  "info": {
+    "singularName": "member",
+    "pluralName": "members",
+    "displayName": "Member",
+    "description": "NGO Member Management"
+  },
+  "options": {
+    "draftAndPublish": true,
+    "populateCreatorFields": true
+  },
+  "attributes": {
+    "memberId": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "email": {
+      "type": "email",
+      "required": true,
+      "unique": true
+    },
+    "phone": {
+      "type": "string",
+      "required": true
+    },
+    "address": {
+      "type": "text"
+    },
+    "designation": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::designation.designation",
+      "inversedBy": "members"
+    },
+    "joinDate": {
+      "type": "date",
+      "required": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["ACTIVE", "INACTIVE", "SUSPENDED"],
+      "default": "ACTIVE"
+    },
+    "qrCode": {
+      "type": "media",
+      "allowedTypes": ["images"]
+    },
+    "profileImage": {
+      "type": "media",
+      "allowedTypes": ["images"]
+    },
+    "seo": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.seo"
+    }
+  }
+}

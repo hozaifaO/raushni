@@ -1,0 +1,51 @@
+{
+  "kind": "collectionType",
+  "collectionName": "reports",
+  "info": {
+    "singularName": "report",
+    "pluralName": "reports",
+    "displayName": "Report",
+    "description": "Annual reports, audits, and impact documents"
+  },
+  "options": {
+    "draftAndPublish": true,
+    "populateCreatorFields": true
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true
+    },
+    "reportType": {
+      "type": "enumeration",
+      "enum": ["ANNUAL", "AUDIT", "IMPACT", "FINANCIAL", "PROGRAM"],
+      "default": "ANNUAL"
+    },
+    "year": {
+      "type": "integer",
+      "required": true
+    },
+    "summary": {
+      "type": "text"
+    },
+    "file": {
+      "type": "media",
+      "allowedTypes": ["files"],
+      "required": true
+    },
+    "coverImage": {
+      "type": "media",
+      "allowedTypes": ["images"]
+    },
+    "seo": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.seo"
+    }
+  }
+}

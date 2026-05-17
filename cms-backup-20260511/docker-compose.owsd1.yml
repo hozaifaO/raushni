@@ -1,0 +1,58 @@
+  #cat > docker-compose.owsd1.yml << 'EOF'
+  services:
+    postgres:
+      image: postgres:15-alpine
+      container_name: raushni-cms-db
+      user: "999:999"  # Explicitly set postgres user
+      environment:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+        POSTGRES_DB: postgres
+      ports:
+        - "5433:5432"
+      volumes:
+        - /Volumes/owsd1/raushni/cms/postgres-data:/var/lib/postgresql/data:z
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U postgres"]
+        interval: 10s
+        timeout: 5s
+        retries: 10
+        start_period: 30s
+      restart: unless-stopped
+      networks:
+        - cms-network
+
+    strapi:
+      build:
+        context: .
+        dockerfile: Dockerfile.simple
+      container_name: raushni-cms
+      ports:
+        - "1337:1337"
+      environment:
+        DATABASE_HOST: postgres
+        DATABASE_PORT: 5432
+        DATABASE_NAME: postgres
+        DATABASE_USERNAME: postgres
+        DATABASE_PASSWORD: postgres
+        NODE_ENV: development
+        APP_KEYS: "key1,key2,key3,key4"
+        ADMIN_JWT_SECRET: "admin-jwt-secret-change-me"
+        API_TOKEN_SALT: "api-token-salt-change-me"
+        JWT_SECRET: "jwt-secret-change-me"
+        TRANSFER_TOKEN_SALT: "transfer-token-salt"
+      volumes:
+        - /Volumes/owsd1/raushni/cms/uploads:/app/public/uploads:z
+        - /Volumes/owsd1/raushni/cms/config:/app/config:z
+        - /Volumes/owsd1/raushni/cms/api:/app/src/api:z
+        - /Volumes/owsd1/raushni/cms/logs:/app/logs:z
+      depends_on:
+        postgres:
+          condition: service_healthy
+      restart: unless-stopped
+      networks:
+        - cms-network
+
+  networks:
+    cms-network:
+      driver: bridge

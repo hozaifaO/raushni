@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  strapi:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: raushni-cms
+    ports:
+      - "1337:1337"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    networks:
+      - cms-network
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: raushni-cms-db
+    environment:
+      POSTGRES_USER: strapi_user
+      POSTGRES_PASSWORD: strapi_password
+      POSTGRES_DB: raushni_cms
+    ports:
+      - "5433:5432"
+    volumes:
+      - cms-db-data:/var/lib/postgresql/data
+    networks:
+      - cms-network
+
+volumes:
+  cms-db-data:
+
+networks:
+  cms-network:
+    driver: bridge

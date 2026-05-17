@@ -30,6 +30,7 @@ import {
 const menuItems = [
   { category: "Main", items: [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Member Management", href: "/members", icon: Users },
     { name: "Beneficiary Management", href: "/beneficiaries", icon: Users },
     { name: "Crowd Funding", href: "/crowdfunding", icon: TrendingUp },
     { name: "Internship Management", href: "/internships", icon: Briefcase },

@@ -1,0 +1,14 @@
+{
+  "collectionName": "components_shared_rich_texts",
+  "info": {
+    "displayName": "Rich Text",
+    "icon": "align-left",
+    "description": "Reusable rich text content block"
+  },
+  "attributes": {
+    "body": {
+      "type": "richtext",
+      "required": true
+    }
+  }
+}

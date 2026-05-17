@@ -1,0 +1,63 @@
+{
+  "kind": "collectionType",
+  "collectionName": "donations",
+  "info": {
+    "singularName": "donation",
+    "pluralName": "donations",
+    "displayName": "Donation",
+    "description": "Donation records and receipt metadata"
+  },
+  "options": {
+    "draftAndPublish": false,
+    "populateCreatorFields": true
+  },
+  "attributes": {
+    "receiptNumber": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "donorName": {
+      "type": "string",
+      "required": true
+    },
+    "donorEmail": {
+      "type": "email"
+    },
+    "donorPhone": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "decimal",
+      "required": true
+    },
+    "currency": {
+      "type": "string",
+      "default": "INR"
+    },
+    "paymentMethod": {
+      "type": "enumeration",
+      "enum": ["CASH", "BANK_TRANSFER", "UPI", "CARD", "CHEQUE", "OTHER"],
+      "default": "UPI"
+    },
+    "paymentStatus": {
+      "type": "enumeration",
+      "enum": ["PENDING", "COMPLETED", "FAILED", "REFUNDED"],
+      "default": "PENDING"
+    },
+    "donatedAt": {
+      "type": "datetime",
+      "required": true
+    },
+    "purpose": {
+      "type": "string"
+    },
+    "panNumber": {
+      "type": "string"
+    },
+    "receiptPdf": {
+      "type": "media",
+      "allowedTypes": ["files"]
+    }
+  }
+}

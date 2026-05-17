@@ -1,0 +1,35 @@
+{
+  "collectionName": "components_shared_seos",
+  "info": {
+    "displayName": "Seo",
+    "icon": "search",
+    "description": "SEO metadata"
+  },
+  "attributes": {
+    "metaTitle": {
+      "type": "string",
+      "required": true
+    },
+    "metaDescription": {
+      "type": "text",
+      "required": true,
+      "maxLength": 160
+    },
+    "metaImage": {
+      "type": "media",
+      "allowedTypes": ["images"]
+    },
+    "keywords": {
+      "type": "text"
+    },
+    "structuredData": {
+      "type": "json"
+    },
+    "metaRobots": {
+      "type": "string"
+    },
+    "canonicalURL": {
+      "type": "string"
+    }
+  }
+}
