@@ -1,18 +1,6 @@
-import logo from './extensions/logo.png';
-import favicon from './extensions/favicon.ico';
-
 export default {
   config: {
     locales: ['en', 'hi'],
-    auth: {
-      logo: logo,
-    },
-    head: {
-      favicon: favicon,
-    },
-    menu: {
-      logo: logo,
-    },
     theme: {
       light: {
         colors: {

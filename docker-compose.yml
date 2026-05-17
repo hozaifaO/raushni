@@ -74,6 +74,12 @@ services:
       - /app/node_modules
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/raushni_cms
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: raushni_cms
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_SSL: "false"
       NODE_ENV: development
     depends_on:
       postgres:
