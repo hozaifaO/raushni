@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # PostgreSQL Database
   postgres:
@@ -66,13 +64,13 @@ services:
   # CMS (Strapi)
   strapi:
     build:
-      context: ./cms
+      context: ./cms-backup-20260511
       dockerfile: Dockerfile.dev
     container_name: raushni-strapi
     ports:
       - "1337:1337"
     volumes:
-      - ./cms:/app
+      - ./cms-backup-20260511:/app
       - /app/node_modules
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/raushni_cms
@@ -97,6 +95,7 @@ services:
       - /app/.next
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:8000
+      NEXT_PUBLIC_PYTHON_URL: http://localhost:8000
       NEXT_PUBLIC_CMS_URL: http://localhost:1337
       NODE_ENV: development
     depends_on:

@@ -12,7 +12,8 @@ RUN apk add --no-cache \
 COPY package.json package-lock.json* ./
 
 # Install all dependencies (including dev)
-RUN npm install
+ENV CYPRESS_INSTALL_BINARY=0
+RUN npm install --no-audit --no-fund
 
 # Copy application code
 COPY . .
