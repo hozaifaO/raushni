@@ -9,7 +9,7 @@ export default function HomePage() {
   const [pythonStatus, setPythonStatus] = useState<ServiceStatus>("checking");
 
   useEffect(() => {
-    fetch("/api/health")
+    fetch("http://localhost:8000/api/")
       .then((res) => {
         setBackendStatus(res.ok ? "connected" : "error");
       })
@@ -37,9 +37,8 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50 px-6 py-16">
       <section className="mx-auto max-w-4xl">
-        <h1 className="text-4xl font-bold text-gray-900">Raushni</h1>
+        <h1 className="text-4xl font-bold text-gray-900">Welcome !</h1>
         <p className="mt-2 text-lg text-gray-600">
-          Educational & Social Welfare Trust platform
         </p>
 
         <div className="mt-8 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
