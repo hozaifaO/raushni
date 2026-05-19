@@ -50,7 +50,7 @@ assert_contains default.conf 'proxy_pass \$cms_api_upstream'
 assert_contains Dockerfile 'apk add --no-cache curl openssl'
 assert_contains Dockerfile '40-raushni-certificates.sh'
 
-SSL_DIR="$TMP_DIR/ssl" "$ROOT_DIR/scripts/generate-self-signed-cert.sh" test.raushni.local >/dev/null
+SSL_DIR="$TMP_DIR/ssl" "$ROOT_DIR/scripts/generate-self-signed-cert.sh" test.raushni.local >/dev/null 2>&1
 [ -s "$TMP_DIR/ssl/raushni.crt" ] || fail "certificate was not created"
 [ -s "$TMP_DIR/ssl/raushni.key" ] || fail "private key was not created"
 openssl x509 -in "$TMP_DIR/ssl/raushni.crt" -noout -subject >/dev/null
