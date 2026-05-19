@@ -4,15 +4,26 @@ import Link from 'next/link';
 import { FaFacebook, FaInstagram, FaTwitter, FaLinkedin, FaYoutube } from "react-icons/fa";
 import { Mail, Phone, MapPin, Send, ArrowRight } from 'lucide-react';
 
+const footerStyles = {
+  heading: "text-sm font-bold uppercase tracking-[0.18em] text-amber-300",
+  link: "text-sm font-medium text-white/70 transition hover:text-amber-200 focus:outline-none focus:text-amber-200",
+  iconLink:
+    "inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/75 transition hover:-translate-y-0.5 hover:bg-white/10 hover:text-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-200 focus:ring-offset-2 focus:ring-offset-[#120f0b]",
+  primaryButton:
+    "inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-amber-400 px-5 text-sm font-bold text-stone-950 shadow-sm shadow-amber-900/10 transition hover:-translate-y-0.5 hover:bg-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-200 focus:ring-offset-2 focus:ring-offset-[#120f0b]",
+  input:
+    "min-h-11 flex-1 rounded-full border border-white/10 bg-white/10 px-4 text-sm text-white outline-none transition placeholder:text-white/45 focus:border-amber-300 focus:ring-2 focus:ring-amber-200/30 sm:w-72",
+};
+
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   const socialLinks = [
-    { name: 'Facebook', icon: FaFacebook, href: 'https://www.facebook.com/profile.php?id=61563690991747', color: 'hover:text-blue-400' },
-    { name: 'Twitter', icon: FaTwitter, href: 'https://X.com/', color: 'hover:text-sky-300' },
-    { name: 'Instagram', icon: FaInstagram, href: 'https://instagram.com/', color: 'hover:text-pink-300' },
-    { name: 'LinkedIn', icon: FaLinkedin, href: 'https://linkedin.com/company/', color: 'hover:text-blue-300' },
-    { name: 'YouTube', icon: FaYoutube, href: 'https://youtube.com/', color: 'hover:text-red-300' },
+    { name: 'Facebook', icon: FaFacebook, href: 'https://www.facebook.com/profile.php?id=61563690991747' },
+    { name: 'Twitter', icon: FaTwitter, href: 'https://X.com/' },
+    { name: 'Instagram', icon: FaInstagram, href: 'https://instagram.com/' },
+    { name: 'LinkedIn', icon: FaLinkedin, href: 'https://linkedin.com/company/' },
+    { name: 'YouTube', icon: FaYoutube, href: 'https://youtube.com/' },
   ];
 
   const quickLinks = [
@@ -40,7 +51,7 @@ export default function Footer() {
               <img
                 src="/assets/brand/raushni-logo.png"
                 alt="Raushni Educational and Social Welfare Trust logo"
-                className="h-14 w-14 rounded-full object-contain"
+                className="h-16 w-16 rounded-2xl object-contain"
               />
               <span className="text-base font-black uppercase leading-tight tracking-wide">
                 Raushni
@@ -63,7 +74,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={social.name}
-                  className={`inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/75 transition hover:-translate-y-0.5 hover:bg-white/10 ${social.color}`}
+                  className={footerStyles.iconLink}
                 >
                   <social.icon size={18} />
                 </a>
@@ -72,11 +83,11 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-amber-300">Explore</h3>
+            <h3 className={footerStyles.heading}>Explore</h3>
             <ul className="mt-5 space-y-3">
               {quickLinks.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-sm font-medium text-white/70 transition hover:text-white">
+                  <Link href={link.href} className={footerStyles.link}>
                     {link.name}
                   </Link>
                 </li>
@@ -85,11 +96,11 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-amber-300">Links</h3>
+            <h3 className={footerStyles.heading}>Links</h3>
             <ul className="mt-5 space-y-3">
               {supportLinks.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-sm font-medium text-white/70 transition hover:text-white">
+                  <Link href={link.href} className={footerStyles.link}>
                     {link.name}
                   </Link>
                 </li>
@@ -98,7 +109,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-amber-300">Contact</h3>
+            <h3 className={footerStyles.heading}>Contact</h3>
             <div className="mt-5 space-y-4">
               <div className="flex items-start gap-3">
                 <MapPin size={20} className="mt-0.5 flex-none text-amber-300" />
@@ -108,13 +119,13 @@ export default function Footer() {
               </div>
               <div className="flex items-center gap-3">
                 <Phone size={18} className="flex-none text-amber-300" />
-                <a href="tel:+9199739557600" className="text-sm text-white/70 transition hover:text-white">
+                <a href="tel:+9199739557600" className={footerStyles.link}>
                   +91 997 3955 7600
                 </a>
               </div>
               <div className="flex items-center gap-3">
                 <Mail size={18} className="flex-none text-amber-300" />
-                <a href="mailto:info@raushni.com" className="text-sm text-white/70 transition hover:text-white">
+                <a href="mailto:info@raushni.com" className={footerStyles.link}>
                   info@raushni.com
                 </a>
               </div>
@@ -132,9 +143,9 @@ export default function Footer() {
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="min-h-11 flex-1 rounded-full border border-white/10 bg-white/8 px-4 text-sm text-white outline-none placeholder:text-white/45 focus:border-amber-300 sm:w-72"
+                className={footerStyles.input}
               />
-              <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-amber-400 px-5 text-sm font-bold text-stone-950 transition hover:bg-amber-300">
+              <button className={footerStyles.primaryButton}>
                 <Send size={16} />
                 Subscribe
               </button>

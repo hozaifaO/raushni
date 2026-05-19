@@ -58,6 +58,21 @@ const stories = [
   },
 ];
 
+const styles = {
+  section: "scroll-mt-24 border-b border-stone-200 px-4 py-24 sm:px-6 lg:px-8",
+  sectionInner: "mx-auto max-w-7xl",
+  eyebrow: "text-sm font-bold uppercase tracking-[0.18em] text-amber-700",
+  eyebrowDark: "text-sm font-bold uppercase tracking-[0.18em] text-amber-300",
+  heading: "mt-4 text-4xl font-black leading-tight text-stone-950 sm:text-5xl",
+  body: "text-lg leading-9 text-stone-700",
+  card: "rounded-lg border border-stone-200 bg-white p-6 shadow-sm",
+  primaryButton:
+    "inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-amber-400 px-6 text-sm font-bold text-stone-950 shadow-sm shadow-amber-900/10 transition hover:-translate-y-0.5 hover:bg-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-200 focus:ring-offset-2",
+  secondaryButton:
+    "inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/30 bg-white/10 px-6 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-[#120f0b]",
+  darkPanel: "rounded-lg border border-white/15 bg-white/10 p-6 shadow-2xl shadow-black/20",
+};
+
 export default function HomePage() {
   const [activeSection, setActiveSection] = useState("about");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -103,7 +118,7 @@ export default function HomePage() {
             <img
               src="/assets/brand/raushni-logo.png"
               alt="Raushni Educational and Social Welfare Trust logo"
-              className="h-12 w-12 rounded-full object-contain"
+              className="h-14 w-14 rounded-2xl object-contain"
             />
             <span className="hidden text-sm font-bold uppercase leading-tight tracking-wide sm:block">
               Raushni
@@ -117,7 +132,7 @@ export default function HomePage() {
                 key={item.href}
                 href={item.href}
                 className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  item.active ? "bg-white text-stone-950" : "text-white/86 hover:bg-white/10 hover:text-white"
+                  item.active ? "bg-white text-stone-950" : "text-white/86 hover:bg-white/10 hover:text-amber-100"
                 }`}
               >
                 {item.label}
@@ -127,7 +142,7 @@ export default function HomePage() {
 
           <a
             href="#volunteer"
-            className="hidden min-h-10 items-center justify-center rounded-full bg-amber-400 px-4 text-sm font-bold text-stone-950 transition hover:bg-amber-300 md:inline-flex"
+            className="hidden min-h-10 items-center justify-center rounded-full bg-amber-400 px-4 text-sm font-bold text-stone-950 shadow-sm shadow-amber-900/10 transition hover:-translate-y-0.5 hover:bg-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-200 focus:ring-offset-2 focus:ring-offset-[#120f0b] md:inline-flex"
           >
             Join Us
           </a>
@@ -151,7 +166,7 @@ export default function HomePage() {
                   href={item.href}
                   onClick={closeMenu}
                   className={`rounded-lg px-3 py-3 text-sm font-semibold ${
-                    item.active ? "bg-white text-stone-950" : "text-white hover:bg-white/10"
+                    item.active ? "bg-white text-stone-950" : "text-white hover:bg-white/10 hover:text-amber-100"
                   }`}
                 >
                   {item.label}
@@ -189,14 +204,14 @@ export default function HomePage() {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <a
                 href="#mission"
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-amber-400 px-6 text-sm font-bold text-stone-950 transition hover:bg-amber-300"
+                className={styles.primaryButton}
               >
                 Explore Our Work
                 <ArrowRight size={18} aria-hidden="true" />
               </a>
               <a
                 href="#contact"
-                className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/30 bg-white/10 px-6 text-sm font-bold text-white transition hover:bg-white/20"
+                className={styles.secondaryButton}
               >
                 Contact the Trust
               </a>
@@ -213,15 +228,15 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="about" className="scroll-mt-24 bg-white px-4 py-20 sm:px-6 lg:px-8">
+      <section id="about" className={`${styles.section} bg-[#faf7f2]`}>
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
           <div>
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-orange-700">About Us</p>
-            <h2 className="mt-4 text-4xl font-black leading-tight text-stone-950 sm:text-5xl">
+            <p className={styles.eyebrow}>About Us</p>
+            <h2 className={styles.heading}>
               Lighting pathways out of poverty and illiteracy.
             </h2>
           </div>
-          <p className="text-lg leading-9 text-stone-700">
+          <p className={styles.body}>
             Raushni Educational & Social Welfare Trust envisions a just and enlightened society where every individual,
             irrespective of socio-economic background, has equal access to quality education, essential healthcare,
             and dignified livelihood opportunities. We empower communities to break cycles of poverty and participate
@@ -230,14 +245,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="mission" className="scroll-mt-24 bg-[#f4efe7] px-4 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
+      <section id="mission" className={`${styles.section} bg-[#f4efe7]`}>
+        <div className={styles.sectionInner}>
           <div className="max-w-3xl">
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-orange-700">Our Mission</p>
-            <h2 className="mt-4 text-4xl font-black leading-tight text-stone-950 sm:text-5xl">
+            <p className={styles.eyebrow}>Our Mission</p>
+            <h2 className={styles.heading}>
               Sustainable change, one life at a time.
             </h2>
-            <p className="mt-5 text-lg leading-9 text-stone-700">
+            <p className={`${styles.body} mt-5`}>
               To empower underserved communities through quality education, healthcare access, skill development,
               and social welfare programs.
             </p>
@@ -247,8 +262,11 @@ export default function HomePage() {
             {focusAreas.map((area) => {
               const Icon = area.icon;
               return (
-                <article key={area.title} className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-orange-100 text-orange-700">
+                <article
+                  key={area.title}
+                  className={`${styles.card} transition hover:-translate-y-1 hover:border-amber-300 hover:shadow-md`}
+                >
+                  <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-amber-100 text-amber-800">
                     <Icon size={22} aria-hidden="true" />
                   </div>
                   <h3 className="mt-5 text-xl font-black text-stone-950">{area.title}</h3>
@@ -260,7 +278,10 @@ export default function HomePage() {
 
           <div className="mt-14 grid gap-3 md:grid-cols-2">
             {objectives.map((objective) => (
-              <div key={objective} className="flex items-start gap-3 rounded-lg bg-white px-4 py-4 shadow-sm">
+              <div
+                key={objective}
+                className="flex items-start gap-3 rounded-lg border border-stone-200 bg-white px-4 py-4 shadow-sm"
+              >
                 <CheckCircle2 className="mt-0.5 flex-none text-emerald-700" size={20} aria-hidden="true" />
                 <p className="text-sm font-semibold leading-6 text-stone-800">{objective}</p>
               </div>
@@ -269,12 +290,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="success" className="scroll-mt-24 bg-white px-4 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
+      <section id="success" className={`${styles.section} bg-[#faf7f2]`}>
+        <div className={styles.sectionInner}>
           <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
             <div>
-              <p className="text-sm font-bold uppercase tracking-[0.18em] text-orange-700">Success Stories</p>
-              <h2 className="mt-4 text-4xl font-black leading-tight text-stone-950 sm:text-5xl">
+              <p className={styles.eyebrow}>Success Stories</p>
+              <h2 className={styles.heading}>
                 Progress shaped by community trust.
               </h2>
             </div>
@@ -286,7 +307,7 @@ export default function HomePage() {
 
           <div className="mt-12 grid gap-5 md:grid-cols-3">
             {stories.map((story) => (
-              <article key={story.title} className="rounded-lg border border-stone-200 bg-[#fbfaf7] p-6">
+              <article key={story.title} className={styles.card}>
                 <h3 className="text-xl font-black text-stone-950">{story.title}</h3>
                 <p className="mt-4 text-sm leading-7 text-stone-700">{story.text}</p>
               </article>
@@ -295,10 +316,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="volunteer" className="scroll-mt-24 bg-[#102015] px-4 py-20 text-white sm:px-6 lg:px-8">
+      <section id="volunteer" className="scroll-mt-24 bg-[#120f0b] px-4 py-24 text-white sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1fr_0.9fr] lg:items-center">
           <div>
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-300">Volunteer</p>
+            <p className={styles.eyebrowDark}>Volunteer</p>
             <h2 className="mt-4 text-4xl font-black leading-tight sm:text-5xl">
               Bring your time, skill, network, or care.
             </h2>
@@ -307,7 +328,7 @@ export default function HomePage() {
               and community mobilization. Every contribution helps a family move with more confidence.
             </p>
           </div>
-          <div className="rounded-lg border border-white/15 bg-white/8 p-6">
+          <div className={styles.darkPanel}>
             <h3 className="text-2xl font-black">Ways to help</h3>
             <div className="mt-5 grid gap-3">
               {["Teach or mentor", "Support health camps", "Document stories", "Coordinate relief", "Sponsor learning material"].map((item) => (
@@ -319,7 +340,7 @@ export default function HomePage() {
             </div>
             <a
               href="#contact"
-              className="mt-7 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-amber-400 px-5 text-sm font-bold text-stone-950 transition hover:bg-amber-300"
+              className={`${styles.primaryButton} mt-7 min-h-11 px-5`}
             >
               Start Volunteering
               <ArrowRight size={18} aria-hidden="true" />
@@ -328,24 +349,24 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="contact" className="scroll-mt-24 bg-[#faf7f2] px-4 py-20 sm:px-6 lg:px-8">
+      <section id="contact" className="scroll-mt-24 bg-[#faf7f2] px-4 py-24 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr]">
           <div>
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-orange-700">Contact</p>
-            <h2 className="mt-4 text-4xl font-black leading-tight text-stone-950 sm:text-5xl">
+            <p className={styles.eyebrow}>Contact</p>
+            <h2 className={styles.heading}>
               Let&apos;s build a more equitable community.
             </h2>
             <div className="mt-8 space-y-4 text-stone-700">
               <p className="flex gap-3">
-                <MapPin className="mt-1 flex-none text-orange-700" size={20} aria-hidden="true" />
+                <MapPin className="mt-1 flex-none text-amber-700" size={20} aria-hidden="true" />
                 Rauzah Apartment, Bhatauna Road, Marwan Khurd, Muzaffarpur, Bihar 843113
               </p>
               <p className="flex gap-3">
-                <Phone className="mt-1 flex-none text-orange-700" size={20} aria-hidden="true" />
+                <Phone className="mt-1 flex-none text-amber-700" size={20} aria-hidden="true" />
                 +91 997 3955 7600
               </p>
               <p className="flex gap-3">
-                <Mail className="mt-1 flex-none text-orange-700" size={20} aria-hidden="true" />
+                <Mail className="mt-1 flex-none text-amber-700" size={20} aria-hidden="true" />
                 info@raushni.com
               </p>
             </div>
@@ -355,20 +376,20 @@ export default function HomePage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block">
                 <span className="text-sm font-bold text-stone-800">Name</span>
-                <input className="mt-2 min-h-11 w-full rounded-lg border border-stone-300 px-3 outline-none focus:border-orange-600" />
+                <input className="mt-2 min-h-11 w-full rounded-lg border border-stone-300 px-3 outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-200" />
               </label>
               <label className="block">
                 <span className="text-sm font-bold text-stone-800">Phone or email</span>
-                <input className="mt-2 min-h-11 w-full rounded-lg border border-stone-300 px-3 outline-none focus:border-orange-600" />
+                <input className="mt-2 min-h-11 w-full rounded-lg border border-stone-300 px-3 outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-200" />
               </label>
             </div>
             <label className="mt-4 block">
               <span className="text-sm font-bold text-stone-800">Message</span>
-              <textarea className="mt-2 min-h-32 w-full rounded-lg border border-stone-300 px-3 py-3 outline-none focus:border-orange-600" />
+              <textarea className="mt-2 min-h-32 w-full rounded-lg border border-stone-300 px-3 py-3 outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-200" />
             </label>
             <button
               type="button"
-              className="mt-5 inline-flex min-h-11 items-center justify-center rounded-full bg-orange-700 px-6 text-sm font-bold text-white transition hover:bg-orange-800"
+              className={`${styles.primaryButton} mt-5 min-h-11 px-6`}
             >
               Send Message
             </button>
