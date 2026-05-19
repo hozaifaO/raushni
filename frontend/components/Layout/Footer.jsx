@@ -2,68 +2,68 @@
 
 import Link from 'next/link';
 import { FaFacebook, FaInstagram, FaTwitter, FaLinkedin, FaYoutube } from "react-icons/fa";
-import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, ArrowRight } from 'lucide-react';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   const socialLinks = [
-    { name: 'FaFacebook', icon: FaFacebook, href: 'https://www.facebook.com/profile.php?id=61563690991747', color: 'hover:text-blue-600' },
-    { name: 'FaTwitter', icon: FaTwitter, href: 'https://X.com/', color: 'hover:text-sky-500' },
-    { name: 'FaInstagram', icon: FaInstagram, href: 'https://instagram.com/', color: 'hover:text-pink-600' },
-    { name: 'FaLinkedin', icon: FaLinkedin, href: 'https://linkedin.com/company/', color: 'hover:text-blue-700' },
-    { name: 'FaYoutube', icon: FaYoutube, href: 'https://youtube.com/', color: 'hover:text-red-600' },
+    { name: 'Facebook', icon: FaFacebook, href: 'https://www.facebook.com/profile.php?id=61563690991747', color: 'hover:text-blue-400' },
+    { name: 'Twitter', icon: FaTwitter, href: 'https://X.com/', color: 'hover:text-sky-300' },
+    { name: 'Instagram', icon: FaInstagram, href: 'https://instagram.com/', color: 'hover:text-pink-300' },
+    { name: 'LinkedIn', icon: FaLinkedin, href: 'https://linkedin.com/company/', color: 'hover:text-blue-300' },
+    { name: 'YouTube', icon: FaYoutube, href: 'https://youtube.com/', color: 'hover:text-red-300' },
   ];
 
   const quickLinks = [
-    { name: 'About Us', href: '/about' },
-    { name: 'Our Mission', href: '/mission' },
-    { name: 'Success Stories', href: '/stories' },
-    { name: 'Volunteer', href: '/volunteer' },
-    { name: 'Contact', href: '/contact' },
+    { name: 'About Us', href: '/#about' },
+    { name: 'Our Mission', href: '/#mission' },
+    { name: 'Success Stories', href: '/#success' },
+    { name: 'Volunteer', href: '/#volunteer' },
+    { name: 'Contact', href: '/#contact' },
   ];
 
   const supportLinks = [
-    { name: 'FAQ', href: '/faq' },
-    { name: 'Privacy Policy', href: '/privacy' },
-    { name: 'Terms of Service', href: '/terms' },
-    { name: 'Donation Policy', href: '/donation-policy' },
-    { name: 'Refund Policy', href: '/refund' },
+    { name: 'Donate', href: '/donate' },
+    { name: 'Gallery', href: '/gallery' },
+    { name: 'Events', href: '/events' },
+    { name: 'Careers', href: '/careers' },
+    { name: 'Admin Login', href: '/login' },
   ];
 
   return (
-    <footer className="bg-gray-900 text-gray-300">
-      {/* Main Footer */}
-      <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* About Section */}
+    <footer className="bg-[#120f0b] text-white">
+      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+        <div className="grid gap-10 lg:grid-cols-[1.25fr_0.7fr_0.7fr_1fr]">
           <div>
-            <div className="flex items-center gap-2 mb-4">
-               <img
-                  src="/assets/images/tL1.png"
-                  alt="Techo4u"
-                  className="object-cover"
-                  style={{ 
-                    width: "100%",
-                    maxWidth: "2.5in",
-                    height: "2in",
-                    borderRadius: "8px"
-                  }}
-                />
-            </div>
-            <div><p>Powered By Owais4u LLC</p><br/></div>
-            <p className="text-sm leading-relaxed">
-              Empowering communities through education and social welfare.
-              Together we can make a difference in the lives of those who need it most.
+            <Link href="/#top" className="inline-flex items-center gap-3">
+              <img
+                src="/assets/brand/raushni-logo.png"
+                alt="Raushni Educational and Social Welfare Trust logo"
+                className="h-14 w-14 rounded-full object-contain"
+              />
+              <span className="text-base font-black uppercase leading-tight tracking-wide">
+                Raushni
+                <span className="block text-xs font-semibold text-amber-200">
+                  Educational & Social Welfare Trust
+                </span>
+              </span>
+            </Link>
+
+            <p className="mt-5 max-w-sm text-sm leading-7 text-white/70">
+              Empowering underserved communities through education, healthcare access,
+              livelihood development, and social welfare programs.
             </p>
-            <div className="flex gap-3 mt-4">
+
+            <div className="mt-5 flex gap-3">
               {socialLinks.map((social) => (
                 <a
                   key={social.name}
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`p-2 bg-gray-800 rounded-lg transition-all duration-300 hover:scale-110 ${social.color}`}
+                  aria-label={social.name}
+                  className={`inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/75 transition hover:-translate-y-0.5 hover:bg-white/10 ${social.color}`}
                 >
                   <social.icon size={18} />
                 </a>
@@ -71,13 +71,12 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-semibold text-white mb-4">Quick Links</h3>
-            <ul className="space-y-2">
+            <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-amber-300">Explore</h3>
+            <ul className="mt-5 space-y-3">
               {quickLinks.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-sm hover:text-orange-400 transition-colors">
+                  <Link href={link.href} className="text-sm font-medium text-white/70 transition hover:text-white">
                     {link.name}
                   </Link>
                 </li>
@@ -85,13 +84,12 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Support */}
           <div>
-            <h3 className="text-lg font-semibold text-white mb-4">Support</h3>
-            <ul className="space-y-2">
+            <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-amber-300">Links</h3>
+            <ul className="mt-5 space-y-3">
               {supportLinks.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-sm hover:text-orange-400 transition-colors">
+                  <Link href={link.href} className="text-sm font-medium text-white/70 transition hover:text-white">
                     {link.name}
                   </Link>
                 </li>
@@ -99,40 +97,44 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Contact Info */}
           <div>
-            <h3 className="text-lg font-semibold text-white mb-4">Contact Us</h3>
-            <div className="space-y-3">
+            <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-amber-300">Contact</h3>
+            <div className="mt-5 space-y-4">
               <div className="flex items-start gap-3">
-                <MapPin size={50} className="text-orange-400 mt-0.5" />
-                <p className="text-sm">Rauzah Aparment, Bhatauna Road, Marwan Khurd Muzaffarpur Bihar - 843113</p>
+                <MapPin size={20} className="mt-0.5 flex-none text-amber-300" />
+                <p className="text-sm leading-6 text-white/70">
+                  Rauzah Apartment, Bhatauna Road, Marwan Khurd, Muzaffarpur, Bihar 843113
+                </p>
               </div>
               <div className="flex items-center gap-3">
-                <Phone size={18} className="text-orange-400" />
-                <p className="text-sm">+91 997 3955 7600</p>
+                <Phone size={18} className="flex-none text-amber-300" />
+                <a href="tel:+9199739557600" className="text-sm text-white/70 transition hover:text-white">
+                  +91 997 3955 7600
+                </a>
               </div>
               <div className="flex items-center gap-3">
-                <Mail size={18} className="text-orange-400" />
-                <p className="text-sm">info@raushni.com</p>
+                <Mail size={18} className="flex-none text-amber-300" />
+                <a href="mailto:info@raushni.com" className="text-sm text-white/70 transition hover:text-white">
+                  info@raushni.com
+                </a>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Newsletter Section */}
-        <div className="mt-8 pt-8 border-t border-gray-800">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="mt-12 border-t border-white/10 pt-8">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <h4 className="text-white font-semibold mb-1">Subscribe to Newsletter</h4>
-              <p className="text-sm">Get updates about our latest activities and events</p>
+              <h4 className="text-lg font-black text-white">Stay connected with Raushni</h4>
+              <p className="mt-1 text-sm text-white/60">Get updates about programs, events, relief work, and volunteer opportunities.</p>
             </div>
-            <div className="flex w-full md:w-auto gap-2">
+            <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="flex-1 md:w-64 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-orange-500 text-sm"
+                className="min-h-11 flex-1 rounded-full border border-white/10 bg-white/8 px-4 text-sm text-white outline-none placeholder:text-white/45 focus:border-amber-300 sm:w-72"
               />
-              <button className="px-6 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all flex items-center gap-2">
+              <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-amber-400 px-5 text-sm font-bold text-stone-950 transition hover:bg-amber-300">
                 <Send size={16} />
                 Subscribe
               </button>
@@ -140,13 +142,13 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Copyright */}
-        <div className="mt-8 pt-8 border-t border-gray-800 text-center">
-          <p className="text-sm">
-            © {currentYear} Raushni : Educational & Social Welfare Trust. All rights reserved.
+        <div className="mt-8 flex flex-col gap-3 border-t border-white/10 pt-8 text-sm text-white/55 md:flex-row md:items-center md:justify-between">
+          <p>
+            © {currentYear} Raushni Educational & Social Welfare Trust. All rights reserved.
           </p>
-          <p className="text-xs mt-2 text-gray-500">
+          <p className="inline-flex items-center gap-2 text-xs">
             Registered under Section 8 of Companies Act, 2013 | 12A & 80G Tax Exempted
+            <ArrowRight size={14} aria-hidden="true" />
           </p>
         </div>
       </div>

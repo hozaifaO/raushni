@@ -1,0 +1,59 @@
+{
+  "kind": "singleType",
+  "collectionName": "landing_pages",
+  "info": {
+    "singularName": "landing-page",
+    "pluralName": "landing-pages",
+    "displayName": "Landing Page",
+    "description": "Public Raushni landing page content"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true,
+      "default": "Raushni Educational & Social Welfare Trust"
+    },
+    "vision": {
+      "type": "text",
+      "required": true
+    },
+    "mission": {
+      "type": "text",
+      "required": true
+    },
+    "objectives": {
+      "type": "richtext",
+      "required": true
+    },
+    "successStories": {
+      "type": "richtext"
+    },
+    "volunteerIntro": {
+      "type": "text"
+    },
+    "contactAddress": {
+      "type": "string"
+    },
+    "contactPhone": {
+      "type": "string"
+    },
+    "contactEmail": {
+      "type": "email"
+    },
+    "logo": {
+      "type": "media",
+      "allowedTypes": ["images"]
+    },
+    "banner": {
+      "type": "media",
+      "allowedTypes": ["images"]
+    },
+    "heroVideo": {
+      "type": "media",
+      "allowedTypes": ["videos"]
+    }
+  }
+}

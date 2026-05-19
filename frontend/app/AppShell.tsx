@@ -17,6 +17,16 @@ export default function AppShell({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [readOnly, setReadOnly] = useState(true);
   const isAuthRoute = pathname?.startsWith("/login") || pathname?.startsWith("/register") || pathname?.startsWith("/forgot-password") || pathname?.startsWith("/reset-password") || pathname?.startsWith("/verify-email");
+  const isPublicRoute =
+    pathname === "/" ||
+    pathname?.startsWith("/about") ||
+    pathname?.startsWith("/blog") ||
+    pathname?.startsWith("/careers") ||
+    pathname?.startsWith("/contact") ||
+    pathname?.startsWith("/donate") ||
+    pathname?.startsWith("/events") ||
+    pathname?.startsWith("/gallery") ||
+    pathname?.startsWith("/volunteer");
 
   useEffect(() => {
     setReadOnly(isReadOnly(getStoredUser().role));
@@ -28,7 +38,7 @@ export default function AppShell({
     return () => window.removeEventListener("resize", syncDesktopState);
   }, []);
 
-  if (isAuthRoute) {
+  if (isAuthRoute || isPublicRoute) {
     return <>{children}</>;
   }
 
