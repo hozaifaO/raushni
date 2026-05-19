@@ -4,6 +4,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 
+from app.api.dependencies.auth import require_write_access
 from app.schemas.member import Member, MemberCreate, MemberListResponse, MemberStatus, MemberUpdate
 from app.services.member_service import MemberNotFoundError, MemberService
 
@@ -27,6 +28,7 @@ def list_members(
 @router.post("", response_model=Member, status_code=status.HTTP_201_CREATED)
 def create_member(
     payload: MemberCreate,
+    _role: object = Depends(require_write_access),
     service: MemberService = Depends(get_member_service),
 ) -> Member:
     return service.create_member(payload)
@@ -47,6 +49,7 @@ def get_member(
 def update_member(
     member_id: UUID,
     payload: MemberUpdate,
+    _role: object = Depends(require_write_access),
     service: MemberService = Depends(get_member_service),
 ) -> Member:
     try:
@@ -58,6 +61,7 @@ def update_member(
 @router.delete("/{member_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_member(
     member_id: UUID,
+    _role: object = Depends(require_write_access),
     service: MemberService = Depends(get_member_service),
 ) -> Response:
     try:

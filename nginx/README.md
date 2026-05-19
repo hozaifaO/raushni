@@ -31,6 +31,7 @@ This directory contains the nginx reverse proxy for the Raushni platform. It ter
 | `scripts/generate-self-signed-cert.sh` | Local certificate generator. |
 | `scripts/test-nginx.sh` | Static config, certificate, and optional nginx syntax tests. |
 | `ssl/` | Ignored certificate directory for local development. |
+| `certbot/www/` | ACME HTTP challenge webroot mounted into the container. |
 
 ## Local Certificate
 
@@ -51,6 +52,8 @@ nginx/ssl/raushni.key
 The private key is ignored by git.
 
 If no certificate is mounted in the container, the image entrypoint generates a self-signed certificate automatically so nginx can still boot for local development and container tests.
+
+The standalone compose file mounts `./ssl` as writable so the same automatic certificate generation works when `ssl/raushni.crt` or `ssl/raushni.key` is missing.
 
 ## Production Certificates
 
@@ -152,6 +155,12 @@ Runtime health test:
 docker run --rm -d --name raushni-nginx-test -p 8080:80 -p 8443:443 raushni-nginx-test
 curl http://localhost:8080/health
 docker rm -f raushni-nginx-test
+```
+
+If host networking is unavailable in your environment, verify health from inside the container:
+
+```bash
+docker exec raushni-nginx-test curl -fsS http://localhost/health
 ```
 
 ## Security Defaults

@@ -1,5 +1,10 @@
+"use client";
+
 import Link from "next/link";
-import { ArrowLeft, CalendarClock, Home } from "lucide-react";
+import { ArrowLeft, CalendarClock, Home, Lock, ShieldCheck } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { findDashboardModule } from "@/lib/auth/modules";
+import { canAdmin, canWrite, getStoredUser } from "@/lib/auth/permissions";
 
 type ComingSoonPageProps = {
   title: string;
@@ -8,8 +13,22 @@ type ComingSoonPageProps = {
 
 export default function ComingSoonPage({
   title,
-  description = "This dashboard section is being prepared and will be available soon.",
+  description,
 }: ComingSoonPageProps) {
+  const [role, setRole] = useState("GUEST");
+  const moduleItem = useMemo(() => findDashboardModule(title), [title]);
+  const moduleDescription =
+    description ??
+    moduleItem?.description ??
+    "This dashboard section is configured and ready for module-specific workflows.";
+  const hasWriteAccess = canWrite(role);
+  const hasAdminAccess = canAdmin(role);
+  const accessGranted = moduleItem?.access === "admin" ? hasAdminAccess : moduleItem?.access === "write" ? hasWriteAccess : true;
+
+  useEffect(() => {
+    setRole(getStoredUser().role);
+  }, []);
+
   return (
     <section className="min-h-[calc(100vh-7rem)] bg-gray-50 px-4 py-10 sm:px-6 lg:px-8">
       <div className="mx-auto flex max-w-5xl flex-col gap-8">
@@ -22,9 +41,13 @@ export default function ComingSoonPage({
             Back
           </Link>
 
-          <span className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-orange-700">
-            <CalendarClock size={14} aria-hidden="true" />
-            Coming soon
+          <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide ${
+            accessGranted
+              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+              : "border-amber-200 bg-amber-50 text-amber-700"
+          }`}>
+            {accessGranted ? <ShieldCheck size={14} aria-hidden="true" /> : <Lock size={14} aria-hidden="true" />}
+            {accessGranted ? "Read/write enabled" : "Read only"}
           </span>
         </div>
 
@@ -40,8 +63,13 @@ export default function ComingSoonPage({
             {title}
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-gray-600">
-            {description}
+            {moduleDescription}
           </p>
+          {!accessGranted && (
+            <p className="mx-auto mt-3 max-w-2xl text-sm font-medium text-amber-700">
+              Login as Admin to create, edit, delete, and configure this module.
+            </p>
+          )}
 
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link

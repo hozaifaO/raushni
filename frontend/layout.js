@@ -17,7 +17,7 @@ export default function RootLayout({ children }) {
           <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
           {/* Main Content */}
-          <main className={`transition-all duration-300 lg:ml-72 mt-16`}>
+          <main className={`transition-all duration-300 lg:mr-72 mt-16`}>
             {children}
           </main>
 

@@ -3,12 +3,15 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Menu, X, ChevronDown, Bell, User, LogOut, Settings } from 'lucide-react';
+import { getStoredUser, isReadOnly, signOutToGuest } from '@/lib/auth/permissions';
 
 export default function Header({ sidebarOpen, setSidebarOpen }) {
   const [scrolled, setScrolled] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
+    setUser(getStoredUser());
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
     };
@@ -16,21 +19,20 @@ export default function Header({ sidebarOpen, setSidebarOpen }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const displayUser = user ?? {
+    name: 'Guest User',
+    email: 'guest@raushni.com',
+    role: 'GUEST',
+  };
+  const readOnly = isReadOnly(displayUser.role);
+
   return (
     <header className={`fixed top-0 right-0 left-0 z-50 transition-all duration-300 ${
       scrolled ? 'bg-white shadow-md' : 'bg-white/95 backdrop-blur-md'
     }`}>
       <div className="flex items-center justify-between px-4 py-3 lg:px-6">
-        {/* Left section - Logo and menu button */}
+        {/* Left section - Logo */}
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
-          >
-            {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
-
           <Link href="/dashboard" className="flex items-center gap-2">
             <img
               src="/assets/images/logo.png"
@@ -61,6 +63,14 @@ export default function Header({ sidebarOpen, setSidebarOpen }) {
 
         {/* Right section - Notifications and User */}
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+          >
+            {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+
           {/* Notifications */}
           <button className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors">
             <Bell size={20} />
@@ -74,14 +84,24 @@ export default function Header({ sidebarOpen, setSidebarOpen }) {
               className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
             >
               <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white font-semibold">
-                A
+                {displayUser.name.charAt(0).toUpperCase()}
               </div>
-              <span className="hidden md:inline text-sm font-medium">Admin User</span>
+              <span className="hidden md:inline text-sm font-medium">{displayUser.name}</span>
+              {readOnly && (
+                <span className="hidden rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700 lg:inline">
+                  Read only
+                </span>
+              )}
               <ChevronDown size={16} className="hidden md:block" />
             </button>
 
             {userMenuOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-2 z-50">
+                  <div className="px-4 py-2 text-xs text-gray-500">
+                    <p className="font-semibold text-gray-700">{displayUser.email}</p>
+                    <p>{readOnly ? 'Guest read-only access' : `${displayUser.role} access`}</p>
+                  </div>
+                  <hr className="my-1" />
                   <Link href="/profile" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                     <User size={16} /> Profile
                   </Link>
@@ -89,7 +109,14 @@ export default function Header({ sidebarOpen, setSidebarOpen }) {
                     <Settings size={16} /> Settings
                   </Link>
                   <hr className="my-1" />
-                  <button className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-gray-50 w-full">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      signOutToGuest();
+                      window.location.href = '/login';
+                    }}
+                    className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-gray-50 w-full"
+                  >
                     <LogOut size={16} /> Logout
                   </button>
               </div>

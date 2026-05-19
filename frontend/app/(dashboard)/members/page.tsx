@@ -10,6 +10,7 @@ import {
   listMembers,
   updateMember,
 } from "@/services/api/members";
+import { canWrite, getStoredUser } from "@/lib/auth/permissions";
 import type { Member, MemberFormValues, MemberListResponse, MemberStatus } from "@/types/models/member";
 
 const emptyList: MemberListResponse = {
@@ -46,6 +47,7 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [readOnly, setReadOnly] = useState(true);
 
   const loadMembers = useCallback(async () => {
     setLoading(true);
@@ -65,6 +67,7 @@ export default function Page() {
   }, [search, status]);
 
   useEffect(() => {
+    setReadOnly(!canWrite(getStoredUser().role));
     void loadMembers();
   }, [loadMembers]);
 
@@ -79,12 +82,20 @@ export default function Page() {
   );
 
   const openCreateForm = () => {
+    if (readOnly) {
+      setError("Guest users have read-only access.");
+      return;
+    }
     setEditingMember(null);
     setFormValues({ ...emptyMemberForm, joined_on: new Date().toISOString().slice(0, 10) });
     setIsFormOpen(true);
   };
 
   const openEditForm = (member: Member) => {
+    if (readOnly) {
+      setError("Guest users have read-only access.");
+      return;
+    }
     setEditingMember(member);
     setFormValues(memberToForm(member));
     setIsFormOpen(true);
@@ -101,6 +112,10 @@ export default function Page() {
   };
 
   const submitForm = async () => {
+    if (readOnly) {
+      setError("Guest users have read-only access.");
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {
@@ -119,6 +134,10 @@ export default function Page() {
   };
 
   const removeMember = async (member: Member) => {
+    if (readOnly) {
+      setError("Guest users have read-only access.");
+      return;
+    }
     const confirmed = window.confirm(`Delete ${member.full_name} from member records?`);
     if (!confirmed) {
       return;
@@ -146,14 +165,20 @@ export default function Page() {
               Maintain member records, contact details, roles, joining dates, and active status.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={openCreateForm}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-orange-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-700"
-          >
-            <Plus size={18} aria-hidden="true" />
-            Add member
-          </button>
+          {readOnly ? (
+            <span className="inline-flex min-h-11 items-center justify-center rounded-lg border border-amber-200 bg-amber-50 px-4 text-sm font-semibold text-amber-800">
+              Read-only guest access
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={openCreateForm}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-orange-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-700"
+            >
+              <Plus size={18} aria-hidden="true" />
+              Add member
+            </button>
+          )}
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -237,7 +262,12 @@ export default function Page() {
             <p className="text-sm font-semibold text-gray-600">Loading member records</p>
           </div>
         ) : (
-          <MemberList members={members.items} onEdit={openEditForm} onDelete={removeMember} />
+          <MemberList
+            members={members.items}
+            readOnly={readOnly}
+            onEdit={openEditForm}
+            onDelete={removeMember}
+          />
         )}
       </div>
     </section>

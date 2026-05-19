@@ -40,4 +40,12 @@ describe("MemberList", () => {
 
     expect(screen.getByText("No members found")).toBeInTheDocument();
   });
+
+  it("hides edit/delete actions for read-only users", () => {
+    render(<MemberList members={[member]} readOnly onEdit={jest.fn()} onDelete={jest.fn()} />);
+
+    expect(screen.getByText("Aisha Khan")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Edit Aisha Khan")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Delete Aisha Khan")).not.toBeInTheDocument();
+  });
 });

@@ -5,6 +5,7 @@ import type { Member } from "@/types/models/member";
 
 type MemberListProps = {
   members: Member[];
+  readOnly?: boolean;
   onEdit: (member: Member) => void;
   onDelete: (member: Member) => void;
 };
@@ -23,7 +24,7 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
-export default function MemberList({ members, onEdit, onDelete }: MemberListProps) {
+export default function MemberList({ members, readOnly = false, onEdit, onDelete }: MemberListProps) {
   if (members.length === 0) {
     return (
       <div className="rounded-lg border border-dashed border-gray-300 bg-white px-6 py-12 text-center">
@@ -56,9 +57,11 @@ export default function MemberList({ members, onEdit, onDelete }: MemberListProp
               <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-500">
                 Status
               </th>
-              <th className="px-4 py-3 text-right text-xs font-semibold uppercase text-gray-500">
-                Actions
-              </th>
+              {!readOnly && (
+                <th className="px-4 py-3 text-right text-xs font-semibold uppercase text-gray-500">
+                  Actions
+                </th>
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 bg-white">
@@ -85,26 +88,28 @@ export default function MemberList({ members, onEdit, onDelete }: MemberListProp
                     {member.status}
                   </span>
                 </td>
-                <td className="whitespace-nowrap px-4 py-4 text-right">
-                  <div className="inline-flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => onEdit(member)}
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition hover:border-orange-300 hover:bg-orange-50 hover:text-orange-700"
-                      aria-label={`Edit ${member.full_name}`}
-                    >
-                      <Edit size={16} aria-hidden="true" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onDelete(member)}
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition hover:border-red-300 hover:bg-red-50 hover:text-red-700"
-                      aria-label={`Delete ${member.full_name}`}
-                    >
-                      <Trash2 size={16} aria-hidden="true" />
-                    </button>
-                  </div>
-                </td>
+                {!readOnly && (
+                  <td className="whitespace-nowrap px-4 py-4 text-right">
+                    <div className="inline-flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => onEdit(member)}
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition hover:border-orange-300 hover:bg-orange-50 hover:text-orange-700"
+                        aria-label={`Edit ${member.full_name}`}
+                      >
+                        <Edit size={16} aria-hidden="true" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onDelete(member)}
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition hover:border-red-300 hover:bg-red-50 hover:text-red-700"
+                        aria-label={`Delete ${member.full_name}`}
+                      >
+                        <Trash2 size={16} aria-hidden="true" />
+                      </button>
+                    </div>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

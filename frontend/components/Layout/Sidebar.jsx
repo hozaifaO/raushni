@@ -3,113 +3,28 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  LayoutDashboard,
-  Users,
-  Heart,
-  TrendingUp,
-  Calendar,
-  FileText,
-  DollarSign,
-  Briefcase,
-  Activity,
-  Mail,
-  Newspaper,
-  FolderKanban,
-  Receipt,
-  FileCheck,
-  Award,
-  UserPlus,
-  HandHeart,
-  GraduationCap,
-  Settings,
-  HelpCircle,
-  LogOut
-} from 'lucide-react';
-
-const menuItems = [
-  { category: "Main", items: [
-    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Member Management", href: "/members", icon: Users },
-    { name: "Beneficiary Management", href: "/beneficiaries", icon: Users },
-    { name: "Crowd Funding", href: "/crowdfunding", icon: TrendingUp },
-    { name: "Internship Management", href: "/internships", icon: Briefcase },
-  ]},
-  { category: "Management", items: [
-    { name: "Donation Management", href: "/donations", icon: Heart },
-    { name: "Activity Posts", href: "/activities", icon: Activity },
-    { name: "Event Management", href: "/dashboard/events", icon: Calendar },
-    { name: "Designation Management", href: "/designations", icon: UserPlus },
-    { name: "Enquiry Management", href: "/enquiries", icon: Mail },
-    { name: "News Management", href: "/news", icon: Newspaper },
-    { name: "Project Management", href: "/projects", icon: FolderKanban },
-    { name: "Expense Management", href: "/expenses", icon: Receipt },
-  ]},
-  { category: "Documents", items: [
-    { name: "Member ID Card", href: "/member-id", icon: FileText },
-    { name: "80G Donation Receipt", href: "/donation-receipt", icon: FileCheck },
-    { name: "Appointment Letter", href: "/appointment", icon: GraduationCap },
-    { name: "Achievement Certificate", href: "/certificate", icon: Award },
-    { name: "Annual Audit Report", href: "/audit", icon: FileText },
-  ]},
-  { category: "Support", items: [
-    { name: "Settings", href: "/settings", icon: Settings },
-    { name: "Help & Support", href: "/help", icon: HelpCircle },
-  ]}
-];
+import { LogOut } from 'lucide-react';
+import { DASHBOARD_MODULES } from '@/lib/auth/modules';
+import { canAdmin, getStoredUser, isReadOnly, signOutToGuest } from '@/lib/auth/permissions';
 
 export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
   const pathname = usePathname();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch user data on component mount
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        // Try to get user from localStorage first
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
-          setLoading(false);
-          return;
-        }
-
-        // If not in localStorage, fetch from API
-        const response = await fetch('/api/auth/me');
-        if (response.ok) {
-          const userData = await response.json();
-          setUser(userData);
-          // Store in localStorage for future use
-          localStorage.setItem('user', JSON.stringify(userData));
-        } else {
-          // Set default admin user if API fails
-          setUser({
-            name: 'Admin User',
-            email: 'admin@raushni.com',
-            role: 'Administrator',
-            profileImage: null
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching user:', error);
-        // Set default admin user on error
-        setUser({
-          name: 'Admin User',
-          email: 'admin@raushni.com',
-          role: 'Administrator',
-          profileImage: null
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
+    setUser(getStoredUser());
+    setLoading(false);
   }, []);
 
   const isActive = (href) => {
-    return pathname === href || pathname?.startsWith(href + '/');
+    const cleanHref = href.split('?')[0];
+    return pathname === cleanHref || pathname?.startsWith(cleanHref + '/');
+  };
+
+  const canSeeModule = (item) => {
+    if (!user) return item.access !== 'admin';
+    return item.access !== 'admin' || canAdmin(user.role);
   };
 
   return (
@@ -124,8 +39,8 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-28 left-0 h-[calc(100vh-7rem)] w-72 bg-white border-r border-gray-200 z-40 overflow-y-auto shadow-xl transition-transform duration-300 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed top-28 right-0 h-[calc(100vh-7rem)] w-72 bg-white border-l border-gray-200 z-40 overflow-y-auto shadow-xl transition-transform duration-300 ${
+          sidebarOpen ? 'translate-x-0' : 'translate-x-full'
         } lg:shadow-none`}
       >
         <div className="p-6">
@@ -181,9 +96,11 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
             <div className="mb-6 p-3 bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl">
               <div className="flex items-center gap-3">
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-gray-800">{user.name || 'Admin User'}</p>
-                  <p className="text-xs text-gray-500 capitalize">{user.role || 'Administrator'}</p>
-                  <p className="text-xs text-gray-400 mt-0.5 truncate">{user.email || 'admin@raushni.com'}</p>
+                  <p className="text-sm font-semibold text-gray-800">{user.name || 'Guest User'}</p>
+                  <p className="text-xs text-gray-500 capitalize">
+                    {isReadOnly(user.role) ? 'Guest - read only' : user.role || 'Guest'}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-0.5 truncate">{user.email || 'guest@raushni.com'}</p>
                 </div>
               </div>
             </div>
@@ -191,13 +108,17 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
 
           {/* Navigation */}
           <nav className="space-y-6">
-            {menuItems.map((category, idx) => (
+            {DASHBOARD_MODULES.map((category, idx) => {
+              const visibleItems = category.items.filter(canSeeModule);
+              if (visibleItems.length === 0) return null;
+
+              return (
               <div key={idx}>
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
                   {category.category}
                 </p>
                 <div className="space-y-1">
-                  {category.items.map((item) => {
+                  {visibleItems.map((item) => {
                     const Icon = item.icon;
                     const active = isActive(item.href);
                     return (
@@ -213,23 +134,28 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                       >
                         <Icon size={18} className={active ? 'text-white' : 'text-gray-400 group-hover:text-orange-500'} />
                         <span className="text-sm font-medium">{item.name}</span>
+                        {item.access === 'admin' && (
+                          <span className={`ml-auto rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                            active ? 'bg-white/20 text-white' : 'bg-orange-50 text-orange-700'
+                          }`}>
+                            Admin
+                          </span>
+                        )}
                         {active && <span className="ml-auto w-1.5 h-1.5 bg-white rounded-full" />}
                       </Link>
                     );
                   })}
                 </div>
               </div>
-            ))}
+              );
+            })}
           </nav>
 
           {/* Logout button */}
           <div className="mt-8 pt-6 border-t border-gray-200">
             <button 
               onClick={() => {
-                // Clear user data on logout
-                localStorage.removeItem('user');
-                localStorage.removeItem('token');
-                // Redirect to login page
+                signOutToGuest();
                 window.location.href = '/login';
               }}
               className="flex items-center gap-3 px-3 py-2 w-full rounded-lg text-red-600 hover:bg-red-50 transition-colors group"

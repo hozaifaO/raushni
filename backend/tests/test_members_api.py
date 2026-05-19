@@ -8,12 +8,16 @@ from app.main import create_app
 
 pytestmark = pytest.mark.api
 
+ADMIN_HEADERS = {"X-User-Role": "ADMIN"}
+GUEST_HEADERS = {"X-User-Role": "GUEST"}
+
 
 def test_member_management_crud_workflow() -> None:
     client = TestClient(create_app())
 
     create_response = client.post(
         "/api/v1/members",
+        headers=ADMIN_HEADERS,
         json={
             "full_name": "Aisha Khan",
             "email": "aisha@example.org",
@@ -43,6 +47,7 @@ def test_member_management_crud_workflow() -> None:
 
     update_response = client.patch(
         f"/api/v1/members/{member_id}",
+        headers=ADMIN_HEADERS,
         json={"role": "Program Lead", "status": "inactive"},
     )
     assert update_response.status_code == 200
@@ -54,7 +59,7 @@ def test_member_management_crud_workflow() -> None:
     assert filtered_response.status_code == 200
     assert filtered_response.json()["items"][0]["id"] == member_id
 
-    delete_response = client.delete(f"/api/v1/members/{member_id}")
+    delete_response = client.delete(f"/api/v1/members/{member_id}", headers=ADMIN_HEADERS)
     assert delete_response.status_code == 204
 
     missing_response = client.get(f"/api/v1/members/{member_id}")
@@ -66,6 +71,7 @@ def test_member_validation_rejects_invalid_payload() -> None:
 
     response = client.post(
         "/api/v1/members",
+        headers=ADMIN_HEADERS,
         json={
             "full_name": "A",
             "email": "invalid-email",
@@ -75,3 +81,24 @@ def test_member_validation_rejects_invalid_payload() -> None:
     )
 
     assert response.status_code == 422
+
+
+def test_guest_can_read_but_cannot_mutate_members() -> None:
+    client = TestClient(create_app())
+
+    list_response = client.get("/api/v1/members", headers=GUEST_HEADERS)
+    assert list_response.status_code == 200
+
+    create_response = client.post(
+        "/api/v1/members",
+        headers=GUEST_HEADERS,
+        json={
+            "full_name": "Guest Blocked",
+            "email": "guest-blocked@example.org",
+            "phone": "+91 9876543210",
+            "role": "Volunteer",
+        },
+    )
+
+    assert create_response.status_code == 403
+    assert create_response.json()["detail"] == "Guest users have read-only access."

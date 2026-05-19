@@ -1,4 +1,5 @@
 import type { Member, MemberFormValues, MemberListResponse, MemberStatus } from "@/types/models/member";
+import { authHeaders } from "@/lib/auth/permissions";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_PYTHON_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -49,6 +50,7 @@ export async function listMembers(options: ListMembersOptions = {}): Promise<Mem
   const query = params.toString();
   const response = await fetch(`${MEMBERS_ENDPOINT}${query ? `?${query}` : ""}`, {
     cache: "no-store",
+    headers: authHeaders(),
   });
   return parseResponse<MemberListResponse>(response);
 }
@@ -56,7 +58,7 @@ export async function listMembers(options: ListMembersOptions = {}): Promise<Mem
 export async function createMember(values: MemberFormValues): Promise<Member> {
   const response = await fetch(MEMBERS_ENDPOINT, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { ...authHeaders(), "Content-Type": "application/json" },
     body: JSON.stringify(cleanPayload(values)),
   });
   return parseResponse<Member>(response);
@@ -65,7 +67,7 @@ export async function createMember(values: MemberFormValues): Promise<Member> {
 export async function updateMember(id: string, values: MemberFormValues): Promise<Member> {
   const response = await fetch(`${MEMBERS_ENDPOINT}/${id}`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: { ...authHeaders(), "Content-Type": "application/json" },
     body: JSON.stringify(cleanPayload(values)),
   });
   return parseResponse<Member>(response);
@@ -74,6 +76,7 @@ export async function updateMember(id: string, values: MemberFormValues): Promis
 export async function deleteMember(id: string): Promise<void> {
   const response = await fetch(`${MEMBERS_ENDPOINT}/${id}`, {
     method: "DELETE",
+    headers: authHeaders(),
   });
   await parseResponse<void>(response);
 }
