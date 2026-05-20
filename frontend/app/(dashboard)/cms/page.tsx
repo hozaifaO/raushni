@@ -11,6 +11,10 @@ export default function Page() {
     () => `${process.env.NEXT_PUBLIC_CMS_URL ?? "http://localhost:1337"}/admin`,
     [],
   );
+  const cmsApiUrl = useMemo(
+    () => `${process.env.NEXT_PUBLIC_CMS_URL ?? "http://localhost:1337"}/api/landing-page?populate=*`,
+    [],
+  );
 
   useEffect(() => {
     setIsAdmin(canAdmin(getStoredUser().role));
@@ -29,10 +33,14 @@ export default function Page() {
           </p>
           <h1 className="mt-3 text-3xl font-bold text-gray-950">CMS</h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-gray-600">
-            Manage Strapi content, media, and publishing workflows with the configured admin account.
+            Manage the Raushni project content, media, and publishing workflows in Strapi with the configured admin account.
           </p>
 
           <div className="mt-6 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
+            <p>
+              <span className="font-semibold text-gray-900">Project:</span>{" "}
+              /raushni
+            </p>
             <p>
               <span className="font-semibold text-gray-900">Admin email:</span>{" "}
               admin@raushni.com
@@ -40,6 +48,10 @@ export default function Page() {
             <p className="mt-1">
               <span className="font-semibold text-gray-900">Local CMS:</span>{" "}
               {cmsAdminUrl}
+            </p>
+            <p className="mt-1">
+              <span className="font-semibold text-gray-900">Landing content:</span>{" "}
+              {cmsApiUrl}
             </p>
           </div>
 

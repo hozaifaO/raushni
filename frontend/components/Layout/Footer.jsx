@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { FaFacebook, FaInstagram, FaTwitter, FaLinkedin, FaYoutube } from "react-icons/fa";
 import { Mail, Phone, MapPin, Send, ArrowRight } from 'lucide-react';
 
@@ -15,8 +16,71 @@ const footerStyles = {
     "min-h-11 flex-1 rounded-full border border-white/10 bg-white/10 px-4 text-sm text-white outline-none transition placeholder:text-white/45 focus:border-amber-300 focus:ring-2 focus:ring-amber-200/30 sm:w-72",
 };
 
+const defaultFooterContent = {
+  title: 'Raushni Educational & Social Welfare Trust',
+  description:
+    'Empowering underserved communities through education, healthcare access, livelihood development, and social welfare programs.',
+  contactAddress: 'Rauzah Apartment, Bhatauna Road, Marwan Khurd, Muzaffarpur, Bihar 843113',
+  contactPhone: '+91 997 3955 7600',
+  contactEmail: 'info@raushni.com',
+  logo: '/assets/brand/raushni-logo.png',
+};
+
+function resolveMediaUrl(media, fallback) {
+  const url = media?.data?.attributes?.url ?? media?.url;
+
+  if (!url) {
+    return fallback;
+  }
+
+  if (url.startsWith('http')) {
+    return url;
+  }
+
+  return `${process.env.NEXT_PUBLIC_CMS_URL ?? ''}${url}`;
+}
+
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const [content, setContent] = useState(defaultFooterContent);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadFooterContent() {
+      try {
+        const response = await fetch('/cms/api/landing-page?populate=*', {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          return;
+        }
+
+        const payload = await response.json();
+        const attributes = payload?.data?.attributes;
+
+        if (attributes) {
+          setContent({
+            title: attributes.title ?? defaultFooterContent.title,
+            description: attributes.heroSubtitle ?? defaultFooterContent.description,
+            contactAddress: attributes.contactAddress ?? defaultFooterContent.contactAddress,
+            contactPhone: attributes.contactPhone ?? defaultFooterContent.contactPhone,
+            contactEmail: attributes.contactEmail ?? defaultFooterContent.contactEmail,
+            logo: resolveMediaUrl(attributes.logo, defaultFooterContent.logo),
+          });
+        }
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          console.warn('Unable to load Strapi footer content', error);
+        }
+      }
+    }
+
+    loadFooterContent();
+
+    return () => controller.abort();
+  }, []);
 
   const socialLinks = [
     { name: 'Facebook', icon: FaFacebook, href: 'https://www.facebook.com/profile.php?id=61563690991747' },
@@ -49,7 +113,7 @@ export default function Footer() {
           <div>
             <Link href="/#top" className="inline-flex items-center gap-3">
               <img
-                src="/assets/brand/raushni-logo.png"
+                src={content.logo}
                 alt="Raushni Educational and Social Welfare Trust logo"
                 className="h-16 w-16 rounded-2xl object-contain"
               />
@@ -62,8 +126,7 @@ export default function Footer() {
             </Link>
 
             <p className="mt-5 max-w-sm text-sm leading-7 text-white/70">
-              Empowering underserved communities through education, healthcare access,
-              livelihood development, and social welfare programs.
+              {content.description}
             </p>
 
             <div className="mt-5 flex gap-3">
@@ -114,19 +177,19 @@ export default function Footer() {
               <div className="flex items-start gap-3">
                 <MapPin size={20} className="mt-0.5 flex-none text-amber-300" />
                 <p className="text-sm leading-6 text-white/70">
-                  Rauzah Apartment, Bhatauna Road, Marwan Khurd, Muzaffarpur, Bihar 843113
+                  {content.contactAddress}
                 </p>
               </div>
               <div className="flex items-center gap-3">
                 <Phone size={18} className="flex-none text-amber-300" />
-                <a href="tel:+9199739557600" className={footerStyles.link}>
-                  +91 997 3955 7600
+                <a href={`tel:${content.contactPhone.replace(/\s/g, '')}`} className={footerStyles.link}>
+                  {content.contactPhone}
                 </a>
               </div>
               <div className="flex items-center gap-3">
                 <Mail size={18} className="flex-none text-amber-300" />
-                <a href="mailto:info@raushni.com" className={footerStyles.link}>
-                  info@raushni.com
+                <a href={`mailto:${content.contactEmail}`} className={footerStyles.link}>
+                  {content.contactEmail}
                 </a>
               </div>
             </div>
@@ -155,7 +218,7 @@ export default function Footer() {
 
         <div className="mt-8 flex flex-col gap-3 border-t border-white/10 pt-8 text-sm text-white/55 md:flex-row md:items-center md:justify-between">
           <p>
-            © {currentYear} Raushni Educational & Social Welfare Trust. All rights reserved.
+            © {currentYear} {content.title}. All rights reserved.
           </p>
           <p className="inline-flex items-center gap-2 text-xs">
             Registered under Section 8 of Companies Act, 2013 | 12A & 80G Tax Exempted

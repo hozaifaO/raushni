@@ -16,6 +16,17 @@
       "required": true,
       "default": "Raushni Educational & Social Welfare Trust"
     },
+    "heroEyebrow": {
+      "type": "string",
+      "default": "Community-led education, healthcare, and dignity"
+    },
+    "heroSubtitle": {
+      "type": "text"
+    },
+    "aboutHeading": {
+      "type": "string",
+      "default": "Lighting pathways out of poverty and illiteracy."
+    },
     "vision": {
       "type": "text",
       "required": true
@@ -24,15 +35,40 @@
       "type": "text",
       "required": true
     },
+    "missionHeading": {
+      "type": "string",
+      "default": "Sustainable change, one life at a time."
+    },
+    "focusAreas": {
+      "type": "json"
+    },
     "objectives": {
       "type": "richtext",
       "required": true
     },
+    "successHeading": {
+      "type": "string",
+      "default": "Progress shaped by community trust."
+    },
+    "successIntro": {
+      "type": "text"
+    },
     "successStories": {
       "type": "richtext"
     },
+    "volunteerHeading": {
+      "type": "string",
+      "default": "Bring your time, skill, network, or care."
+    },
     "volunteerIntro": {
       "type": "text"
+    },
+    "volunteerWays": {
+      "type": "json"
+    },
+    "contactHeading": {
+      "type": "string",
+      "default": "Let's build a more equitable community."
     },
     "contactAddress": {
       "type": "string"

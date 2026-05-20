@@ -36,14 +36,14 @@ const objectives = [
   "Community mobilization, advocacy, and strategic partnerships",
 ];
 
-const focusAreas = [
+const defaultFocusAreas = [
   { title: "Education", text: "Learning support, digital literacy, mentorship, and school readiness.", icon: BookOpen },
   { title: "Healthcare", text: "Basic care access, nutrition awareness, and community health camps.", icon: HeartPulse },
   { title: "Livelihood", text: "Skills, self-help groups, and pathways toward dignified income.", icon: Heart },
   { title: "Environment", text: "Tree plantation, cleanliness drives, and local sustainability action.", icon: Sprout },
 ];
 
-const stories = [
+const defaultStories = [
   {
     title: "A classroom closer to home",
     text: "Children from underserved families receive structured learning support, books, and mentoring that keeps them connected to school.",
@@ -58,6 +58,106 @@ const stories = [
   },
 ];
 
+const defaultVolunteerWays = ["Teach or mentor", "Support health camps", "Document stories", "Coordinate relief", "Sponsor learning material"];
+
+const iconMap = {
+  education: BookOpen,
+  healthcare: HeartPulse,
+  health: HeartPulse,
+  livelihood: Heart,
+  environment: Sprout,
+};
+
+type FocusArea = {
+  title: string;
+  text: string;
+  icon: typeof BookOpen;
+};
+
+type Story = {
+  title: string;
+  text: string;
+};
+
+type LandingContent = {
+  title: string;
+  heroEyebrow: string;
+  heroSubtitle: string;
+  aboutHeading: string;
+  vision: string;
+  missionHeading: string;
+  mission: string;
+  focusAreas: FocusArea[];
+  objectives: string[];
+  successHeading: string;
+  successIntro: string;
+  stories: Story[];
+  volunteerHeading: string;
+  volunteerIntro: string;
+  volunteerWays: string[];
+  contactHeading: string;
+  contactAddress: string;
+  contactPhone: string;
+  contactEmail: string;
+  assets: {
+    logo: string;
+    banner: string;
+    video: string;
+  };
+};
+
+type StrapiMedia = {
+  data?: {
+    attributes?: {
+      url?: string;
+    };
+  };
+  url?: string;
+};
+
+type StrapiLandingAttributes = Partial<
+  Omit<LandingContent, "focusAreas" | "objectives" | "stories" | "volunteerWays" | "assets">
+> & {
+  focusAreas?: Array<{ title?: string; text?: string }>;
+  objectives?: string;
+  successStories?: string;
+  volunteerWays?: string[];
+  logo?: StrapiMedia;
+  banner?: StrapiMedia;
+  heroVideo?: StrapiMedia;
+};
+
+const defaultLandingContent: LandingContent = {
+  title: "Raushni Educational & Social Welfare Trust",
+  heroEyebrow: "Community-led education, healthcare, and dignity",
+  heroSubtitle:
+    "A beacon of hope for equal access to quality education, essential healthcare, and dignified livelihood opportunities.",
+  aboutHeading: "Lighting pathways out of poverty and illiteracy.",
+  vision:
+    "Raushni Educational & Social Welfare Trust envisions a just and enlightened society where every individual, irrespective of socio-economic background, has equal access to quality education, essential healthcare, and dignified livelihood opportunities. We empower communities to break cycles of poverty and participate actively in the nation's progress.",
+  missionHeading: "Sustainable change, one life at a time.",
+  mission: "To empower underserved communities through quality education, healthcare access, skill development, and social welfare programs.",
+  focusAreas: defaultFocusAreas,
+  objectives,
+  successHeading: "Progress shaped by community trust.",
+  successIntro:
+    "Every initiative begins with listening. Our programs are designed around local needs, volunteer action, and measurable dignity for families.",
+  stories: defaultStories,
+  volunteerHeading: "Bring your time, skill, network, or care.",
+  volunteerIntro:
+    "Volunteers support teaching, health camps, field coordination, content, fundraising, disaster relief, and community mobilization. Every contribution helps a family move with more confidence.",
+  volunteerWays: defaultVolunteerWays,
+  contactHeading: "Let's build a more equitable community.",
+  contactAddress: "Rauzah Apartment, Bhatauna Road, Marwan Khurd, Muzaffarpur, Bihar 843113",
+  contactPhone: "+91 997 3955 7600",
+  contactEmail: "info@raushni.com",
+  assets: {
+    logo: "/assets/brand/raushni-logo.png",
+    banner: "/assets/brand/raushni-banner.png",
+    video: "/assets/videos/raushni-community.mp4",
+  },
+};
+
 const styles = {
   section: "scroll-mt-24 border-b border-stone-200 px-4 py-24 sm:px-6 lg:px-8",
   sectionInner: "mx-auto max-w-7xl",
@@ -71,9 +171,102 @@ const styles = {
     "inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/30 bg-white/10 px-6 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-[#120f0b]",
 };
 
+function resolveMediaUrl(media: StrapiMedia | undefined, fallback: string) {
+  const url = media?.data?.attributes?.url ?? media?.url;
+
+  if (!url) {
+    return fallback;
+  }
+
+  if (url.startsWith("http")) {
+    return url;
+  }
+
+  return `${process.env.NEXT_PUBLIC_CMS_URL ?? ""}${url}`;
+}
+
+function parseRichTextList(value: string | undefined, fallback: string[]) {
+  if (!value) {
+    return fallback;
+  }
+
+  const items = value
+    .split(/\r?\n/)
+    .map((item) => item.replace(/^[-*]\s*/, "").trim())
+    .filter(Boolean);
+
+  return items.length > 0 ? items : fallback;
+}
+
+function parseStories(value: string | undefined, fallback: Story[]) {
+  if (!value) {
+    return fallback;
+  }
+
+  const items = parseRichTextList(value, []).map((item, index) => {
+    const [title, ...rest] = item.split(":");
+    return {
+      title: rest.length > 0 ? title.trim() : fallback[index]?.title ?? `Story ${index + 1}`,
+      text: rest.length > 0 ? rest.join(":").trim() : item,
+    };
+  });
+
+  return items.length > 0 ? items : fallback;
+}
+
+function normalizeFocusAreas(value: StrapiLandingAttributes["focusAreas"], fallback: FocusArea[]) {
+  if (!Array.isArray(value) || value.length === 0) {
+    return fallback;
+  }
+
+  return value
+    .filter((area) => area.title || area.text)
+    .map((area, index) => {
+      const title = area.title ?? fallback[index]?.title ?? "Focus Area";
+      const icon = iconMap[title.toLowerCase() as keyof typeof iconMap] ?? fallback[index]?.icon ?? Heart;
+
+      return {
+        title,
+        text: area.text ?? fallback[index]?.text ?? "",
+        icon,
+      };
+    });
+}
+
+function normalizeLandingContent(attributes: StrapiLandingAttributes): LandingContent {
+  return {
+    ...defaultLandingContent,
+    title: attributes.title ?? defaultLandingContent.title,
+    heroEyebrow: attributes.heroEyebrow ?? defaultLandingContent.heroEyebrow,
+    heroSubtitle: attributes.heroSubtitle ?? defaultLandingContent.heroSubtitle,
+    aboutHeading: attributes.aboutHeading ?? defaultLandingContent.aboutHeading,
+    vision: attributes.vision ?? defaultLandingContent.vision,
+    missionHeading: attributes.missionHeading ?? defaultLandingContent.missionHeading,
+    mission: attributes.mission ?? defaultLandingContent.mission,
+    focusAreas: normalizeFocusAreas(attributes.focusAreas, defaultLandingContent.focusAreas),
+    objectives: parseRichTextList(attributes.objectives, defaultLandingContent.objectives),
+    successHeading: attributes.successHeading ?? defaultLandingContent.successHeading,
+    successIntro: attributes.successIntro ?? defaultLandingContent.successIntro,
+    stories: parseStories(attributes.successStories, defaultLandingContent.stories),
+    volunteerHeading: attributes.volunteerHeading ?? defaultLandingContent.volunteerHeading,
+    volunteerIntro: attributes.volunteerIntro ?? defaultLandingContent.volunteerIntro,
+    volunteerWays: Array.isArray(attributes.volunteerWays) ? attributes.volunteerWays : defaultLandingContent.volunteerWays,
+    contactHeading: attributes.contactHeading ?? defaultLandingContent.contactHeading,
+    contactAddress: attributes.contactAddress ?? defaultLandingContent.contactAddress,
+    contactPhone: attributes.contactPhone ?? defaultLandingContent.contactPhone,
+    contactEmail: attributes.contactEmail ?? defaultLandingContent.contactEmail,
+    assets: {
+      logo: resolveMediaUrl(attributes.logo, defaultLandingContent.assets.logo),
+      banner: resolveMediaUrl(attributes.banner, defaultLandingContent.assets.banner),
+      video: resolveMediaUrl(attributes.heroVideo, defaultLandingContent.assets.video),
+    },
+  };
+}
+
 export default function HomePage() {
   const [activeSection, setActiveSection] = useState("about");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [landingContent, setLandingContent] = useState(defaultLandingContent);
 
   const activeItems = useMemo(
     () =>
@@ -106,6 +299,37 @@ export default function HomePage() {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadLandingContent() {
+      try {
+        const response = await fetch("/cms/api/landing-page?populate=*", {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          return;
+        }
+
+        const payload = await response.json();
+        const attributes = payload?.data?.attributes;
+
+        if (attributes) {
+          setLandingContent(normalizeLandingContent(attributes));
+        }
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          console.warn("Unable to load Strapi landing content", error);
+        }
+      }
+    }
+
+    loadLandingContent();
+
+    return () => controller.abort();
+  }, []);
+
   const closeMenu = () => setMenuOpen(false);
 
   return (
@@ -114,7 +338,7 @@ export default function HomePage() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
           <a href="#top" className="flex items-center gap-3" aria-label="Raushni home">
             <img
-              src="/assets/brand/raushni-logo.png"
+              src={landingContent.assets.logo}
               alt="Raushni Educational and Social Welfare Trust logo"
               className="h-14 w-14 rounded-2xl object-contain"
             />
@@ -178,12 +402,12 @@ export default function HomePage() {
       <section id="top" className="relative flex min-h-[92vh] items-end overflow-hidden bg-stone-950 text-white">
         <video
           className="absolute inset-0 h-full w-full object-cover opacity-60"
-          src="/assets/videos/raushni-community.mp4"
+              src={landingContent.assets.video}
           autoPlay
           muted
           loop
           playsInline
-          poster="/assets/brand/raushni-banner.png"
+          poster={landingContent.assets.banner}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/25 to-[#120f0b]" />
 
@@ -191,13 +415,13 @@ export default function HomePage() {
           <div className="max-w-4xl">
             <p className="inline-flex items-center gap-2 rounded-full border border-amber-300/50 bg-black/25 px-4 py-2 text-sm font-semibold text-amber-100">
               <PlayCircle size={18} aria-hidden="true" />
-              Community-led education, healthcare, and dignity
+              {landingContent.heroEyebrow}
             </p>
             <h1 className="mt-7 max-w-4xl text-5xl font-black leading-none text-white sm:text-6xl lg:text-7xl">
-              Raushni Educational & Social Welfare Trust
+              {landingContent.title}
             </h1>
             <p className="mt-6 max-w-3xl text-lg leading-8 text-white/88 sm:text-xl">
-              A beacon of hope for equal access to quality education, essential healthcare, and dignified livelihood opportunities.
+              {landingContent.heroSubtitle}
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <a
@@ -218,7 +442,7 @@ export default function HomePage() {
 
           <div className="hidden self-end rounded-2xl border border-white/20 bg-white/10 p-4 backdrop-blur-md lg:block">
             <img
-              src="/assets/brand/raushni-banner.png"
+              src={landingContent.assets.banner}
               alt="Raushni brand banner"
               className="aspect-[3/2] w-full rounded-xl object-cover"
             />
@@ -231,14 +455,11 @@ export default function HomePage() {
           <div>
             <p className={styles.eyebrow}>About Us</p>
             <h2 className={styles.heading}>
-              Lighting pathways out of poverty and illiteracy.
+              {landingContent.aboutHeading}
             </h2>
           </div>
           <p className={styles.body}>
-            Raushni Educational & Social Welfare Trust envisions a just and enlightened society where every individual,
-            irrespective of socio-economic background, has equal access to quality education, essential healthcare,
-            and dignified livelihood opportunities. We empower communities to break cycles of poverty and participate
-            actively in the nation&apos;s progress.
+            {landingContent.vision}
           </p>
         </div>
       </section>
@@ -248,16 +469,15 @@ export default function HomePage() {
           <div className="max-w-3xl">
             <p className={styles.eyebrow}>Our Mission</p>
             <h2 className={styles.heading}>
-              Sustainable change, one life at a time.
+              {landingContent.missionHeading}
             </h2>
             <p className={`${styles.body} mt-5`}>
-              To empower underserved communities through quality education, healthcare access, skill development,
-              and social welfare programs.
+              {landingContent.mission}
             </p>
           </div>
 
           <div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {focusAreas.map((area) => {
+            {landingContent.focusAreas.map((area) => {
               const Icon = area.icon;
               return (
                 <article
@@ -275,7 +495,7 @@ export default function HomePage() {
           </div>
 
           <div className="mt-14 grid gap-3 md:grid-cols-2">
-            {objectives.map((objective) => (
+            {landingContent.objectives.map((objective) => (
               <div
                 key={objective}
                 className="flex items-start gap-3 rounded-lg border border-stone-200 bg-white px-4 py-4 shadow-sm"
@@ -294,17 +514,16 @@ export default function HomePage() {
             <div>
               <p className={styles.eyebrow}>Success Stories</p>
               <h2 className={styles.heading}>
-                Progress shaped by community trust.
+                {landingContent.successHeading}
               </h2>
             </div>
             <p className="text-lg leading-8 text-stone-700">
-              Every initiative begins with listening. Our programs are designed around local needs, volunteer action,
-              and measurable dignity for families.
+              {landingContent.successIntro}
             </p>
           </div>
 
           <div className="mt-12 grid gap-5 md:grid-cols-3">
-            {stories.map((story) => (
+            {landingContent.stories.map((story) => (
               <article key={story.title} className={styles.card}>
                 <h3 className="text-xl font-black text-stone-950">{story.title}</h3>
                 <p className="mt-4 text-sm leading-7 text-stone-700">{story.text}</p>
@@ -319,17 +538,16 @@ export default function HomePage() {
           <div>
             <p className={styles.eyebrow}>Volunteer</p>
             <h2 className={styles.heading}>
-              Bring your time, skill, network, or care.
+              {landingContent.volunteerHeading}
             </h2>
             <p className={`${styles.body} mt-5 max-w-3xl`}>
-              Volunteers support teaching, health camps, field coordination, content, fundraising, disaster relief,
-              and community mobilization. Every contribution helps a family move with more confidence.
+              {landingContent.volunteerIntro}
             </p>
           </div>
           <div className={styles.card}>
             <h3 className="text-2xl font-black text-stone-950">Ways to help</h3>
             <div className="mt-5 grid gap-3">
-              {["Teach or mentor", "Support health camps", "Document stories", "Coordinate relief", "Sponsor learning material"].map((item) => (
+              {landingContent.volunteerWays.map((item) => (
                 <div key={item} className="flex items-center gap-3 text-sm font-semibold text-stone-800">
                   <CheckCircle2 className="text-emerald-700" size={18} aria-hidden="true" />
                   {item}
@@ -352,20 +570,20 @@ export default function HomePage() {
           <div>
             <p className={styles.eyebrow}>Contact</p>
             <h2 className={styles.heading}>
-              Let&apos;s build a more equitable community.
+              {landingContent.contactHeading}
             </h2>
             <div className="mt-8 space-y-4 text-stone-700">
               <p className="flex gap-3">
                 <MapPin className="mt-1 flex-none text-amber-700" size={20} aria-hidden="true" />
-                Rauzah Apartment, Bhatauna Road, Marwan Khurd, Muzaffarpur, Bihar 843113
+                {landingContent.contactAddress}
               </p>
               <p className="flex gap-3">
                 <Phone className="mt-1 flex-none text-amber-700" size={20} aria-hidden="true" />
-                +91 997 3955 7600
+                {landingContent.contactPhone}
               </p>
               <p className="flex gap-3">
                 <Mail className="mt-1 flex-none text-amber-700" size={20} aria-hidden="true" />
-                info@raushni.com
+                {landingContent.contactEmail}
               </p>
             </div>
           </div>
