@@ -62,7 +62,6 @@ const styles = {
   section: "scroll-mt-24 border-b border-stone-200 px-4 py-24 sm:px-6 lg:px-8",
   sectionInner: "mx-auto max-w-7xl",
   eyebrow: "text-sm font-bold uppercase tracking-[0.18em] text-amber-700",
-  eyebrowDark: "text-sm font-bold uppercase tracking-[0.18em] text-amber-300",
   heading: "mt-4 text-4xl font-black leading-tight text-stone-950 sm:text-5xl",
   body: "text-lg leading-9 text-stone-700",
   card: "rounded-lg border border-stone-200 bg-white p-6 shadow-sm",
@@ -70,7 +69,6 @@ const styles = {
     "inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-amber-400 px-6 text-sm font-bold text-stone-950 shadow-sm shadow-amber-900/10 transition hover:-translate-y-0.5 hover:bg-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-200 focus:ring-offset-2",
   secondaryButton:
     "inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/30 bg-white/10 px-6 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-[#120f0b]",
-  darkPanel: "rounded-lg border border-white/15 bg-white/10 p-6 shadow-2xl shadow-black/20",
 };
 
 export default function HomePage() {
@@ -316,24 +314,24 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="volunteer" className="scroll-mt-24 bg-[#120f0b] px-4 py-24 text-white sm:px-6 lg:px-8">
+      <section id="volunteer" className={`${styles.section} bg-[#faf7f2]`}>
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1fr_0.9fr] lg:items-center">
           <div>
-            <p className={styles.eyebrowDark}>Volunteer</p>
-            <h2 className="mt-4 text-4xl font-black leading-tight sm:text-5xl">
+            <p className={styles.eyebrow}>Volunteer</p>
+            <h2 className={styles.heading}>
               Bring your time, skill, network, or care.
             </h2>
-            <p className="mt-5 max-w-3xl text-lg leading-9 text-white/78">
+            <p className={`${styles.body} mt-5 max-w-3xl`}>
               Volunteers support teaching, health camps, field coordination, content, fundraising, disaster relief,
               and community mobilization. Every contribution helps a family move with more confidence.
             </p>
           </div>
-          <div className={styles.darkPanel}>
-            <h3 className="text-2xl font-black">Ways to help</h3>
+          <div className={styles.card}>
+            <h3 className="text-2xl font-black text-stone-950">Ways to help</h3>
             <div className="mt-5 grid gap-3">
               {["Teach or mentor", "Support health camps", "Document stories", "Coordinate relief", "Sponsor learning material"].map((item) => (
-                <div key={item} className="flex items-center gap-3 text-sm font-semibold text-white/88">
-                  <CheckCircle2 className="text-amber-300" size={18} aria-hidden="true" />
+                <div key={item} className="flex items-center gap-3 text-sm font-semibold text-stone-800">
+                  <CheckCircle2 className="text-emerald-700" size={18} aria-hidden="true" />
                   {item}
                 </div>
               ))}
