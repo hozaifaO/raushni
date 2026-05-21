@@ -12,7 +12,8 @@ RUN apk add --no-cache \
   pango-dev \
   pixman-dev \
   python3 \
-  vips-dev
+  vips-dev \
+  vips-cpp
 
 COPY package*.json ./
 RUN npm install --legacy-peer-deps

@@ -10,6 +10,9 @@ services:
       NODE_ENV: development
       NEXT_PUBLIC_API_URL: http://localhost:8000
       NEXT_PUBLIC_CMS_URL: http://localhost:1337
+      API_INTERNAL_URL: http://backend:8000
+      CMS_INTERNAL_URL: http://strapi:1337
+    command: sh -c "rm -rf .next && test -f 'app/(dashboard)/activities/page.tsx' && test -f 'app/(dashboard)/news/page.tsx' && npm run dev"
 
   strapi:
     build:

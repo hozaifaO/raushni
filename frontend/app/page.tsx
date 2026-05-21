@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowRight,
   BookOpen,
@@ -9,21 +9,11 @@ import {
   HeartPulse,
   Mail,
   MapPin,
-  Menu,
   Phone,
   PlayCircle,
   Sprout,
-  X,
 } from "lucide-react";
-import Footer from "@/components/Layout/Footer";
-
-const navItems = [
-  { label: "About Us", href: "#about" },
-  { label: "Our Mission", href: "#mission" },
-  { label: "Success Stories", href: "#success" },
-  { label: "Volunteer", href: "#volunteer" },
-  { label: "Contact", href: "#contact" },
-];
+import PublicPageShell from "@/components/Public/PublicPageShell";
 
 const objectives = [
   "Formal and digital education for children and adults",
@@ -264,40 +254,7 @@ function normalizeLandingContent(attributes: StrapiLandingAttributes): LandingCo
 }
 
 export default function HomePage() {
-  const [activeSection, setActiveSection] = useState("about");
-  const [menuOpen, setMenuOpen] = useState(false);
   const [landingContent, setLandingContent] = useState(defaultLandingContent);
-
-  const activeItems = useMemo(
-    () =>
-      navItems.map((item) => ({
-        ...item,
-        active: item.href === `#${activeSection}`,
-      })),
-    [activeSection],
-  );
-
-  useEffect(() => {
-    const sections = navItems
-      .map((item) => document.querySelector(item.href))
-      .filter((section): section is Element => Boolean(section));
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-
-        if (visible?.target.id) {
-          setActiveSection(visible.target.id);
-        }
-      },
-      { rootMargin: "-35% 0px -50% 0px", threshold: [0.1, 0.35, 0.6] },
-    );
-
-    sections.forEach((section) => observer.observe(section));
-    return () => observer.disconnect();
-  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -330,75 +287,8 @@ export default function HomePage() {
     return () => controller.abort();
   }, []);
 
-  const closeMenu = () => setMenuOpen(false);
-
   return (
-    <main className="min-h-screen bg-[#faf7f2] text-stone-950">
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-white/20 bg-[#120f0b]/80 text-white backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-          <a href="#top" className="flex items-center gap-3" aria-label="Raushni home">
-            <img
-              src={landingContent.assets.logo}
-              alt="Raushni Educational and Social Welfare Trust logo"
-              className="h-14 w-14 rounded-2xl object-contain"
-            />
-            <span className="hidden text-sm font-bold uppercase leading-tight tracking-wide sm:block">
-              Raushni
-              <span className="block text-[11px] font-medium text-amber-100">Educational & Social Welfare Trust</span>
-            </span>
-          </a>
-
-          <nav className="hidden items-center justify-center gap-1 rounded-full border border-white/15 bg-white/10 px-2 py-1 md:flex">
-            {activeItems.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  item.active ? "bg-white text-stone-950" : "text-white/86 hover:bg-white/10 hover:text-amber-100"
-                }`}
-              >
-                {item.label}
-              </a>
-            ))}
-          </nav>
-
-          <a
-            href="#volunteer"
-            className="hidden min-h-10 items-center justify-center rounded-full bg-amber-400 px-4 text-sm font-bold text-stone-950 shadow-sm shadow-amber-900/10 transition hover:-translate-y-0.5 hover:bg-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-200 focus:ring-offset-2 focus:ring-offset-[#120f0b] md:inline-flex"
-          >
-            Join Us
-          </a>
-
-          <button
-            type="button"
-            onClick={() => setMenuOpen((open) => !open)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 md:hidden"
-            aria-label="Toggle navigation"
-          >
-            {menuOpen ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}
-          </button>
-        </div>
-
-        {menuOpen && (
-          <nav className="border-t border-white/10 bg-[#120f0b] px-4 py-3 md:hidden">
-            <div className="flex flex-col gap-2">
-              {activeItems.map((item) => (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  onClick={closeMenu}
-                  className={`rounded-lg px-3 py-3 text-sm font-semibold ${
-                    item.active ? "bg-white text-stone-950" : "text-white hover:bg-white/10 hover:text-amber-100"
-                  }`}
-                >
-                  {item.label}
-                </a>
-              ))}
-            </div>
-          </nav>
-        )}
-      </header>
-
+    <PublicPageShell mainClassName="bg-[#faf7f2] text-stone-950">
       <section id="top" className="relative flex min-h-[92vh] items-end overflow-hidden bg-stone-950 text-white">
         <video
           className="absolute inset-0 h-full w-full object-cover opacity-60"
@@ -612,8 +502,6 @@ export default function HomePage() {
           </form>
         </div>
       </section>
-
-      <Footer />
-    </main>
+    </PublicPageShell>
   );
 }

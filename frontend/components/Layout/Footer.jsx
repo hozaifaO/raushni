@@ -91,11 +91,11 @@ export default function Footer() {
   ];
 
   const quickLinks = [
-    { name: 'About Us', href: '/#about' },
-    { name: 'Our Mission', href: '/#mission' },
-    { name: 'Success Stories', href: '/#success' },
-    { name: 'Volunteer', href: '/#volunteer' },
-    { name: 'Contact', href: '/#contact' },
+    { name: 'About Us', href: '/about' },
+    { name: 'Activities', href: '/activities' },
+    { name: 'News', href: '/news' },
+    { name: 'Volunteer', href: '/volunteer' },
+    { name: 'Contact', href: '/contact' },
   ];
 
   const supportLinks = [

@@ -1,5 +1,10 @@
-import ComingSoonPage from "../_components/ComingSoonPage";
+import ActivitiesContent from "@/components/Public/ActivitiesContent";
+import PublicPageShell from "@/components/Public/PublicPageShell";
 
 export default function Page() {
-  return <ComingSoonPage title="Activities" />;
+  return (
+    <PublicPageShell>
+      <ActivitiesContent />
+    </PublicPageShell>
+  );
 }

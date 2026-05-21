@@ -89,7 +89,7 @@ export const DASHBOARD_MODULES: DashboardModuleGroup[] = [
       },
       {
         name: "Activity Posts",
-        href: "/activities",
+        href: "/dashboard/activities",
         icon: Activity,
         access: "write",
         description: "Publish and maintain activities shown across the platform.",
@@ -117,7 +117,7 @@ export const DASHBOARD_MODULES: DashboardModuleGroup[] = [
       },
       {
         name: "News Management",
-        href: "/news",
+        href: "/dashboard/news",
         icon: Newspaper,
         access: "write",
         description: "Prepare news content and publish updates.",

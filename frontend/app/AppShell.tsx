@@ -20,12 +20,14 @@ export default function AppShell({
   const isPublicRoute =
     pathname === "/" ||
     pathname?.startsWith("/about") ||
+    pathname?.startsWith("/activities") ||
     pathname?.startsWith("/blog") ||
     pathname?.startsWith("/careers") ||
     pathname?.startsWith("/contact") ||
     pathname?.startsWith("/donate") ||
     pathname?.startsWith("/events") ||
     pathname?.startsWith("/gallery") ||
+    pathname?.startsWith("/news") ||
     pathname?.startsWith("/volunteer");
   const isDashboardHome = pathname === "/dashboard";
 

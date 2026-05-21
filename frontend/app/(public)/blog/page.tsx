@@ -1,3 +1,5 @@
+import NewsContent from "@/components/Public/NewsContent";
+
 export default function Page() {
-  return <div className="p-6">Coming soon.</div>;
+  return <NewsContent />;
 }

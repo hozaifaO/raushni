@@ -21,18 +21,17 @@ const nextConfig = {
   },
 
   async rewrites() {
+    const apiUrl = process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || 'http://backend:8000';
+    const cmsUrl = process.env.CMS_INTERNAL_URL || process.env.NEXT_PUBLIC_CMS_URL || 'http://strapi:1337';
+
     return [
       {
         source: '/api/:path*',
-        destination: process.env.NEXT_PUBLIC_API_URL
-          ? `${process.env.NEXT_PUBLIC_API_URL}/api/:path*`
-          : 'http://backend:8000/api/:path*',
+        destination: `${apiUrl}/api/:path*`,
       },
       {
         source: '/cms/api/:path*',
-        destination: process.env.NEXT_PUBLIC_CMS_URL
-          ? `${process.env.NEXT_PUBLIC_CMS_URL}/api/:path*`
-          : 'http://strapi:1337/api/:path*',
+        destination: `${cmsUrl}/api/:path*`,
       },
     ];
   },

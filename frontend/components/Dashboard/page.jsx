@@ -105,7 +105,7 @@ export default function Dashboard() {
     { title: 'Donation Management', description: 'Track all donations', icon: Heart, href: '/donations', color: 'rose' },
     { title: 'Event Management', description: 'Organize and manage events', icon: Calendar, href: '/events', color: 'cyan' },
     { title: 'Project Management', description: 'Monitor project progress', icon: FolderKanban, href: '/projects', color: 'amber' },
-    { title: 'News Management', description: 'Share updates and news', icon: Newspaper, href: '/news', color: 'lime' },
+    { title: 'News Management', description: 'Share updates and news', icon: Newspaper, href: '/dashboard/news', color: 'lime' },
     { title: 'Expense Management', description: 'Track NGO expenses', icon: DollarSign, href: '/expenses', color: 'emerald' },
   ];
 

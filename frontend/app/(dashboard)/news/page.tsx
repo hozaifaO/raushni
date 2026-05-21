@@ -1,5 +1,10 @@
-import ComingSoonPage from "../_components/ComingSoonPage";
+import NewsContent from "@/components/Public/NewsContent";
+import PublicPageShell from "@/components/Public/PublicPageShell";
 
 export default function Page() {
-  return <ComingSoonPage title="News" />;
+  return (
+    <PublicPageShell>
+      <NewsContent />
+    </PublicPageShell>
+  );
 }
