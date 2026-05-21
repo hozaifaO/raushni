@@ -4,8 +4,8 @@ services:
     build: ./database
     container_name: raushni-postgres
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     ports:
       - "5432:5432"
     volumes:
@@ -48,10 +48,10 @@ services:
       - ./backend:/app
       - /app/__pycache__
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/raushni_backend
-      REDIS_URL: redis://redis:6379
-      ENVIRONMENT: development
-      DEBUG: "true"
+      DATABASE_URL: ${BACKEND_DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/raushni_backend}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      DEBUG: ${DEBUG:-false}
     depends_on:
       postgres:
         condition: service_healthy
@@ -64,28 +64,42 @@ services:
   # CMS (Strapi)
   strapi:
     build:
-      context: ./cms-backup-20260511
-      dockerfile: Dockerfile.dev
+      context: ./cms
+      dockerfile: Dockerfile
     container_name: raushni-strapi
     ports:
       - "1337:1337"
     volumes:
-      - ./cms-backup-20260511:/app
-      - /app/node_modules
+      - strapi_uploads:/opt/app/public/uploads
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/raushni_cms
+      HOST: 0.0.0.0
+      PORT: 1337
+      NODE_ENV: production
+      PUBLIC_URL: ${CMS_PUBLIC_URL:-http://localhost:1337}
+      APP_KEYS: ${STRAPI_APP_KEYS:-replace-with-four-comma-separated-production-keys}
+      API_TOKEN_SALT: ${STRAPI_API_TOKEN_SALT:-replace-with-production-api-token-salt}
+      ADMIN_JWT_SECRET: ${STRAPI_ADMIN_JWT_SECRET:-replace-with-production-admin-jwt-secret}
+      JWT_SECRET: ${STRAPI_JWT_SECRET:-replace-with-production-jwt-secret}
+      TRANSFER_TOKEN_SALT: ${STRAPI_TRANSFER_TOKEN_SALT:-replace-with-production-transfer-token-salt}
+      CORS_ORIGINS: ${CMS_CORS_ORIGINS:-http://localhost:3000,http://localhost:3001}
+      DATABASE_CLIENT: postgres
       DATABASE_HOST: postgres
       DATABASE_PORT: 5432
-      DATABASE_NAME: raushni_cms
-      DATABASE_USERNAME: postgres
-      DATABASE_PASSWORD: postgres
-      DATABASE_SSL: "false"
-      NODE_ENV: development
+      DATABASE_NAME: ${CMS_DATABASE_NAME:-raushni_cms}
+      DATABASE_USERNAME: ${CMS_DATABASE_USERNAME:-postgres}
+      DATABASE_PASSWORD: ${CMS_DATABASE_PASSWORD:-postgres}
+      DATABASE_SSL: ${CMS_DATABASE_SSL:-false}
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - raushni_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:1337/_health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
   # Frontend
   frontend:
@@ -100,13 +114,15 @@ services:
       - /app/node_modules
       - /app/.next
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:8000
-      NEXT_PUBLIC_PYTHON_URL: http://localhost:8000
-      NEXT_PUBLIC_CMS_URL: http://localhost:1337
-      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      NEXT_PUBLIC_PYTHON_URL: ${NEXT_PUBLIC_PYTHON_URL:-http://localhost:8000}
+      NEXT_PUBLIC_CMS_URL: ${NEXT_PUBLIC_CMS_URL:-http://localhost:1337}
+      NODE_ENV: ${NODE_ENV:-production}
     depends_on:
-      - backend
-      - strapi
+      backend:
+        condition: service_started
+      strapi:
+        condition: service_healthy
     networks:
       - raushni_network
 
@@ -127,6 +143,7 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  strapi_uploads:
 
 networks:
   raushni_network:

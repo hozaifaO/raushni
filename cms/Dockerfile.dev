@@ -1,0 +1,25 @@
+FROM node:20-alpine
+
+WORKDIR /opt/app
+ENV NODE_ENV=development
+
+RUN apk add --no-cache \
+  build-base \
+  cairo-dev \
+  curl \
+  git \
+  jpeg-dev \
+  pango-dev \
+  pixman-dev \
+  python3 \
+  vips-dev
+
+COPY package*.json ./
+RUN npm install --legacy-peer-deps
+
+COPY . .
+RUN mkdir -p public/uploads .tmp
+
+EXPOSE 1337
+
+CMD ["npm", "run", "develop", "--", "--host", "0.0.0.0"]

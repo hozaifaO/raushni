@@ -1,0 +1,58 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: raushni-cms-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${CMS_DATABASE_NAME:-raushni_cms}
+    ports:
+      - "${CMS_DATABASE_PORT:-5433}:5432"
+    volumes:
+      - cms_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  strapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: raushni-cms
+    environment:
+      HOST: 0.0.0.0
+      PORT: 1337
+      NODE_ENV: production
+      PUBLIC_URL: ${CMS_PUBLIC_URL:-http://localhost:1337}
+      APP_KEYS: ${STRAPI_APP_KEYS:-replace-with-four-comma-separated-production-keys}
+      API_TOKEN_SALT: ${STRAPI_API_TOKEN_SALT:-replace-with-production-api-token-salt}
+      ADMIN_JWT_SECRET: ${STRAPI_ADMIN_JWT_SECRET:-replace-with-production-admin-jwt-secret}
+      JWT_SECRET: ${STRAPI_JWT_SECRET:-replace-with-production-jwt-secret}
+      TRANSFER_TOKEN_SALT: ${STRAPI_TRANSFER_TOKEN_SALT:-replace-with-production-transfer-token-salt}
+      CORS_ORIGINS: ${CMS_CORS_ORIGINS:-http://localhost:3000,http://localhost:3001}
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: ${CMS_DATABASE_NAME:-raushni_cms}
+      DATABASE_USERNAME: ${CMS_DATABASE_USERNAME:-postgres}
+      DATABASE_PASSWORD: ${CMS_DATABASE_PASSWORD:-postgres}
+      DATABASE_SSL: ${CMS_DATABASE_SSL:-false}
+    ports:
+      - "${CMS_PORT:-1337}:1337"
+    volumes:
+      - cms_uploads:/opt/app/public/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:1337/_health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+volumes:
+  cms_postgres_data:
+  cms_uploads:

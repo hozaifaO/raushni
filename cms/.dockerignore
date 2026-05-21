@@ -1,0 +1,9 @@
+.cache
+.tmp
+build
+node_modules
+npm-debug.log
+public/uploads
+.env
+.env.*
+!.env.example
