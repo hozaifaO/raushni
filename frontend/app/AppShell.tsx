@@ -27,6 +27,7 @@ export default function AppShell({
     pathname?.startsWith("/events") ||
     pathname?.startsWith("/gallery") ||
     pathname?.startsWith("/volunteer");
+  const isDashboardHome = pathname === "/dashboard";
 
   useEffect(() => {
     setReadOnly(isReadOnly(getStoredUser().role));
@@ -49,6 +50,8 @@ export default function AppShell({
 
       <main
         className={`mt-28 transition-all duration-300 ${
+          isDashboardHome ? "bg-[#f7f7f7]" : ""
+        } ${
           sidebarOpen ? "lg:mr-72" : "lg:mr-0"
         }`}
       >

@@ -6,7 +6,8 @@
     "start": "strapi start",
     "build": "strapi build",
     "develop": "strapi develop",
-    "strapi": "strapi"
+    "strapi": "strapi",
+    "seed:raushni": "node scripts/seed-raushni-content.js"
   },
   "dependencies": {
     "@strapi/strapi": "4.15.5",

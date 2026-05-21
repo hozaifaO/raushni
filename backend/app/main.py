@@ -44,6 +44,8 @@ def create_app() -> FastAPI:
             "endpoints": [
                 "GET /health",
                 "GET /api",
+                "GET /api/v1/dashboard/status",
+                "GET /api/v1/landing",
                 "GET /api/v1/members",
                 "POST /api/v1/members",
             ],
