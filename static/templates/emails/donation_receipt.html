@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <body style="margin:0;background:#f5f6f7;font-family:Arial,Helvetica,sans-serif;color:#111827;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f5f6f7;padding:24px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="640" cellspacing="0" cellpadding="0" style="background:#ffffff;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+            <tr>
+              <td style="padding:28px;border-bottom:1px solid #e5e7eb;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td width="92" valign="top">
+                      <img
+                        src="{{ logo_url | default('/assets/brand/raushni-stamp-logo.png') }}"
+                        width="84"
+                        height="84"
+                        alt="Raushni Educational and Social Welfare Trust stamp logo"
+                        style="display:block;border-radius:50%;border:1px solid #e5e7eb;background:#f9fafb;object-fit:contain;"
+                      />
+                    </td>
+                    <td valign="top">
+                      <p style="margin:0;color:#ea580c;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">Official Donation Receipt</p>
+                      <h1 style="margin:8px 0 0;font-size:22px;line-height:1.2;">Raushni Educational &amp; Social Welfare Trust</h1>
+                      <p style="margin:8px 0 0;color:#4b5563;font-size:13px;line-height:1.6;">Registered under Section 8 of Companies Act, 2013 | 12A &amp; 80G Tax Exempted</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:28px;">
+                <p style="margin:0 0 16px;font-size:15px;line-height:1.6;">Dear {{ donor_name }},</p>
+                <p style="margin:0 0 20px;color:#374151;font-size:14px;line-height:1.7;">
+                  Thank you for your contribution toward Raushni community programs. Your receipt
+                  details are below.
+                </p>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border:1px solid #e5e7eb;border-radius:8px;">
+                  <tr>
+                    <td style="padding:14px;color:#6b7280;font-size:13px;">Receipt number</td>
+                    <td align="right" style="padding:14px;font-size:13px;font-weight:700;">{{ receipt_number }}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:14px;color:#6b7280;font-size:13px;border-top:1px solid #e5e7eb;">Amount</td>
+                    <td align="right" style="padding:14px;font-size:18px;font-weight:800;border-top:1px solid #e5e7eb;">{{ amount }}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:14px;color:#6b7280;font-size:13px;border-top:1px solid #e5e7eb;">Purpose</td>
+                    <td align="right" style="padding:14px;font-size:13px;font-weight:700;border-top:1px solid #e5e7eb;">{{ purpose }}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:14px;color:#6b7280;font-size:13px;border-top:1px solid #e5e7eb;">Payment status</td>
+                    <td align="right" style="padding:14px;font-size:13px;font-weight:700;border-top:1px solid #e5e7eb;">{{ payment_status }}</td>
+                  </tr>
+                </table>
+                <p style="margin:20px 0 0;color:#4b5563;font-size:13px;line-height:1.7;">
+                  This receipt is computer generated and valid without a physical signature.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

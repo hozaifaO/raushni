@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.router import api_router
+from app.services.donation_service import DonationService
 from app.services.member_service import MemberService
 
 
@@ -17,6 +18,7 @@ APP_VERSION = "1.0.0"
 def create_app() -> FastAPI:
     app = FastAPI(title=APP_NAME, version=APP_VERSION)
     app.state.member_service = MemberService()
+    app.state.donation_service = DonationService()
 
     app.add_middleware(
         CORSMiddleware,
@@ -46,6 +48,8 @@ def create_app() -> FastAPI:
                 "GET /api",
                 "GET /api/v1/dashboard/status",
                 "GET /api/v1/landing",
+                "GET /api/v1/donations",
+                "POST /api/v1/donations",
                 "GET /api/v1/members",
                 "POST /api/v1/members",
             ],
