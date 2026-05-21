@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.router import api_router
 from app.services.donation_service import DonationService
 from app.services.member_service import MemberService
+from app.services.settings_service import SettingsService
 
 
 APP_NAME = "Raushni NGO API"
@@ -19,6 +20,7 @@ def create_app() -> FastAPI:
     app = FastAPI(title=APP_NAME, version=APP_VERSION)
     app.state.member_service = MemberService()
     app.state.donation_service = DonationService()
+    app.state.settings_service = SettingsService()
 
     app.add_middleware(
         CORSMiddleware,
@@ -47,6 +49,8 @@ def create_app() -> FastAPI:
                 "GET /health",
                 "GET /api",
                 "GET /api/v1/dashboard/status",
+                "GET /api/v1/account/profile",
+                "GET /api/v1/settings",
                 "GET /api/v1/landing",
                 "GET /api/v1/donations",
                 "POST /api/v1/donations",

@@ -27,7 +27,7 @@ def get_dashboard_status() -> dict[str, Any]:
                 "name": "Backend API",
                 "status": "configured",
                 "path": "/api/v1",
-                "description": "FastAPI service exposing authenticated operational APIs.",
+                "description": "FastAPI service exposing profile, settings, and operational APIs.",
             },
             {
                 "name": "Strapi CMS",
@@ -43,6 +43,16 @@ def get_dashboard_status() -> dict[str, Any]:
             },
         ],
         "content": [
+            {
+                "name": "Profile",
+                "source": "FastAPI account session",
+                "api": "/api/v1/account/profile",
+            },
+            {
+                "name": "Settings",
+                "source": "FastAPI settings dashboard",
+                "api": "/api/v1/settings",
+            },
             {
                 "name": "Landing Page",
                 "source": "Strapi single type: landing-page",
@@ -67,6 +77,7 @@ def get_dashboard_status() -> dict[str, Any]:
             "documents",
             "reports",
             "cms",
+            "profile",
             "settings",
         ],
     }

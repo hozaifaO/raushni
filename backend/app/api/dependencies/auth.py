@@ -22,3 +22,15 @@ def require_write_access(
             detail=READ_ONLY_MESSAGE,
         )
     return role
+
+
+def require_admin_access(
+    x_user_role: str | None = Header(default=None, alias="X-User-Role"),
+) -> UserRole:
+    role = normalize_role(x_user_role)
+    if role != UserRole.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Administrator access is required.",
+        )
+    return role
