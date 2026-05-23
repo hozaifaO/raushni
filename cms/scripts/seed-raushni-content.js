@@ -8,6 +8,7 @@ const uids = {
   publicPage: "api::public-page.public-page",
   internshipAnnouncement: "api::internship-announcement.internship-announcement",
   documentTemplate: "api::document-template.document-template",
+  projectContent: "api::project-content.project-content",
 };
 
 const now = () => new Date();
@@ -439,6 +440,101 @@ const documentTemplates = [
   },
 ];
 
+const projectContents = [
+  {
+    slug: "project-sparsh-watsan-muzaffarpur",
+    title: "Project Sparsh: WATSAN Intervention Programme in Marginalized Schools",
+    shortTitle: "Project Sparsh",
+    summary:
+      "A 12-month integrated Water, Sanitation, and Hygiene intervention for 10 marginalized government schools in Muzaffarpur, Bihar, focused on safe drinking water, gender-segregated sanitation, handwashing facilities, menstrual hygiene awareness, teacher capacity building, and community-led maintenance.",
+    rationale:
+      "Rural schools in Muzaffarpur continue to face unsafe drinking water, non-functional toilets, limited handwashing facilities, menstrual hygiene challenges, and flood-related water contamination. These gaps increase illness, absenteeism, girls' dropout risk, and educational inequality. Project Sparsh combines infrastructure, behaviour change, and community ownership to create safe, healthy, and gender-inclusive learning environments.",
+    location: "Muzaffarpur District, Bihar, India",
+    duration: "12 months",
+    budget: "INR 48,11,136",
+    beneficiaries: "2,500 school children, 100 teachers and staff, and 10,000+ community members",
+    status: "proposed",
+    focusArea: "Education, WATSAN, health, gender inclusion, school infrastructure",
+    coverImageUrl: "/assets/brand/raushni-banner.png",
+    proposalDocumentUrl: "/cms/project-proposals/project-sparsh-watsan-muzaffarpur.docx",
+    objectives: [
+      "Install RO-based drinking water systems, gender-segregated toilets, and handwashing stations in 10 schools.",
+      "Conduct hygiene awareness, Menstrual Hygiene Management counselling, and teacher sensitization programmes.",
+      "Build the capacity of teachers, school committees, and community stakeholders for operation and maintenance.",
+      "Strengthen community participation and convergence with Jal Jeevan Mission, Swachh Bharat Mission, and Samagra Shiksha.",
+    ],
+    activities: [
+      { title: "Baseline assessment and school selection", phase: "Q1", text: "WATSAN gap analysis, school mobilization, stakeholder consultation, and implementation planning." },
+      { title: "Infrastructure development", phase: "Q1-Q3", text: "RO systems, toilets, handwashing stations, water storage, plumbing, drainage, and minor repairs." },
+      { title: "Hygiene behaviour change", phase: "Q1-Q4", text: "Student hygiene sessions, IEC material, cleanliness drives, disease prevention awareness, and community sensitization." },
+      { title: "MHM and gender inclusion", phase: "Q2-Q4", text: "Adolescent girls' counselling, menstrual hygiene support, teacher/parent sensitization, and stigma reduction." },
+      { title: "Capacity building and sustainability", phase: "Q2-Q4", text: "Teacher workshops, SMC strengthening, SHG engagement, O&M systems, vendor linkages, and scheme convergence." },
+      { title: "Monitoring and closure", phase: "Q1-Q4", text: "MIS reporting, quality checks, attendance and health tracking, case studies, endline assessment, and closure report." },
+    ],
+    outcomes: [
+      "10 marginalized schools equipped with functional WATSAN infrastructure.",
+      "Reduced waterborne diseases and hygiene-related absenteeism among children.",
+      "Improved attendance and retention among adolescent girls.",
+      "Better hygiene practices among students, teachers, and communities.",
+      "Functional community-led maintenance systems in all covered schools.",
+      "Replicable school WATSAN model for underserved districts of Bihar.",
+    ],
+    sdgs: [
+      "SDG 3 - Good Health and Well-being",
+      "SDG 4 - Quality Education",
+      "SDG 5 - Gender Equality",
+      "SDG 6 - Clean Water and Sanitation",
+      "SDG 10 - Reduced Inequalities",
+      "SDG 11 - Sustainable Cities and Communities",
+      "SDG 12 - Responsible Consumption and Production",
+      "SDG 13 - Climate Action",
+    ],
+    timeline: [
+      { quarter: "Q1", milestone: "Planning, baseline, school selection, SMC formation, and procurement readiness" },
+      { quarter: "Q2", milestone: "RO installation, toilet/handwashing works, hygiene sessions, and teacher sensitization" },
+      { quarter: "Q3", milestone: "Infrastructure completion, MHM counselling, community drives, and monitoring" },
+      { quarter: "Q4", milestone: "O&M handover, endline assessment, documentation, donor reporting, and closure" },
+    ],
+    budgetBreakdown: [
+      { head: "Human resources", amount: 1164000 },
+      { head: "Baseline and endline assessment", amount: 80000 },
+      { head: "RO water purification systems", amount: 700000 },
+      { head: "Gender-segregated toilet construction/renovation", amount: 500000 },
+      { head: "Handwashing stations and plumbing fixtures", amount: 200000 },
+      { head: "Water storage tanks and installation", amount: 200000 },
+      { head: "Minor civil works and repairs", amount: 200000 },
+      { head: "Teacher sensitization workshops", amount: 120000 },
+      { head: "MHM counselling for adolescent girls", amount: 100000 },
+      { head: "Hygiene awareness campaigns and IEC", amount: 130000 },
+      { head: "Volunteer and stakeholder training", amount: 90000 },
+      { head: "O&M support", amount: 150000 },
+    ],
+    team: [
+      { role: "Project Manager", positions: 1 },
+      { role: "Plant Manager (RO)", positions: 1 },
+      { role: "Community Mobiliser", positions: 1 },
+      { role: "Finance & Accounts Officer", positions: 1 },
+    ],
+    monitoring: [
+      "Baseline and endline surveys",
+      "Monthly progress reports and MIS dashboards",
+      "School inspection and infrastructure functionality checks",
+      "Training attendance and participant feedback",
+      "Attendance, absenteeism, and health incident tracking",
+      "Case studies, donor visibility, and final closure documentation",
+    ],
+    risks: [
+      { risk: "Seasonal floods affecting infrastructure", mitigation: "Climate-resilient design and buffer planning." },
+      { risk: "Low adoption of hygiene practices", mitigation: "Continuous school and community behaviour change sessions." },
+      { risk: "Weak long-term maintenance", mitigation: "SMC, SHG, teacher, and vendor-linked O&M systems." },
+      { risk: "Procurement or construction delays", mitigation: "Strong procurement planning, vendor accountability, and field supervision." },
+    ],
+    seoTitle: "Project Sparsh WATSAN Proposal",
+    seoDescription: "CMS-managed Project Sparsh proposal for school WATSAN intervention in Muzaffarpur, Bihar.",
+    publishedAt: now(),
+  },
+];
+
 async function upsertSingle(app, uid, data) {
   const existing = await app.db.query(uid).findOne();
   if (existing) {
@@ -531,6 +627,9 @@ async function main() {
       await upsertBySlug(app, uids.publicPage, page);
     }
     await upsertBySlug(app, uids.internshipAnnouncement, internshipContent);
+    for (const project of projectContents) {
+      await upsertBySlug(app, uids.projectContent, project);
+    }
     for (const template of documentTemplates) {
       await upsertByKey(app, uids.documentTemplate, template);
     }

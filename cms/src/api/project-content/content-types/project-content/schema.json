@@ -1,0 +1,45 @@
+{
+  "kind": "collectionType",
+  "collectionName": "project_contents",
+  "info": {
+    "singularName": "project-content",
+    "pluralName": "project-contents",
+    "displayName": "Project Content",
+    "description": "CMS-managed project proposals and dashboard project content"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "slug": { "type": "uid", "targetField": "title", "required": true },
+    "title": { "type": "string", "required": true },
+    "shortTitle": { "type": "string" },
+    "summary": { "type": "text" },
+    "rationale": { "type": "richtext" },
+    "location": { "type": "string" },
+    "duration": { "type": "string" },
+    "budget": { "type": "string" },
+    "beneficiaries": { "type": "string" },
+    "status": {
+      "type": "enumeration",
+      "enum": ["draft", "proposed", "approved", "active", "completed", "on_hold"],
+      "default": "proposed"
+    },
+    "focusArea": { "type": "string" },
+    "coverImage": { "type": "media", "allowedTypes": ["images"] },
+    "coverImageUrl": { "type": "string" },
+    "proposalDocument": { "type": "media" },
+    "proposalDocumentUrl": { "type": "string" },
+    "objectives": { "type": "json" },
+    "activities": { "type": "json" },
+    "outcomes": { "type": "json" },
+    "sdgs": { "type": "json" },
+    "timeline": { "type": "json" },
+    "budgetBreakdown": { "type": "json" },
+    "team": { "type": "json" },
+    "monitoring": { "type": "json" },
+    "risks": { "type": "json" },
+    "seoTitle": { "type": "string" },
+    "seoDescription": { "type": "text" }
+  }
+}

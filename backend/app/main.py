@@ -11,6 +11,7 @@ from app.services.donation_service import DonationService
 from app.services.internship_service import InternshipService
 from app.services.document_service import DocumentService
 from app.services.member_service import MemberService
+from app.services.project_service import ProjectService
 from app.services.settings_service import SettingsService
 
 
@@ -25,6 +26,7 @@ def create_app() -> FastAPI:
     app.state.internship_service = InternshipService()
     app.state.document_service = DocumentService()
     app.state.settings_service = SettingsService()
+    app.state.project_service = ProjectService()
 
     app.add_middleware(
         CORSMiddleware,
