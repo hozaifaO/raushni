@@ -7,6 +7,7 @@ const uids = {
   siteSetting: "api::site-setting.site-setting",
   publicPage: "api::public-page.public-page",
   internshipAnnouncement: "api::internship-announcement.internship-announcement",
+  designation: "api::designation.designation",
   documentTemplate: "api::document-template.document-template",
   projectContent: "api::project-content.project-content",
 };
@@ -440,6 +441,115 @@ const documentTemplates = [
   },
 ];
 
+const designationContents = [
+  {
+    slug: "trustee",
+    title: "Trustee",
+    code: "TRUSTEE",
+    department: "Governance",
+    level: "board",
+    status: "active",
+    reportsTo: "",
+    description: "Governance designation for trust oversight, policy approvals, compliance review, and statutory accountability.",
+    assignmentScope: "Board governance and trust-level approvals",
+    responsibilities: [
+      "Approve strategic plans and budgets",
+      "Review compliance and audit actions",
+      "Represent trust governance decisions",
+    ],
+    requiredDocuments: ["Identity proof", "Address proof", "Board consent record"],
+    staffAssigned: 3,
+    capacity: 3,
+    sortOrder: 10,
+    notes: "Reserved for legally appointed board members.",
+    publishedAt: now(),
+  },
+  {
+    slug: "project-manager",
+    title: "Project Manager",
+    code: "PM",
+    department: "Programmes",
+    level: "management",
+    status: "active",
+    reportsTo: "Trustee",
+    description: "Programme designation for project planning, donor reporting, field coordination, timeline control, and delivery quality.",
+    assignmentScope: "Project execution and donor coordination",
+    responsibilities: [
+      "Prepare project plans and implementation calendars",
+      "Coordinate field teams and partners",
+      "Submit progress, impact, and utilization reports",
+    ],
+    requiredDocuments: ["Appointment letter", "KYC", "Experience profile"],
+    staffAssigned: 1,
+    capacity: 2,
+    sortOrder: 20,
+    publishedAt: now(),
+  },
+  {
+    slug: "finance-accounts-officer",
+    title: "Finance and Accounts Officer",
+    code: "FIN",
+    department: "Finance",
+    level: "management",
+    status: "active",
+    reportsTo: "Trustee",
+    description: "Finance designation for donation records, receipts, expenses, vouchers, bank records, and audit-ready reporting.",
+    assignmentScope: "Finance controls, payment records, receipts, and compliance",
+    responsibilities: [
+      "Record donations and expenses",
+      "Maintain vouchers and audit files",
+      "Prepare financial summaries",
+    ],
+    requiredDocuments: ["Appointment letter", "KYC", "Bank verification"],
+    staffAssigned: 1,
+    capacity: 1,
+    sortOrder: 30,
+    publishedAt: now(),
+  },
+  {
+    slug: "volunteer-coordinator",
+    title: "Volunteer Coordinator",
+    code: "VOL-COORD",
+    department: "Community",
+    level: "coordination",
+    status: "active",
+    reportsTo: "Project Manager",
+    description: "Coordination designation for volunteer onboarding, deployment, attendance, conduct, and community activity support.",
+    assignmentScope: "Volunteer deployment and community activity coordination",
+    responsibilities: [
+      "Maintain volunteer rosters",
+      "Assign volunteers to activities",
+      "Collect attendance and field updates",
+    ],
+    requiredDocuments: ["Volunteer form", "Identity proof", "Consent declaration"],
+    staffAssigned: 1,
+    capacity: 10,
+    sortOrder: 40,
+    publishedAt: now(),
+  },
+  {
+    slug: "intern",
+    title: "Intern",
+    code: "INTERN",
+    department: "Internships",
+    level: "intern",
+    status: "active",
+    reportsTo: "Internship Coordinator",
+    description: "Learning designation for internship tasks, documentation, weekly progress updates, completion deliverables, and certificate workflow.",
+    assignmentScope: "Internship tasks, learning milestones, and certificate workflow",
+    responsibilities: [
+      "Complete assigned internship deliverables",
+      "Submit weekly progress updates",
+      "Follow mentor guidance and trust conduct rules",
+    ],
+    requiredDocuments: ["Internship application", "College ID", "Completion report"],
+    staffAssigned: 0,
+    capacity: 25,
+    sortOrder: 50,
+    publishedAt: now(),
+  },
+];
+
 const projectContents = [
   {
     slug: "project-sparsh-watsan-muzaffarpur",
@@ -627,6 +737,9 @@ async function main() {
       await upsertBySlug(app, uids.publicPage, page);
     }
     await upsertBySlug(app, uids.internshipAnnouncement, internshipContent);
+    for (const designation of designationContents) {
+      await upsertBySlug(app, uids.designation, designation);
+    }
     for (const project of projectContents) {
       await upsertBySlug(app, uids.projectContent, project);
     }
