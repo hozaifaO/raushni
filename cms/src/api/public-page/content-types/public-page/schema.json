@@ -1,0 +1,27 @@
+{
+  "kind": "collectionType",
+  "collectionName": "public_pages",
+  "info": {
+    "singularName": "public-page",
+    "pluralName": "public-pages",
+    "displayName": "Public Page",
+    "description": "CMS-managed content for public website pages"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "slug": { "type": "uid", "targetField": "title", "required": true },
+    "title": { "type": "string", "required": true },
+    "heroEyebrow": { "type": "string" },
+    "heroTitle": { "type": "string", "required": true },
+    "heroText": { "type": "text" },
+    "heroImage": { "type": "media", "allowedTypes": ["images"] },
+    "heroImageUrl": { "type": "string" },
+    "actionLabel": { "type": "string" },
+    "actionHref": { "type": "string" },
+    "sections": { "type": "json" },
+    "seoTitle": { "type": "string" },
+    "seoDescription": { "type": "text" }
+  }
+}

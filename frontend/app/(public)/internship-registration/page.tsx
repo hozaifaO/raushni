@@ -2,6 +2,7 @@
 
 import { CheckCircle2, Github, Send, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
+import { fallbackPages, type CmsPublicPage } from "@/lib/cms/publicContent";
 import {
   listPublicInternships,
   registerInternshipApplication,
@@ -28,11 +29,36 @@ const emptyForm: InternshipApplicationFormValues = {
   completion_notes: "",
 };
 
+const defaultCmsPage = fallbackPages["internship-registration"];
+
+function resolvePublicMediaUrl(value: string | undefined, fallback: string) {
+  if (!value) return fallback;
+  if (value.startsWith("http") || value.startsWith("/assets")) return value;
+  return `${process.env.NEXT_PUBLIC_CMS_URL ?? ""}${value}`;
+}
+
+function normalizeCmsPage(payload: unknown): CmsPublicPage {
+  const attrs = (payload as { data?: Array<{ attributes?: Partial<CmsPublicPage> & { heroImageUrl?: string; heroImage?: { data?: { attributes?: { url?: string } }; url?: string } } }> })?.data?.[0]?.attributes;
+  if (!attrs) return defaultCmsPage;
+  const heroImageUrl = attrs.heroImage?.data?.attributes?.url ?? attrs.heroImage?.url ?? attrs.heroImageUrl;
+  return {
+    ...defaultCmsPage,
+    slug: attrs.slug ?? defaultCmsPage.slug,
+    title: attrs.title ?? defaultCmsPage.title,
+    heroEyebrow: attrs.heroEyebrow ?? defaultCmsPage.heroEyebrow,
+    heroTitle: attrs.heroTitle ?? defaultCmsPage.heroTitle,
+    heroText: attrs.heroText ?? defaultCmsPage.heroText,
+    heroImage: resolvePublicMediaUrl(heroImageUrl, defaultCmsPage.heroImage),
+    sections: Array.isArray(attrs.sections) ? attrs.sections : defaultCmsPage.sections,
+  };
+}
+
 function dateLabel(value: string) {
   return new Intl.DateTimeFormat("en-IN", { dateStyle: "long" }).format(new Date(value));
 }
 
 export default function Page() {
+  const [cmsPage, setCmsPage] = useState<CmsPublicPage>(defaultCmsPage);
   const [announcements, setAnnouncements] = useState<InternshipAnnouncement[]>([]);
   const [form, setForm] = useState<InternshipApplicationFormValues>(emptyForm);
   const [created, setCreated] = useState<InternshipApplication | null>(null);
@@ -63,7 +89,27 @@ export default function Page() {
     void load();
   }, []);
 
+  useEffect(() => {
+    const controller = new AbortController();
+    async function loadCmsPage() {
+      try {
+        const response = await fetch("/cms/api/public-pages?filters[slug][$eq]=internship-registration&populate=*", {
+          signal: controller.signal,
+        });
+        if (!response.ok) return;
+        setCmsPage(normalizeCmsPage(await response.json()));
+      } catch (requestError) {
+        if (!controller.signal.aborted) {
+          console.warn("Unable to load internship registration content from CMS", requestError);
+        }
+      }
+    }
+    void loadCmsPage();
+    return () => controller.abort();
+  }, []);
+
   const announcement = announcements.find((item) => item.id === form.announcement_id) ?? announcements[0];
+  const registrationSection = cmsPage.sections[0];
 
   const submit = async () => {
     setSubmitting(true);
@@ -137,11 +183,9 @@ export default function Page() {
               <ShieldCheck size={22} aria-hidden="true" />
             </div>
             <div>
-              <p className="text-sm font-bold uppercase tracking-[0.16em] text-amber-700">Registration form</p>
-              <h2 className="mt-1 text-2xl font-black text-stone-950">Apply for Raushni Internship</h2>
-              <p className="mt-2 text-sm leading-6 text-stone-600">
-                Complete this form carefully. The team will review your details and update your registration status from the dashboard.
-              </p>
+              <p className="text-sm font-bold uppercase tracking-[0.16em] text-amber-700">{registrationSection?.eyebrow ?? cmsPage.heroEyebrow}</p>
+              <h2 className="mt-1 text-2xl font-black text-stone-950">{registrationSection?.title ?? cmsPage.heroTitle}</h2>
+              <p className="mt-2 text-sm leading-6 text-stone-600">{registrationSection?.text ?? cmsPage.heroText}</p>
             </div>
           </div>
 

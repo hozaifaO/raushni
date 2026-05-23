@@ -1,4 +1,19 @@
-module.exports = ({ env }) => [
+const csv = (value) => String(value || '')
+  .split(',')
+  .map((item) => item.trim())
+  .filter(Boolean);
+
+module.exports = ({ env }) => {
+  const publicUrl = env('PUBLIC_URL', 'http://localhost:1337');
+  const adminUrl = env('ADMIN_URL', '/admin');
+  const configuredOrigins = csv(env('CORS_ORIGINS', ''));
+  const localOrigins = ['http://localhost', 'http://localhost:80', 'http://localhost:1337', 'http://localhost:3000', 'http://localhost:3001'];
+  const urlOrigins = [publicUrl, adminUrl]
+    .filter((value) => value && value.startsWith('http'))
+    .map((value) => new URL(value).origin);
+  const allowedOrigins = Array.from(new Set([...configuredOrigins, ...localOrigins, ...urlOrigins]));
+
+  return [
   'strapi::logger',
   'strapi::errors',
   {
@@ -7,9 +22,9 @@ module.exports = ({ env }) => [
       contentSecurityPolicy: {
         useDefaults: true,
         directives: {
-          'connect-src': ["'self'", 'https:'],
-          'img-src': ["'self'", 'data:', 'blob:', env('PUBLIC_URL', 'http://localhost:1337')],
-          'media-src': ["'self'", 'data:', 'blob:', env('PUBLIC_URL', 'http://localhost:1337')],
+          'connect-src': ["'self'", 'http:', 'https:'],
+          'img-src': ["'self'", 'data:', 'blob:', publicUrl],
+          'media-src': ["'self'", 'data:', 'blob:', publicUrl],
           upgradeInsecureRequests: null,
         },
       },
@@ -18,7 +33,7 @@ module.exports = ({ env }) => [
   {
     name: 'strapi::cors',
     config: {
-      origin: env.array('CORS_ORIGINS', ['http://localhost:3000', 'http://localhost:3001']),
+      origin: allowedOrigins,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
       headers: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
       keepHeaderOnError: true,
@@ -35,4 +50,5 @@ module.exports = ({ env }) => [
     },
   },
   'strapi::public',
-];
+  ];
+};

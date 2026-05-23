@@ -1,0 +1,31 @@
+{
+  "kind": "singleType",
+  "collectionName": "site_settings",
+  "info": {
+    "singularName": "site-setting",
+    "pluralName": "site-settings",
+    "displayName": "Site Setting",
+    "description": "Shared public website navigation, brand, contact, footer, and social content"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "siteName": { "type": "string", "required": true, "default": "Raushni Educational & Social Welfare Trust" },
+    "brandShortName": { "type": "string", "default": "Raushni" },
+    "brandTagline": { "type": "string", "default": "Educational & Social Welfare Trust" },
+    "description": { "type": "text" },
+    "contactAddress": { "type": "string" },
+    "contactPhone": { "type": "string" },
+    "contactEmail": { "type": "email" },
+    "logo": { "type": "media", "allowedTypes": ["images"] },
+    "stampLogo": { "type": "media", "allowedTypes": ["images"] },
+    "navItems": { "type": "json" },
+    "quickLinks": { "type": "json" },
+    "supportLinks": { "type": "json" },
+    "socialLinks": { "type": "json" },
+    "footerNote": { "type": "text" },
+    "newsletterTitle": { "type": "string", "default": "Stay connected with Raushni" },
+    "newsletterText": { "type": "text" }
+  }
+}

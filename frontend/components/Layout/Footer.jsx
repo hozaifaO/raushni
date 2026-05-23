@@ -24,6 +24,23 @@ const defaultFooterContent = {
   contactPhone: '+91 997 3955 7600',
   contactEmail: 'info@raushni.com',
   logo: '/assets/brand/raushni-logo.png',
+  quickLinks: [
+    { label: 'About Us', href: '/about' },
+    { label: 'Activities', href: '/activities' },
+    { label: 'News', href: '/news' },
+    { label: 'Volunteer', href: '/volunteer' },
+    { label: 'Contact', href: '/contact' },
+  ],
+  supportLinks: [
+    { label: 'Donate', href: '/donate' },
+    { label: 'Gallery', href: '/gallery' },
+    { label: 'Events', href: '/events' },
+    { label: 'Careers', href: '/careers' },
+    { label: 'Admin Login', href: '/login' },
+  ],
+  newsletterTitle: 'Stay connected with Raushni',
+  newsletterText: 'Get updates about programs, events, relief work, and volunteer opportunities.',
+  footerNote: 'Registered under Section 8 of Companies Act, 2013 | 12A & 80G Tax Exempted',
 };
 
 function resolveMediaUrl(media, fallback) {
@@ -49,25 +66,30 @@ export default function Footer() {
 
     async function loadFooterContent() {
       try {
-        const response = await fetch('/cms/api/landing-page?populate=*', {
-          signal: controller.signal,
-        });
+        const [landingPayload, settingResponse] = await Promise.all([
+          fetch('/cms/api/landing-page?populate=*', { signal: controller.signal })
+            .then((item) => (item.ok ? item.json() : null))
+            .catch(() => null),
+          fetch('/cms/api/site-setting?populate=*', { signal: controller.signal })
+            .then((item) => (item.ok ? item.json() : null))
+            .catch(() => null),
+        ]);
+        const attributes = landingPayload?.data?.attributes;
+        const settings = settingResponse?.data?.attributes;
 
-        if (!response.ok) {
-          return;
-        }
-
-        const payload = await response.json();
-        const attributes = payload?.data?.attributes;
-
-        if (attributes) {
+        if (attributes || settings) {
           setContent({
-            title: attributes.title ?? defaultFooterContent.title,
-            description: attributes.heroSubtitle ?? defaultFooterContent.description,
-            contactAddress: attributes.contactAddress ?? defaultFooterContent.contactAddress,
-            contactPhone: attributes.contactPhone ?? defaultFooterContent.contactPhone,
-            contactEmail: attributes.contactEmail ?? defaultFooterContent.contactEmail,
-            logo: resolveMediaUrl(attributes.logo, defaultFooterContent.logo),
+            title: settings?.siteName ?? attributes?.title ?? defaultFooterContent.title,
+            description: settings?.description ?? attributes?.heroSubtitle ?? defaultFooterContent.description,
+            contactAddress: settings?.contactAddress ?? attributes?.contactAddress ?? defaultFooterContent.contactAddress,
+            contactPhone: settings?.contactPhone ?? attributes?.contactPhone ?? defaultFooterContent.contactPhone,
+            contactEmail: settings?.contactEmail ?? attributes?.contactEmail ?? defaultFooterContent.contactEmail,
+            logo: resolveMediaUrl(settings?.logo ?? attributes?.logo, defaultFooterContent.logo),
+            quickLinks: Array.isArray(settings?.quickLinks) ? settings.quickLinks : defaultFooterContent.quickLinks,
+            supportLinks: Array.isArray(settings?.supportLinks) ? settings.supportLinks : defaultFooterContent.supportLinks,
+            newsletterTitle: settings?.newsletterTitle ?? defaultFooterContent.newsletterTitle,
+            newsletterText: settings?.newsletterText ?? defaultFooterContent.newsletterText,
+            footerNote: settings?.footerNote ?? defaultFooterContent.footerNote,
           });
         }
       } catch (error) {
@@ -88,22 +110,6 @@ export default function Footer() {
     { name: 'Instagram', icon: FaInstagram, href: 'https://instagram.com/' },
     { name: 'LinkedIn', icon: FaLinkedin, href: 'https://linkedin.com/company/' },
     { name: 'YouTube', icon: FaYoutube, href: 'https://youtube.com/' },
-  ];
-
-  const quickLinks = [
-    { name: 'About Us', href: '/about' },
-    { name: 'Activities', href: '/activities' },
-    { name: 'News', href: '/news' },
-    { name: 'Volunteer', href: '/volunteer' },
-    { name: 'Contact', href: '/contact' },
-  ];
-
-  const supportLinks = [
-    { name: 'Donate', href: '/donate' },
-    { name: 'Gallery', href: '/gallery' },
-    { name: 'Events', href: '/events' },
-    { name: 'Careers', href: '/careers' },
-    { name: 'Admin Login', href: '/login' },
   ];
 
   return (
@@ -149,10 +155,10 @@ export default function Footer() {
           <div>
             <h3 className={footerStyles.heading}>Explore</h3>
             <ul className="mt-5 space-y-3">
-              {quickLinks.map((link) => (
-                <li key={link.name}>
+              {content.quickLinks.map((link) => (
+                <li key={link.label ?? link.name}>
                   <Link href={link.href} className={footerStyles.link}>
-                    {link.name}
+                    {link.label ?? link.name}
                   </Link>
                 </li>
               ))}
@@ -162,10 +168,10 @@ export default function Footer() {
           <div>
             <h3 className={footerStyles.heading}>Links</h3>
             <ul className="mt-5 space-y-3">
-              {supportLinks.map((link) => (
-                <li key={link.name}>
+              {content.supportLinks.map((link) => (
+                <li key={link.label ?? link.name}>
                   <Link href={link.href} className={footerStyles.link}>
-                    {link.name}
+                    {link.label ?? link.name}
                   </Link>
                 </li>
               ))}
@@ -200,8 +206,8 @@ export default function Footer() {
         <div className="mt-12 border-t border-white/10 pt-8">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <h4 className="text-lg font-black text-white">Stay connected with Raushni</h4>
-              <p className="mt-1 text-sm text-white/60">Get updates about programs, events, relief work, and volunteer opportunities.</p>
+              <h4 className="text-lg font-black text-white">{content.newsletterTitle}</h4>
+              <p className="mt-1 text-sm text-white/60">{content.newsletterText}</p>
             </div>
             <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
               <input
@@ -222,7 +228,7 @@ export default function Footer() {
             © {currentYear} {content.title}. All rights reserved.
           </p>
           <p className="inline-flex items-center gap-2 text-xs">
-            Registered under Section 8 of Companies Act, 2013 | 12A & 80G Tax Exempted
+            {content.footerNote}
             <ArrowRight size={14} aria-hidden="true" />
           </p>
         </div>

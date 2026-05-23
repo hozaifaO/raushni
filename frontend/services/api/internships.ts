@@ -104,6 +104,46 @@ export async function listInternships(options: ListInternshipsOptions = {}): Pro
 }
 
 export async function listPublicInternships(): Promise<InternshipAnnouncement[]> {
+  const cmsResponse = await fetch("/cms/api/internship-announcements?filters[status][$eq]=published&populate=*", {
+    cache: "no-store",
+  }).catch(() => null);
+  if (cmsResponse?.ok) {
+    const payload = await cmsResponse.json().catch(() => null);
+    const items = payload?.data;
+    if (Array.isArray(items) && items.length > 0) {
+      return items.map((item) => {
+        const attributes = item.attributes ?? {};
+        const poster = attributes.poster?.data?.attributes?.url ?? attributes.poster?.url ?? attributes.posterUrl;
+        const posterUrl = poster?.startsWith("http") || poster?.startsWith("/assets")
+          ? poster
+          : `${process.env.NEXT_PUBLIC_CMS_URL ?? ""}${poster ?? ""}`;
+        return {
+          id: String(item.id),
+          title: attributes.title,
+          slug: attributes.slug,
+          summary: attributes.summary,
+          description: attributes.description,
+          start_date: attributes.startDate,
+          end_date: attributes.endDate,
+          registration_deadline: attributes.registrationDeadline,
+          event_date: attributes.eventDate,
+          event_time: attributes.eventTime,
+          location: attributes.location,
+          mode: attributes.mode,
+          status: attributes.status,
+          poster_url: posterUrl || "/assets/brand/internship-2026.jpg",
+          apply_url: attributes.applyUrl ?? "/internship-registration",
+          github_url: attributes.githubUrl ?? "https://github.com/owais4u/raushni",
+          contact_phone: attributes.contactPhone ?? "+91 7827860062",
+          benefits: Array.isArray(attributes.benefits) ? attributes.benefits : [],
+          tracks: Array.isArray(attributes.tracks) ? attributes.tracks : [],
+          eligibility: Array.isArray(attributes.eligibility) ? attributes.eligibility : [],
+          created_at: attributes.createdAt,
+          updated_at: attributes.updatedAt,
+        } satisfies InternshipAnnouncement;
+      });
+    }
+  }
   const response = await fetch(`${INTERNSHIPS_ENDPOINT}/public`, { cache: "no-store" });
   return parseResponse<InternshipAnnouncement[]>(response);
 }

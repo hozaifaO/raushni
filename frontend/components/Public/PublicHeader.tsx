@@ -3,33 +3,62 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { HeartHandshake, Menu, X } from "lucide-react";
-import { useState } from "react";
-import { publicNavItems } from "@/lib/public/content";
+import { useEffect, useState } from "react";
+import { defaultSiteSettings, type CmsSiteSettings } from "@/lib/cms/publicContent";
 
 export default function PublicHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [settings, setSettings] = useState<CmsSiteSettings>(defaultSiteSettings);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    async function loadSettings() {
+      try {
+        const response = await fetch("/cms/api/site-setting?populate=*", { signal: controller.signal });
+        if (!response.ok) return;
+        const payload = await response.json();
+        const attributes = payload?.data?.attributes;
+        if (!attributes) return;
+        const mediaUrl = attributes.logo?.data?.attributes?.url ?? attributes.logo?.url;
+        setSettings((current) => ({
+          ...current,
+          siteName: attributes.siteName ?? current.siteName,
+          brandShortName: attributes.brandShortName ?? current.brandShortName,
+          brandTagline: attributes.brandTagline ?? current.brandTagline,
+          logo: mediaUrl ? (mediaUrl.startsWith("http") ? mediaUrl : `${process.env.NEXT_PUBLIC_CMS_URL ?? ""}${mediaUrl}`) : current.logo,
+          navItems: Array.isArray(attributes.navItems) ? attributes.navItems : current.navItems,
+        }));
+      } catch {
+        if (!controller.signal.aborted) {
+          setSettings(defaultSiteSettings);
+        }
+      }
+    }
+    loadSettings();
+    return () => controller.abort();
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[#120f0b]/95 text-white shadow-sm shadow-black/10 backdrop-blur-xl">
       <div className="mx-auto flex min-h-40 max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-4" aria-label="Raushni home">
           <img
-            src="/assets/brand/raushni-logo.png"
+            src={settings.logo}
             alt="Raushni Educational and Social Welfare Trust logo"
             className="rounded-full object-contain ring-2 ring-white/15"
             style={{ width: "1.5in", height: "1.5in" }}
           />
           <span className="hidden text-xl font-black uppercase leading-tight tracking-wide text-white sm:block">
-            Raushni
+            {settings.brandShortName}
             <span className="block text-sm font-semibold text-amber-200">
-              Educational & Social Welfare Trust
+              {settings.brandTagline}
             </span>
           </span>
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex">
-          {publicNavItems.map((item) => {
+          {settings.navItems.map((item) => {
             const active = pathname === item.href || (item.href === "/news" && pathname?.startsWith("/blog"));
             return (
               <Link
@@ -68,7 +97,7 @@ export default function PublicHeader() {
       {open && (
         <nav className="border-t border-white/10 bg-[#120f0b] px-4 py-3 lg:hidden">
           <div className="grid gap-2">
-            {publicNavItems.map((item) => (
+            {settings.navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
