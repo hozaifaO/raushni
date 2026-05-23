@@ -23,7 +23,7 @@ const defaultFooterContent = {
   contactAddress: 'Rauzah Apartment, Bhatauna Road, Marwan Khurd, Muzaffarpur, Bihar 843113',
   contactPhone: '+91 997 3955 7600',
   contactEmail: 'info@raushni.com',
-  logo: '/assets/brand/raushni-logo.png',
+  logo: '/assets/brand/o4uL2.png',
   quickLinks: [
     { label: 'About Us', href: '/about' },
     { label: 'Activities', href: '/activities' },
