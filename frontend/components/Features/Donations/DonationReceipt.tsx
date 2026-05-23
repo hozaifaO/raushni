@@ -3,6 +3,7 @@
 import { Printer, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { fallbackDocumentTemplates, type CmsDocumentTemplate } from "@/lib/cms/documentTemplates";
+import { documentQrUrl, documentVerificationValue } from "@/lib/documents/qr";
 import type { DonationReceipt as DonationReceiptModel } from "@/types/models/donation";
 
 type DonationReceiptProps = {
@@ -35,6 +36,7 @@ const stampLogoPath = "/assets/brand/raushni-stamp-logo.png";
 export default function DonationReceipt({ receipt, onClose }: DonationReceiptProps) {
   const donation = receipt.donation;
   const [template, setTemplate] = useState<CmsDocumentTemplate>(fallbackDocumentTemplates["donation-receipt"]);
+  const qrUrl = documentQrUrl(documentVerificationValue("donation-receipt", receipt.receipt_number));
 
   useEffect(() => {
     const controller = new AbortController();
@@ -180,6 +182,9 @@ export default function DonationReceipt({ receipt, onClose }: DonationReceiptPro
 
         <div className="mt-8 flex items-end justify-between gap-6 text-sm text-gray-600">
           <p>{template.thankYouNote}</p>
+          <div className="grid h-28 w-28 shrink-0 place-items-center rounded-lg border border-gray-200 bg-white p-2">
+            <img src={qrUrl} alt={`QR verification for receipt ${receipt.receipt_number}`} className="h-full w-full object-contain" />
+          </div>
           <div className="min-w-44 border-t border-gray-400 pt-2 text-center font-semibold text-gray-800">
             {template.signatoryLabel}
           </div>

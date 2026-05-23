@@ -1,4 +1,5 @@
 import { fallbackDocumentTemplates, type CmsDocumentTemplate } from "@/lib/cms/documentTemplates";
+import { documentQrUrl, documentVerificationValue } from "@/lib/documents/qr";
 
 type AppointmentLetterProps = {
   template?: CmsDocumentTemplate;
@@ -7,6 +8,7 @@ type AppointmentLetterProps = {
   startDate?: string;
   department?: string;
   letterNumber?: string;
+  qrCodeUrl?: string;
 };
 
 export default function AppointmentLetter({
@@ -16,7 +18,9 @@ export default function AppointmentLetter({
   startDate = new Date().toLocaleDateString("en-IN"),
   department = "Community Programs",
   letterNumber = "RSH-APT-0000",
+  qrCodeUrl,
 }: AppointmentLetterProps) {
+  const qrUrl = qrCodeUrl ?? documentQrUrl(documentVerificationValue("appointment-letter", letterNumber));
   const body = template.body
     .split("${recipient_name}").join(recipientName)
     .split("${role_title}").join(roleTitle);
@@ -41,8 +45,11 @@ export default function AppointmentLetter({
         </dl>
         <p className="mt-6">{template.footer}</p>
       </section>
-      <footer className="flex items-end justify-between border-t border-gray-200 pt-8 text-sm text-gray-600">
+      <footer className="grid grid-cols-[1fr_112px_1fr] items-end gap-5 border-t border-gray-200 pt-8 text-sm text-gray-600">
         <p>{template.legalNote}</p>
+        <div className="grid h-28 w-28 place-items-center justify-self-center rounded-lg border border-gray-200 bg-white p-2">
+          <img src={qrUrl} alt={`QR verification for ${letterNumber}`} className="h-full w-full object-contain" />
+        </div>
         <div className="min-w-44 border-t border-gray-400 pt-2 text-center font-semibold text-gray-800">{template.signatoryLabel}</div>
       </footer>
     </article>

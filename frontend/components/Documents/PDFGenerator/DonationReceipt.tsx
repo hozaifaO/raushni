@@ -1,3 +1,5 @@
+import { documentQrUrl, documentVerificationValue } from "@/lib/documents/qr";
+
 type DonationReceiptProps = {
   templateTitle?: string;
   legalNote?: string;
@@ -16,6 +18,7 @@ type DonationReceiptProps = {
   paymentMethod?: string;
   paymentStatus?: string;
   transactionReference?: string;
+  qrCodeUrl?: string;
 };
 
 const stampLogoPath = "/assets/brand/raushni-stamp-logo.png";
@@ -38,7 +41,9 @@ export default function DonationReceipt({
   paymentMethod = "UPI",
   paymentStatus = "Paid",
   transactionReference = "Not provided",
+  qrCodeUrl,
 }: DonationReceiptProps) {
+  const qrUrl = qrCodeUrl ?? documentQrUrl(documentVerificationValue("donation-receipt", receiptNumber));
   return (
     <article className="mx-auto max-w-3xl bg-white p-8 text-gray-950">
       <header className="flex items-start justify-between gap-6 border-b border-gray-300 pb-6">
@@ -109,6 +114,9 @@ export default function DonationReceipt({
 
       <footer className="mt-8 flex items-end justify-between gap-6 text-sm text-gray-600">
         <p>{thankYouNote}</p>
+        <div className="grid h-28 w-28 place-items-center rounded-lg border border-gray-200 bg-white p-2">
+          <img src={qrUrl} alt={`QR verification for ${receiptNumber}`} className="h-full w-full object-contain" />
+        </div>
         <div className="min-w-44 border-t border-gray-400 pt-2 text-center font-semibold text-gray-800">
           {signatoryLabel}
         </div>

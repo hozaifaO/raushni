@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Query, Request, Response
 
 from app.services.document_service import DocumentService
 
@@ -24,3 +24,12 @@ def list_document_templates(request: Request) -> list[dict[str, object]]:
 @router.get("/templates/{key}")
 def get_document_template(key: str, request: Request) -> dict[str, object]:
     return get_document_service(request).get_template(key)
+
+
+@router.get("/qr.svg")
+def generate_qr_svg(
+    request: Request,
+    data: str = Query(..., min_length=1, max_length=500),
+) -> Response:
+    svg = get_document_service(request).make_qr_svg(data)
+    return Response(content=svg, media_type="image/svg+xml")

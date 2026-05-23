@@ -1,4 +1,5 @@
 import { fallbackDocumentTemplates, type CmsDocumentTemplate } from "@/lib/cms/documentTemplates";
+import { documentQrUrl, documentVerificationValue } from "@/lib/documents/qr";
 
 type MemberIDCardProps = {
   template?: CmsDocumentTemplate;
@@ -8,6 +9,7 @@ type MemberIDCardProps = {
   joinedOn?: string;
   phone?: string;
   qrCodeSvg?: string;
+  qrCodeUrl?: string;
 };
 
 export default function MemberIDCard({
@@ -18,7 +20,9 @@ export default function MemberIDCard({
   joinedOn = new Date().toLocaleDateString("en-IN"),
   phone = "+91",
   qrCodeSvg,
+  qrCodeUrl,
 }: MemberIDCardProps) {
+  const qrUrl = qrCodeUrl ?? documentQrUrl(documentVerificationValue("member-id-card", memberId));
   return (
     <article className="grid w-[420px] gap-4 rounded-xl border border-gray-200 bg-white p-5 text-gray-950 shadow-sm">
       <header className="flex items-center gap-3 border-b border-gray-200 pb-4">
@@ -39,8 +43,8 @@ export default function MemberIDCard({
             <div><dt className="inline font-bold">Phone:</dt> <dd className="inline">{phone}</dd></div>
           </dl>
         </div>
-        <div className="grid h-24 w-24 place-items-center rounded-lg border border-gray-200 bg-gray-50 p-2" dangerouslySetInnerHTML={qrCodeSvg ? { __html: qrCodeSvg } : undefined}>
-          {!qrCodeSvg && <span className="text-center text-xs font-bold text-gray-500">QR</span>}
+        <div className="grid h-24 w-24 place-items-center rounded-lg border border-gray-200 bg-white p-2" dangerouslySetInnerHTML={qrCodeSvg ? { __html: qrCodeSvg } : undefined}>
+          {!qrCodeSvg && <img src={qrUrl} alt={`QR verification for ${memberId}`} className="h-full w-full object-contain" />}
         </div>
       </section>
       <footer className="border-t border-gray-200 pt-3 text-xs leading-5 text-gray-600">{template.footer}</footer>

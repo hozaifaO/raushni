@@ -1,3 +1,1 @@
-export default function MemberIDCard() {
-  return <div />;
-}
+export { default } from "@/components/Documents/PDFGenerator/MemberIDCard";
