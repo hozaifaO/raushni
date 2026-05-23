@@ -1,6 +1,8 @@
 "use client";
 
 import { Printer, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { fallbackDocumentTemplates, type CmsDocumentTemplate } from "@/lib/cms/documentTemplates";
 import type { DonationReceipt as DonationReceiptModel } from "@/types/models/donation";
 
 type DonationReceiptProps = {
@@ -32,6 +34,40 @@ const stampLogoPath = "/assets/brand/raushni-stamp-logo.png";
 
 export default function DonationReceipt({ receipt, onClose }: DonationReceiptProps) {
   const donation = receipt.donation;
+  const [template, setTemplate] = useState<CmsDocumentTemplate>(fallbackDocumentTemplates["donation-receipt"]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    async function loadTemplate() {
+      try {
+        const response = await fetch("/cms/api/document-templates?filters[key][$eq]=donation-receipt&populate=*", {
+          signal: controller.signal,
+        });
+        if (!response.ok) return;
+        const attrs = (await response.json())?.data?.[0]?.attributes;
+        if (!attrs) return;
+        setTemplate((current) => ({
+          ...current,
+          name: attrs.name ?? current.name,
+          title: attrs.title ?? current.title,
+          subtitle: attrs.subtitle ?? current.subtitle,
+          body: attrs.body ?? current.body,
+          footer: attrs.footer ?? current.footer,
+          legalNote: attrs.legalNote ?? current.legalNote,
+          thankYouNote: attrs.thankYouNote ?? current.thankYouNote,
+          signatoryLabel: attrs.signatoryLabel ?? current.signatoryLabel,
+          stampUrl: attrs.stampUrl ?? current.stampUrl,
+          accentColor: attrs.accentColor ?? current.accentColor,
+        }));
+      } catch (requestError) {
+        if (!controller.signal.aborted) {
+          console.warn("Unable to load donation receipt CMS template", requestError);
+        }
+      }
+    }
+    void loadTemplate();
+    return () => controller.abort();
+  }, []);
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
@@ -72,10 +108,10 @@ export default function DonationReceipt({ receipt, onClose }: DonationReceiptPro
             />
             <div>
               <p className="text-sm font-semibold uppercase tracking-wide text-orange-600">
-                Official Receipt
+                {template.title}
               </p>
               <h3 className="mt-1 text-2xl font-bold">{receipt.organization}</h3>
-              <p className="mt-2 max-w-xl text-sm leading-6 text-gray-600">{receipt.registration_note}</p>
+              <p className="mt-2 max-w-xl text-sm leading-6 text-gray-600">{template.legalNote || receipt.registration_note}</p>
             </div>
           </div>
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
@@ -131,9 +167,7 @@ export default function DonationReceipt({ receipt, onClose }: DonationReceiptPro
             />
             <div>
               <p>
-                We gratefully acknowledge this contribution toward community education, welfare, and
-                social development programs. This receipt is computer generated and valid without a
-                physical signature.
+                {template.body}
               </p>
               {donation.transaction_reference && (
                 <p className="mt-2">
@@ -145,9 +179,9 @@ export default function DonationReceipt({ receipt, onClose }: DonationReceiptPro
         </div>
 
         <div className="mt-8 flex items-end justify-between gap-6 text-sm text-gray-600">
-          <p>Thank you for supporting Raushni.</p>
+          <p>{template.thankYouNote}</p>
           <div className="min-w-44 border-t border-gray-400 pt-2 text-center font-semibold text-gray-800">
-            Authorized signatory
+            {template.signatoryLabel}
           </div>
         </div>
       </article>

@@ -11,6 +11,7 @@ from app.schemas.donation import (
     DonationReceipt,
     DonationUpdate,
 )
+from app.services.cms_template_service import get_document_template
 
 
 class DonationNotFoundError(LookupError):
@@ -111,11 +112,15 @@ class DonationService:
             )
             self._donations[donation_id] = donation
 
+        template = get_document_template("donation-receipt")
+        settings = template.get("settings", {})
+        organization = settings.get("organization") if isinstance(settings, dict) else None
+
         return DonationReceipt(
             receipt_number=donation.receipt_number,
             issued_at=datetime.now(timezone.utc),
-            organization="Raushni Educational & Social Welfare Trust",
-            registration_note="Registered under Section 8 of Companies Act, 2013 | 12A & 80G Tax Exempted",
+            organization=str(organization or "Raushni Educational & Social Welfare Trust"),
+            registration_note=str(template.get("legalNote", "Registered under Section 8 of Companies Act, 2013 | 12A & 80G Tax Exempted")),
             donation=donation,
         )
 

@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.router import api_router
 from app.services.donation_service import DonationService
 from app.services.internship_service import InternshipService
+from app.services.document_service import DocumentService
 from app.services.member_service import MemberService
 from app.services.settings_service import SettingsService
 
@@ -22,6 +23,7 @@ def create_app() -> FastAPI:
     app.state.member_service = MemberService()
     app.state.donation_service = DonationService()
     app.state.internship_service = InternshipService()
+    app.state.document_service = DocumentService()
     app.state.settings_service = SettingsService()
 
     app.add_middleware(

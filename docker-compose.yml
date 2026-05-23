@@ -50,6 +50,7 @@ services:
     environment:
       DATABASE_URL: ${BACKEND_DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/raushni_backend}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      CMS_INTERNAL_URL: ${CMS_INTERNAL_URL:-http://strapi:1337}
       ENVIRONMENT: ${ENVIRONMENT:-production}
       DEBUG: ${DEBUG:-false}
     depends_on:

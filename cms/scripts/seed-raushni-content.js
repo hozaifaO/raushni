@@ -7,6 +7,7 @@ const uids = {
   siteSetting: "api::site-setting.site-setting",
   publicPage: "api::public-page.public-page",
   internshipAnnouncement: "api::internship-announcement.internship-announcement",
+  documentTemplate: "api::document-template.document-template",
 };
 
 const now = () => new Date();
@@ -307,6 +308,137 @@ const internshipContent = {
   publishedAt: now(),
 };
 
+const documentTemplates = [
+  {
+    key: "member-id-card",
+    name: "Member ID Card",
+    category: "member_id",
+    description: "Printable member identification card with QR verification block and contact-safe member details.",
+    title: "Member ID Card",
+    subtitle: "Authorized community representative",
+    body: "This card identifies an active member or volunteer associated with Raushni Educational & Social Welfare Trust.",
+    footer: "If found, please contact the trust office using the public contact details.",
+    legalNote: siteSettingContent.footerNote,
+    signatoryLabel: "Authorized signatory",
+    logoUrl: "/assets/brand/raushni-logo.png",
+    stampUrl: "/assets/brand/raushni-stamp-logo.png",
+    accentColor: "#ea580c",
+    placeholders: ["member_name", "member_role", "member_id", "joined_on", "phone", "qr_code"],
+    settings: {
+      organization: siteSettingContent.siteName,
+      cardPrefix: "RSH-MEM",
+      includeQr: true,
+      paperSize: "ID-1 / printable badge",
+    },
+    publishedAt: now(),
+  },
+  {
+    key: "donation-receipt",
+    name: "Donation Receipt",
+    category: "donation_receipt",
+    description: "Official receipt wording for verified donations, print/PDF generation, and donor acknowledgement.",
+    title: "Official Receipt",
+    subtitle: "Donation acknowledgement",
+    body: "We gratefully acknowledge this contribution toward community education, welfare, and social development programs. This receipt is computer generated and valid without a physical signature.",
+    footer: "Keep this receipt for your records. Payment status and donor details are maintained in the dashboard.",
+    legalNote: siteSettingContent.footerNote,
+    thankYouNote: "Thank you for supporting Raushni.",
+    signatoryLabel: "Authorized signatory",
+    logoUrl: "/assets/brand/raushni-logo.png",
+    stampUrl: "/assets/brand/raushni-stamp-logo.png",
+    accentColor: "#ea580c",
+    placeholders: ["receipt_number", "issued_at", "donor_name", "amount", "purpose", "payment_method", "transaction_reference"],
+    settings: {
+      organization: siteSettingContent.siteName,
+      receiptPrefix: "RSH-DON",
+      requirePaidStatus: true,
+    },
+    publishedAt: now(),
+  },
+  {
+    key: "internship-completion-certificate",
+    name: "Internship Completion Certificate",
+    category: "certificate",
+    description: "QR-verifiable internship completion certificate template used by the dashboard issue certificate workflow.",
+    title: "Certificate of Completion",
+    subtitle: "This certificate is proudly awarded to",
+    body: "for successfully completing <strong>${program_title}</strong> in the <strong>${track}</strong> track with professional conduct, practical contribution, and learning commitment.",
+    footer: "This certificate can be authenticated using the QR code or verification URL.",
+    legalNote: "Issued by Raushni Educational & Social Welfare Trust for verified internship completion.",
+    signatoryLabel: "Authorized Signatory",
+    logoUrl: "/assets/brand/raushni-logo.png",
+    stampUrl: "/assets/brand/raushni-stamp-logo.png",
+    accentColor: "#b45309",
+    placeholders: ["participant_name", "program_title", "track", "certificate_number", "issued_on", "verification_url", "qr_code_svg"],
+    htmlTemplate: "Backend renders the HTML/PDF shell and substitutes this CMS-managed title, subtitle, body, footer, and signatory text.",
+    settings: {
+      certificatePrefix: "RSH-CERT",
+      verificationBaseUrl: "/certificates/verify",
+      includeQr: true,
+    },
+    publishedAt: now(),
+  },
+  {
+    key: "achievement-certificate",
+    name: "Achievement Certificate",
+    category: "certificate",
+    description: "General certificate template for volunteers, donors, members, and program participants.",
+    title: "Certificate of Appreciation",
+    subtitle: "Presented with gratitude to",
+    body: "for meaningful contribution, service, and commitment to community welfare programs.",
+    footer: "Issued for verified contribution and approved by the authorized team.",
+    legalNote: siteSettingContent.footerNote,
+    signatoryLabel: "Authorized signatory",
+    logoUrl: "/assets/brand/raushni-logo.png",
+    stampUrl: "/assets/brand/raushni-stamp-logo.png",
+    accentColor: "#047857",
+    placeholders: ["recipient_name", "achievement_title", "issued_on", "certificate_number", "qr_code"],
+    settings: {
+      certificatePrefix: "RSH-ACH",
+      includeQr: true,
+    },
+    publishedAt: now(),
+  },
+  {
+    key: "appointment-letter",
+    name: "Appointment Letter",
+    category: "appointment_letter",
+    description: "Appointment and engagement letter wording for staff, volunteers, interns, and coordinators.",
+    title: "Appointment Letter",
+    subtitle: "Formal role confirmation",
+    body: "We are pleased to appoint ${recipient_name} as ${role_title}. The appointment is subject to trust policies, role responsibilities, code of conduct, and periodic review.",
+    footer: "This letter is generated from the dashboard and should be verified against approved records.",
+    legalNote: siteSettingContent.footerNote,
+    signatoryLabel: "Authorized signatory",
+    logoUrl: "/assets/brand/raushni-logo.png",
+    stampUrl: "/assets/brand/raushni-stamp-logo.png",
+    accentColor: "#1d4ed8",
+    placeholders: ["recipient_name", "role_title", "start_date", "department", "letter_number", "qr_code"],
+    settings: {
+      letterPrefix: "RSH-APT",
+      includeQr: true,
+    },
+    publishedAt: now(),
+  },
+  {
+    key: "qr-verification",
+    name: "QR Verification Block",
+    category: "qr_code",
+    description: "Reusable QR verification instructions for certificates, ID cards, receipts, and letters.",
+    title: "Scan to verify",
+    subtitle: "Public authentication",
+    body: "Scan the QR code to open the public verification page and confirm the document number, recipient, status, and issue date.",
+    footer: "Do not accept altered documents without QR or verification URL confirmation.",
+    legalNote: "Verification records are managed by Raushni dashboard and CMS configuration.",
+    accentColor: "#111827",
+    placeholders: ["verification_url", "document_number", "qr_code_svg"],
+    settings: {
+      supportedDocuments: ["member_id", "donation_receipt", "certificate", "appointment_letter"],
+    },
+    publishedAt: now(),
+  },
+];
+
 async function upsertSingle(app, uid, data) {
   const existing = await app.db.query(uid).findOne();
   if (existing) {
@@ -318,6 +450,15 @@ async function upsertSingle(app, uid, data) {
 
 async function upsertBySlug(app, uid, data) {
   const existing = await app.db.query(uid).findOne({ where: { slug: data.slug } });
+  if (existing) {
+    await app.db.query(uid).update({ where: { id: existing.id }, data });
+  } else {
+    await app.db.query(uid).create({ data });
+  }
+}
+
+async function upsertByKey(app, uid, data) {
+  const existing = await app.db.query(uid).findOne({ where: { key: data.key } });
   if (existing) {
     await app.db.query(uid).update({ where: { id: existing.id }, data });
   } else {
@@ -390,6 +531,9 @@ async function main() {
       await upsertBySlug(app, uids.publicPage, page);
     }
     await upsertBySlug(app, uids.internshipAnnouncement, internshipContent);
+    for (const template of documentTemplates) {
+      await upsertByKey(app, uids.documentTemplate, template);
+    }
     await enablePublicRead(app);
     console.log("Seeded Raushni CMS-managed site content.");
   } finally {

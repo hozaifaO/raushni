@@ -1,0 +1,38 @@
+{
+  "kind": "collectionType",
+  "collectionName": "document_templates",
+  "info": {
+    "singularName": "document-template",
+    "pluralName": "document-templates",
+    "displayName": "Document Template",
+    "description": "CMS-managed templates and wording for generated documents"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "key": { "type": "uid", "targetField": "name", "required": true },
+    "name": { "type": "string", "required": true },
+    "category": {
+      "type": "enumeration",
+      "enum": ["member_id", "donation_receipt", "certificate", "appointment_letter", "qr_code"],
+      "required": true
+    },
+    "description": { "type": "text" },
+    "title": { "type": "string" },
+    "subtitle": { "type": "string" },
+    "body": { "type": "richtext" },
+    "footer": { "type": "text" },
+    "legalNote": { "type": "text" },
+    "thankYouNote": { "type": "string" },
+    "signatoryLabel": { "type": "string" },
+    "logo": { "type": "media", "allowedTypes": ["images"] },
+    "logoUrl": { "type": "string" },
+    "stamp": { "type": "media", "allowedTypes": ["images"] },
+    "stampUrl": { "type": "string" },
+    "accentColor": { "type": "string" },
+    "htmlTemplate": { "type": "text" },
+    "placeholders": { "type": "json" },
+    "settings": { "type": "json" }
+  }
+}

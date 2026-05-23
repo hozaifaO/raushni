@@ -27,6 +27,7 @@ from app.schemas.internship import (
     InternshipListResponse,
     InternshipStatus,
 )
+from app.services.cms_template_service import get_document_template, render_template
 
 
 class InternshipNotFoundError(LookupError):
@@ -269,6 +270,20 @@ class InternshipService:
         issued_at: datetime,
         qr_code_svg: str,
     ) -> str:
+        template = get_document_template("internship-completion-certificate")
+        context = {
+            "participant_name": participant_name,
+            "program_title": program_title,
+            "track": track,
+            "certificate_number": certificate_number,
+            "verification_url": verification_url,
+            "issued_on": issued_at.date().isoformat(),
+        }
+        title = str(template.get("title", "Certificate of Completion"))
+        subtitle = str(template.get("subtitle", "This certificate is proudly awarded to"))
+        body = render_template(str(template.get("body", "")), context)
+        footer = str(template.get("footer", "This certificate can be authenticated using the QR code or verification URL."))
+        signatory = str(template.get("signatoryLabel", "Authorized Signatory"))
         return f"""<!doctype html>
 <html>
 <head>
@@ -295,25 +310,26 @@ class InternshipService:
     <div class="top">
       <div>
         <div class="brand">Raushni Educational & Social Welfare Trust</div>
-        <p>Internship Completion Certificate</p>
+        <p>{escape(str(template.get("name", "Internship Completion Certificate")))}</p>
       </div>
       <div class="seal">R</div>
     </div>
-    <h1>Certificate of Completion</h1>
-    <p class="subtitle">This certificate is proudly awarded to</p>
+    <h1>{escape(title)}</h1>
+    <p class="subtitle">{escape(subtitle)}</p>
     <div class="name">{escape(participant_name)}</div>
-    <p class="body">for successfully completing <strong>{escape(program_title)}</strong> in the <strong>{escape(track)}</strong> track with professional conduct, practical contribution, and learning commitment.</p>
+    <p class="body">{body}</p>
     <div class="details">
       <div class="meta">
         <span><strong>Certificate No:</strong> {escape(certificate_number)}</span>
         <span><strong>Issued On:</strong> {issued_at.date().isoformat()}</span>
         <span><strong>Verify:</strong> {escape(verification_url)}</span>
+        <span>{escape(footer)}</span>
       </div>
       <div class="qr">{qr_code_svg}</div>
     </div>
     <div class="sign">
       <strong>Program Coordinator</strong>
-      <strong>Authorized Signatory</strong>
+      <strong>{escape(signatory)}</strong>
     </div>
   </section>
 </body>

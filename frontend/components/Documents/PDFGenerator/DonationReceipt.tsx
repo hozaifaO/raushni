@@ -1,4 +1,9 @@
 type DonationReceiptProps = {
+  templateTitle?: string;
+  legalNote?: string;
+  body?: string;
+  thankYouNote?: string;
+  signatoryLabel?: string;
   receiptNumber?: string;
   issuedAt?: string;
   donorName?: string;
@@ -16,6 +21,11 @@ type DonationReceiptProps = {
 const stampLogoPath = "/assets/brand/raushni-stamp-logo.png";
 
 export default function DonationReceipt({
+  templateTitle = "Official Donation Receipt",
+  legalNote = "Registered under Section 8 of Companies Act, 2013 | 12A & 80G Tax Exempted",
+  body = "We gratefully acknowledge this contribution toward community education, welfare, and social development programs. This receipt is computer generated and valid without a physical signature.",
+  thankYouNote = "Thank you for supporting Raushni.",
+  signatoryLabel = "Authorized signatory",
   receiptNumber = "RSH-DON-YYYY-0000",
   issuedAt = new Date().toLocaleDateString("en-IN"),
   donorName = "Donor Name",
@@ -40,11 +50,11 @@ export default function DonationReceipt({
           />
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-orange-600">
-              Official Donation Receipt
+              {templateTitle}
             </p>
             <h1 className="mt-2 text-2xl font-bold">Raushni Educational & Social Welfare Trust</h1>
             <p className="mt-2 max-w-lg text-sm leading-6 text-gray-600">
-              Registered under Section 8 of Companies Act, 2013 | 12A & 80G Tax Exempted
+              {legalNote}
             </p>
           </div>
         </div>
@@ -93,16 +103,14 @@ export default function DonationReceipt({
       <section className="flex items-start gap-4 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm leading-6 text-gray-700">
         <img src={stampLogoPath} alt="" className="h-16 w-16 rounded-full object-contain opacity-70" />
         <p>
-          We gratefully acknowledge this contribution toward community education, welfare, and social
-          development programs. This receipt is computer generated and valid without a physical
-          signature.
+          {body}
         </p>
       </section>
 
       <footer className="mt-8 flex items-end justify-between gap-6 text-sm text-gray-600">
-        <p>Thank you for supporting Raushni.</p>
+        <p>{thankYouNote}</p>
         <div className="min-w-44 border-t border-gray-400 pt-2 text-center font-semibold text-gray-800">
-          Authorized signatory
+          {signatoryLabel}
         </div>
       </footer>
     </article>
