@@ -115,7 +115,8 @@ export default function Footer() {
               <img
                 src={content.logo}
                 alt="Raushni Educational and Social Welfare Trust logo"
-                className="h-16 w-16 rounded-2xl object-contain"
+                className="rounded-full object-contain ring-2 ring-white/15"
+                style={{ width: "1.5in", height: "1.5in" }}
               />
               <span className="text-base font-black uppercase leading-tight tracking-wide">
                 Raushni

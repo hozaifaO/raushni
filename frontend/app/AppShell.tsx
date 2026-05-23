@@ -27,7 +27,9 @@ export default function AppShell({
     pathname?.startsWith("/donate") ||
     pathname?.startsWith("/events") ||
     pathname?.startsWith("/gallery") ||
+    pathname?.startsWith("/internship-registration") ||
     pathname?.startsWith("/news") ||
+    pathname?.startsWith("/certificates/verify") ||
     pathname?.startsWith("/volunteer");
   const isDashboardHome = pathname === "/dashboard";
 
@@ -51,7 +53,7 @@ export default function AppShell({
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
       <main
-        className={`mt-28 transition-all duration-300 ${
+        className={`mt-44 transition-all duration-300 ${
           isDashboardHome ? "bg-[#f7f7f7]" : ""
         } ${
           sidebarOpen ? "lg:mr-72" : "lg:mr-0"

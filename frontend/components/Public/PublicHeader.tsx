@@ -12,16 +12,17 @@ export default function PublicHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[#120f0b]/95 text-white shadow-sm shadow-black/10 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-3" aria-label="Raushni home">
+      <div className="mx-auto flex min-h-40 max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+        <Link href="/" className="flex items-center gap-4" aria-label="Raushni home">
           <img
             src="/assets/brand/raushni-logo.png"
             alt="Raushni Educational and Social Welfare Trust logo"
-            className="h-14 w-14 rounded-2xl object-contain ring-1 ring-white/15"
+            className="rounded-full object-contain ring-2 ring-white/15"
+            style={{ width: "1.5in", height: "1.5in" }}
           />
-          <span className="hidden text-sm font-black uppercase leading-tight tracking-wide text-white sm:block">
+          <span className="hidden text-xl font-black uppercase leading-tight tracking-wide text-white sm:block">
             Raushni
-            <span className="block text-[11px] font-semibold text-amber-200">
+            <span className="block text-sm font-semibold text-amber-200">
               Educational & Social Welfare Trust
             </span>
           </span>

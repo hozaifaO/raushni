@@ -9,6 +9,7 @@ export const publicNavItems = [
   { label: "Activities", href: "/activities" },
   { label: "Events", href: "/events" },
   { label: "News", href: "/news" },
+  { label: "Internships", href: "/internship-registration" },
   { label: "Gallery", href: "/gallery" },
   { label: "Careers", href: "/careers" },
   { label: "Volunteer", href: "/volunteer" },

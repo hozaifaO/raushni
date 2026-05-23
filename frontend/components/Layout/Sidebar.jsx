@@ -39,7 +39,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-28 right-0 h-[calc(100vh-7rem)] w-72 bg-white border-l border-gray-200 z-40 overflow-y-auto shadow-xl transition-transform duration-300 ${
+        className={`fixed top-44 right-0 h-[calc(100vh-11rem)] w-72 bg-white border-l border-gray-200 z-40 overflow-y-auto shadow-xl transition-transform duration-300 ${
           sidebarOpen ? 'translate-x-0' : 'translate-x-full'
         } lg:shadow-none`}
       >
