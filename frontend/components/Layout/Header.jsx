@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Menu, X, ChevronDown, Bell, User, LogOut, Settings } from 'lucide-react';
+import { signOut } from 'next-auth/react';
 import { getStoredUser, isReadOnly, signOutToGuest } from '@/lib/auth/permissions';
 
 export default function Header({ sidebarOpen, setSidebarOpen }) {
@@ -86,7 +87,7 @@ export default function Header({ sidebarOpen, setSidebarOpen }) {
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-400 font-semibold text-stone-950">
                 {displayUser.name.charAt(0).toUpperCase()}
               </div>
-              <span className="hidden md:inline text-sm font-medium">{displayUser.name}</span>
+              <span className="hidden max-w-32 whitespace-normal break-words text-left text-sm font-medium leading-tight md:inline">{displayUser.name}</span>
               {readOnly && (
                 <span className="hidden rounded-full border border-amber-200/30 bg-amber-300/15 px-2 py-0.5 text-xs font-semibold text-amber-100 lg:inline">
                   Read only
@@ -102,10 +103,10 @@ export default function Header({ sidebarOpen, setSidebarOpen }) {
                     <p className="text-amber-200">{readOnly ? 'Guest read-only access' : `${displayUser.role} access`}</p>
                   </div>
                   <hr className="my-1 border-white/10" />
-                  <Link href="/profile" className="flex items-center gap-3 px-4 py-2 text-sm text-white/75 hover:bg-white/10 hover:text-amber-100">
+                  <Link href="/profile" className="flex items-center gap-3 whitespace-normal break-words px-4 py-2 text-sm text-white/75 hover:bg-white/10 hover:text-amber-100">
                     <User size={16} /> Profile
                   </Link>
-                  <Link href="/settings" className="flex items-center gap-3 px-4 py-2 text-sm text-white/75 hover:bg-white/10 hover:text-amber-100">
+                  <Link href="/settings" className="flex items-center gap-3 whitespace-normal break-words px-4 py-2 text-sm text-white/75 hover:bg-white/10 hover:text-amber-100">
                     <Settings size={16} /> Settings
                   </Link>
                   <hr className="my-1 border-white/10" />
@@ -113,7 +114,7 @@ export default function Header({ sidebarOpen, setSidebarOpen }) {
                     type="button"
                     onClick={() => {
                       signOutToGuest();
-                      window.location.href = '/login';
+                      void signOut({ callbackUrl: '/login' });
                     }}
                     className="flex w-full items-center gap-3 px-4 py-2 text-sm text-red-200 hover:bg-white/10"
                   >

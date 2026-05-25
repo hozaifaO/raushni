@@ -1,0 +1,82 @@
+{
+  "realm": "raushni",
+  "enabled": true,
+  "displayName": "Raushni Educational & Social Welfare Trust",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "roles": {
+    "realm": [
+      { "name": "RAUSHNI_ADMIN", "description": "Full platform and CMS administration." },
+      { "name": "RAUSHNI_STAFF", "description": "Operational staff with dashboard write access." },
+      { "name": "RAUSHNI_GUEST", "description": "Read-only dashboard access." }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "raushni-frontend",
+      "name": "Raushni Frontend",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "local-dev-secret",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "http://localhost:3000/api/auth/callback/keycloak",
+        "https://raushni.com/api/auth/callback/keycloak"
+      ],
+      "webOrigins": [
+        "http://localhost:3000",
+        "https://raushni.com"
+      ],
+      "attributes": {
+        "post.logout.redirect.uris": "http://localhost:3000/login##https://raushni.com/login"
+      },
+      "protocolMappers": [
+        {
+          "name": "realm roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "realm_access.roles",
+            "jsonType.label": "String"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "admin@raushni.com",
+      "email": "admin@raushni.com",
+      "firstName": "Raushni",
+      "lastName": "Admin",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        { "type": "password", "value": "ChangeMe@12345", "temporary": true }
+      ],
+      "realmRoles": ["RAUSHNI_ADMIN"]
+    },
+    {
+      "username": "staff@raushni.com",
+      "email": "staff@raushni.com",
+      "firstName": "Raushni",
+      "lastName": "Staff",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        { "type": "password", "value": "ChangeMe@12345", "temporary": true }
+      ],
+      "realmRoles": ["RAUSHNI_STAFF"]
+    }
+  ]
+}

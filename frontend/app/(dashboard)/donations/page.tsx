@@ -1,11 +1,13 @@
 "use client";
 
-import { HeartHandshake, Plus, RefreshCw, Search } from "lucide-react";
+import { HeartHandshake, Plus, QrCode, RefreshCw, Search } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import DonationForm, { emptyDonationForm } from "@/components/Features/Donations/DonationForm";
 import DonationList from "@/components/Features/Donations/DonationList";
 import DonationReceipt from "@/components/Features/Donations/DonationReceipt";
+import { PaymentMethodIcon } from "@/components/Features/Donations/paymentMethodMeta";
 import { canWrite, getStoredUser } from "@/lib/auth/permissions";
+import { fallbackDonationPaymentSettings, type DonationPaymentSettings } from "@/lib/cms/donationSettings";
 import {
   createDonation,
   deleteDonation,
@@ -67,6 +69,7 @@ export default function Page() {
   const [formValues, setFormValues] = useState<DonationFormValues>(emptyDonationForm);
   const [editingDonation, setEditingDonation] = useState<Donation | null>(null);
   const [receipt, setReceipt] = useState<DonationReceiptModel | null>(null);
+  const [paymentSettings, setPaymentSettings] = useState<DonationPaymentSettings>(fallbackDonationPaymentSettings);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -94,6 +97,30 @@ export default function Page() {
     setReadOnly(!canWrite(getStoredUser().role));
     void loadDonations();
   }, [loadDonations]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    async function loadPaymentSettings() {
+      try {
+        const response = await fetch("/cms/api/donation-payment-settings?filters[slug][$eq]=donation-payment-methods&populate=*", {
+          signal: controller.signal,
+        });
+        if (!response.ok) return;
+        const attrs = (await response.json())?.data?.[0]?.attributes;
+        if (!attrs) return;
+        setPaymentSettings({
+          ...fallbackDonationPaymentSettings,
+          ...attrs,
+          paymentOptions: Array.isArray(attrs.paymentOptions) ? attrs.paymentOptions : fallbackDonationPaymentSettings.paymentOptions,
+          instructions: Array.isArray(attrs.instructions) ? attrs.instructions : fallbackDonationPaymentSettings.instructions,
+        });
+      } catch (requestError) {
+        if (!controller.signal.aborted) console.warn("Unable to load CMS donation payment settings", requestError);
+      }
+    }
+    void loadPaymentSettings();
+    return () => controller.abort();
+  }, []);
 
   const stats = useMemo(
     () => [
@@ -237,6 +264,38 @@ export default function Page() {
           ))}
         </div>
 
+        <div className="grid gap-4 rounded-lg border border-gray-200 bg-white p-5 shadow-sm lg:grid-cols-[0.72fr_1.28fr] lg:items-center">
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-orange-100 text-orange-700">
+              <QrCode size={24} aria-hidden="true" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-gray-950">{paymentSettings.title}</h2>
+              <p className="mt-1 text-sm leading-6 text-gray-600">{paymentSettings.intro}</p>
+              <p className="mt-3 text-sm font-semibold text-gray-900">UPI ID: {paymentSettings.upiId}</p>
+              <p className="text-sm text-gray-600">{paymentSettings.accountName}</p>
+            </div>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-[9rem_1fr] sm:items-center">
+            <img src={paymentSettings.qrImageUrl} alt="Raushni donation UPI QR code" className="h-36 w-36 rounded-lg border border-gray-200 bg-gray-50 object-contain p-2" />
+            <div className="grid gap-2">
+              <div className="flex flex-wrap gap-2">
+                {paymentSettings.paymentOptions.filter((option) => option.enabled !== false).map((option) => (
+                  <span key={option.value} className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-bold text-gray-700">
+                    <PaymentMethodIcon method={option.value} size={14} />
+                    {option.label}
+                  </span>
+                ))}
+              </div>
+              <ul className="grid gap-1 text-sm text-gray-600">
+                {paymentSettings.instructions.slice(0, 3).map((instruction) => (
+                  <li key={instruction}>{instruction}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+
         <div className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm lg:flex-row lg:items-center">
           <label className="relative flex-1">
             <Search
@@ -301,6 +360,7 @@ export default function Page() {
               onChange={updateFormField}
               onCancel={closeForm}
               onSubmit={submitForm}
+              paymentOptions={paymentSettings.paymentOptions}
             />
           </div>
         )}

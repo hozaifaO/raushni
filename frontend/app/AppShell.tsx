@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Header from "@/components/Layout/Header";
 import Sidebar from "@/components/Layout/Sidebar";
 import Footer from "@/components/Layout/Footer";
-import { getStoredUser, isReadOnly } from "@/lib/auth/permissions";
+import { getStoredUser, isReadOnly, setStoredUser } from "@/lib/auth/permissions";
 
 export default function AppShell({
   children,
@@ -14,6 +15,7 @@ export default function AppShell({
   children: ReactNode;
 }>) {
   const pathname = usePathname();
+  const { data: session } = useSession();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [readOnly, setReadOnly] = useState(true);
   const isAuthRoute = pathname?.startsWith("/login") || pathname?.startsWith("/register") || pathname?.startsWith("/forgot-password") || pathname?.startsWith("/reset-password") || pathname?.startsWith("/verify-email");
@@ -34,7 +36,24 @@ export default function AppShell({
   const isDashboardHome = pathname === "/dashboard";
 
   useEffect(() => {
-    setReadOnly(isReadOnly(getStoredUser().role));
+    if (session?.user) {
+      const user = setStoredUser({
+        name: session.user.name ?? "Raushni User",
+        email: session.user.email ?? "user@raushni.com",
+        role: session.user.role ?? "GUEST",
+        accessLevel: session.user.accessLevel,
+        profileImage: session.user.image ?? null,
+      });
+      if (session.accessToken) {
+        window.localStorage.setItem("accessToken", session.accessToken);
+      }
+      setReadOnly(isReadOnly(user.role));
+    } else {
+      setReadOnly(isReadOnly(getStoredUser().role));
+    }
+  }, [session]);
+
+  useEffect(() => {
     const syncDesktopState = () => {
       setSidebarOpen(window.innerWidth >= 1024);
     };

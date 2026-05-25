@@ -24,16 +24,18 @@ const nextConfig = {
     const apiUrl = process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || 'http://backend:8000';
     const cmsUrl = process.env.CMS_INTERNAL_URL || process.env.NEXT_PUBLIC_CMS_URL || 'http://strapi:1337';
 
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${apiUrl}/api/:path*`,
-      },
-      {
-        source: '/cms/api/:path*',
-        destination: `${cmsUrl}/api/:path*`,
-      },
-    ];
+    return {
+      afterFiles: [
+        {
+          source: '/api/:path((?!auth(?:/|$)).*)',
+          destination: `${apiUrl}/api/:path*`,
+        },
+        {
+          source: '/cms/api/:path*',
+          destination: `${cmsUrl}/api/:path*`,
+        },
+      ],
+    };
   },
 
   async headers() {

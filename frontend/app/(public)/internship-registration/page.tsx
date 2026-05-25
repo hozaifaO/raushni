@@ -134,7 +134,7 @@ export default function Page() {
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-8">
         <div className="overflow-hidden rounded-lg border border-stone-200 bg-white shadow-sm">
           {loading ? (
-            <div className="p-8 text-sm font-semibold text-stone-600">Loading internship announcement</div>
+            <div className="p-8 text-sm font-semibold text-stone-800">Loading internship announcement</div>
           ) : announcement ? (
             <>
               <img src={announcement.poster_url} alt={announcement.title} className="w-full object-cover" />
@@ -173,7 +173,7 @@ export default function Page() {
               </div>
             </>
           ) : (
-            <div className="p-8 text-sm font-semibold text-stone-600">No internship announcement is currently published.</div>
+            <div className="p-8 text-sm font-semibold text-stone-800">No internship announcement is currently published.</div>
           )}
         </div>
 
@@ -185,7 +185,7 @@ export default function Page() {
             <div>
               <p className="text-sm font-bold uppercase tracking-[0.16em] text-amber-700">{registrationSection?.eyebrow ?? cmsPage.heroEyebrow}</p>
               <h2 className="mt-1 text-2xl font-black text-stone-950">{registrationSection?.title ?? cmsPage.heroTitle}</h2>
-              <p className="mt-2 text-sm leading-6 text-stone-600">{registrationSection?.text ?? cmsPage.heroText}</p>
+              <p className="mt-2 text-sm leading-6 text-stone-800">{registrationSection?.text ?? cmsPage.heroText}</p>
             </div>
           </div>
 
@@ -208,7 +208,7 @@ export default function Page() {
               <select
                 value={form.announcement_id}
                 onChange={(event) => setForm((current) => ({ ...current, announcement_id: event.target.value }))}
-                className="mt-1 min-h-11 w-full rounded-lg border border-stone-300 px-3 text-sm outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-100"
+                className="mt-1 min-h-11 w-full rounded-lg border border-stone-300 bg-white px-3 text-sm text-stone-950 outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-100"
               >
                 {announcements.map((item) => (
                   <option key={item.id} value={item.id}>{item.title}</option>
@@ -230,7 +230,7 @@ export default function Page() {
                 <input
                   value={String(form[field as keyof InternshipApplicationFormValues])}
                   onChange={(event) => setForm((current) => ({ ...current, [field]: event.target.value }))}
-                  className="mt-1 min-h-11 w-full rounded-lg border border-stone-300 px-3 text-sm outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-100"
+                  className="mt-1 min-h-11 w-full rounded-lg border border-stone-300 bg-white px-3 text-sm text-stone-950 placeholder:text-stone-500 outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-100"
                 />
               </label>
             ))}
@@ -239,7 +239,7 @@ export default function Page() {
               <select
                 value={form.track}
                 onChange={(event) => setForm((current) => ({ ...current, track: event.target.value }))}
-                className="mt-1 min-h-11 w-full rounded-lg border border-stone-300 px-3 text-sm outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-100"
+                className="mt-1 min-h-11 w-full rounded-lg border border-stone-300 bg-white px-3 text-sm text-stone-950 outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-100"
               >
                 {(announcement?.tracks ?? ["Web Development"]).map((track) => (
                   <option key={track} value={track}>{track}</option>
@@ -251,7 +251,7 @@ export default function Page() {
               <textarea
                 value={form.motivation}
                 onChange={(event) => setForm((current) => ({ ...current, motivation: event.target.value }))}
-                className="mt-1 min-h-32 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-100"
+                className="mt-1 min-h-32 w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-950 placeholder:text-stone-500 outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-100"
               />
             </label>
           </div>
@@ -273,8 +273,8 @@ export default function Page() {
 
 function Info({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-stone-200 bg-stone-50 p-3">
-      <p className="text-xs font-bold uppercase text-stone-500">{label}</p>
+    <div className="rounded-lg border border-stone-200 bg-white p-3 shadow-sm">
+      <p className="text-xs font-bold uppercase text-stone-700">{label}</p>
       <p className="mt-1 text-sm font-black text-stone-950">{value}</p>
     </div>
   );

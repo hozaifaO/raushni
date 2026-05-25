@@ -1,6 +1,7 @@
 "use client";
 
 import { Edit, FileText, Printer, Trash2 } from "lucide-react";
+import { PaymentMethodIcon, paymentMethodLabel } from "@/components/Features/Donations/paymentMethodMeta";
 import type { Donation } from "@/types/models/donation";
 
 type DonationListProps = {
@@ -99,8 +100,11 @@ export default function DonationList({
                   </div>
                 </td>
                 <td className="whitespace-nowrap px-4 py-4">
-                  <div className="text-sm font-medium capitalize text-gray-900">
-                    {label(donation.payment_method)}
+                  <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-50 text-orange-600">
+                      <PaymentMethodIcon method={donation.payment_method} />
+                    </span>
+                    {paymentMethodLabel(donation.payment_method)}
                   </div>
                   <div className="text-sm text-gray-500">
                     {donation.transaction_reference || "Reference not set"}

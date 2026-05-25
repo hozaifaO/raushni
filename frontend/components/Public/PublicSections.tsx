@@ -50,12 +50,12 @@ export function PublicSection({
   children?: ReactNode;
 }) {
   return (
-    <section className="border-b border-stone-200 bg-[#fafafa] px-4 py-14 sm:px-6 lg:px-8">
+    <section className="border-b border-stone-200 bg-white px-4 py-14 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <div className="max-w-3xl">
           {eyebrow && <p className="text-sm font-bold uppercase tracking-[0.16em] text-orange-700">{eyebrow}</p>}
           <h2 className="mt-3 text-3xl font-black leading-tight text-stone-950 sm:text-4xl">{title}</h2>
-          {text && <p className="mt-4 text-base leading-7 text-stone-700">{text}</p>}
+          {text && <p className="mt-4 text-base leading-7 text-stone-800">{text}</p>}
         </div>
         {children && <div className="mt-8">{children}</div>}
       </div>
@@ -76,7 +76,7 @@ export function InfoCard({
     <article className="rounded-lg border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-md">
       {meta && <p className="text-xs font-bold uppercase tracking-[0.14em] text-orange-700">{meta}</p>}
       <h3 className="mt-2 text-xl font-black text-stone-950">{title}</h3>
-      <p className="mt-3 text-sm leading-6 text-stone-600">{text}</p>
+      <p className="mt-3 text-sm leading-6 text-stone-700">{text}</p>
     </article>
   );
 }

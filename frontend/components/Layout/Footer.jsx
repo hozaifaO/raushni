@@ -7,7 +7,7 @@ import { Mail, Phone, MapPin, Send, ArrowRight } from 'lucide-react';
 
 const footerStyles = {
   heading: "text-sm font-bold uppercase tracking-[0.18em] text-amber-300",
-  link: "text-sm font-medium text-white/70 transition hover:text-amber-200 focus:outline-none focus:text-amber-200",
+  link: "whitespace-normal break-words text-sm font-medium leading-tight text-white/70 transition hover:text-amber-200 focus:outline-none focus:text-amber-200",
   iconLink:
     "inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/75 transition hover:-translate-y-0.5 hover:bg-white/10 hover:text-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-200 focus:ring-offset-2 focus:ring-offset-[#120f0b]",
   primaryButton:
@@ -23,7 +23,7 @@ const defaultFooterContent = {
   contactAddress: 'Rauzah Apartment, Bhatauna Road, Marwan Khurd, Muzaffarpur, Bihar 843113',
   contactPhone: '+91 997 3955 7600',
   contactEmail: 'info@raushni.com',
-  logo: '/assets/brand/o4uL2.png',
+  logo: '/assets/brand/tL1.png',
   quickLinks: [
     { label: 'About Us', href: '/about' },
     { label: 'Activities', href: '/activities' },

@@ -5,6 +5,7 @@ from uuid import UUID, uuid4
 
 from app.schemas.donation import (
     Donation,
+    DonationCheckoutSession,
     DonationCreate,
     DonationListResponse,
     DonationPaymentStatus,
@@ -12,6 +13,7 @@ from app.schemas.donation import (
     DonationUpdate,
 )
 from app.services.cms_template_service import get_document_template
+from app.services.payment_service import StripePaymentService
 
 
 class DonationNotFoundError(LookupError):
@@ -26,6 +28,7 @@ class DonationService:
     def __init__(self) -> None:
         self._donations: dict[UUID, Donation] = {}
         self._receipt_counter = 1000
+        self._stripe = StripePaymentService()
 
     def list_donations(
         self,
@@ -123,6 +126,42 @@ class DonationService:
             registration_note=str(template.get("legalNote", "Registered under Section 8 of Companies Act, 2013 | 12A & 80G Tax Exempted")),
             donation=donation,
         )
+
+    def create_checkout_session(self, donation_id: UUID) -> DonationCheckoutSession:
+        donation = self.get_donation(donation_id)
+        session = self._stripe.create_checkout_session(donation)
+        updated = donation.model_copy(
+            update={
+                "gateway_provider": session.provider,
+                "gateway_session_id": session.session_id,
+                "checkout_url": session.checkout_url,
+                "updated_at": datetime.now(timezone.utc),
+            },
+        )
+        self._donations[donation_id] = updated
+        return session
+
+    def mark_paid_from_gateway(
+        self,
+        *,
+        gateway_session_id: str,
+        gateway_payment_intent: str | None = None,
+        transaction_reference: str | None = None,
+    ) -> Donation:
+        for donation_id, donation in self._donations.items():
+            if donation.gateway_session_id == gateway_session_id:
+                updated = donation.model_copy(
+                    update={
+                        "payment_status": DonationPaymentStatus.PAID,
+                        "receipt_issued": True,
+                        "gateway_payment_intent": gateway_payment_intent,
+                        "transaction_reference": transaction_reference or gateway_payment_intent or gateway_session_id,
+                        "updated_at": datetime.now(timezone.utc),
+                    },
+                )
+                self._donations[donation_id] = updated
+                return updated
+        raise DonationNotFoundError(f"Donation with gateway session {gateway_session_id} was not found")
 
     def delete_donation(self, donation_id: UUID) -> None:
         self.get_donation(donation_id)

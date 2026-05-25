@@ -32,7 +32,7 @@ function renderSection(section: CmsSection) {
               {item.date} · {item.time}
             </div>
             <h3 className="mt-4 text-xl font-black text-stone-950">{item.title}</h3>
-            <p className="mt-3 text-sm leading-6 text-stone-600">{item.text}</p>
+            <p className="mt-3 text-sm leading-6 text-stone-700">{item.text}</p>
             <div className="mt-5 flex items-center gap-2 text-sm font-semibold text-stone-700">
               <MapPin size={16} aria-hidden="true" />
               {item.location}
@@ -51,7 +51,7 @@ function renderSection(section: CmsSection) {
             <img src={item.image} alt={item.title} className="aspect-[4/3] w-full bg-stone-100 object-contain p-4" />
             <figcaption className="border-t border-stone-200 p-4">
               <p className="font-bold text-stone-950">{item.title}</p>
-              <p className="mt-1 text-sm leading-6 text-stone-600">{item.caption}</p>
+              <p className="mt-1 text-sm leading-6 text-stone-700">{item.caption}</p>
             </figcaption>
           </figure>
         ))}
@@ -66,8 +66,8 @@ function renderSection(section: CmsSection) {
           <article key={item.title} className="rounded-lg border border-stone-200 bg-white p-5 shadow-sm">
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-orange-700">{item.tag}</p>
             <h3 className="mt-3 text-xl font-black leading-snug text-stone-950">{item.title}</h3>
-            <p className="mt-2 text-sm font-semibold text-stone-500">{item.date}</p>
-            <p className="mt-4 text-sm leading-6 text-stone-600">{item.summary}</p>
+            <p className="mt-2 text-sm font-semibold text-stone-700">{item.date}</p>
+            <p className="mt-4 text-sm leading-6 text-stone-700">{item.summary}</p>
           </article>
         ))}
       </div>

@@ -7,6 +7,7 @@ const uids = {
   siteSetting: "api::site-setting.site-setting",
   publicPage: "api::public-page.public-page",
   internshipAnnouncement: "api::internship-announcement.internship-announcement",
+  donationPaymentSetting: "api::donation-payment-setting.donation-payment-setting",
   designation: "api::designation.designation",
   documentTemplate: "api::document-template.document-template",
   projectContent: "api::project-content.project-content",
@@ -307,6 +308,37 @@ const internshipContent = {
   benefits: ["Real industry exposure", "Final year project work", "Hands-on experience and AI enabled delivery", "Career guidance", "Completion certificate with QR verification"],
   tracks: ["Web Development", "AI Enabled Operations", "Content and Outreach", "Data and Reporting"],
   eligibility: ["Students, freshers, and early-career learners", "Basic computer and internet access", "Commitment to weekly progress and professional communication"],
+  publishedAt: now(),
+};
+
+const donationPaymentSettingContent = {
+  slug: "donation-payment-methods",
+  title: "Donation Payment Methods",
+  intro: "Choose a payment method and share the transaction reference for finance verification and receipt generation.",
+  upiId: "raushni.eswt@upi",
+  qrImageUrl: "/cms/donations/raushni-upi-qr.jpeg",
+  accountName: siteSettingContent.siteName,
+  paymentOptions: [
+    { value: "upi", label: "UPI", description: "Pay with any UPI app.", enabled: true, requiresReference: true },
+    { value: "qr_code", label: "QR Code", description: "Scan the Raushni QR code and submit the UPI reference.", enabled: true, requiresReference: true },
+    { value: "gpay", label: "GPay", description: "Pay via Google Pay UPI.", enabled: true, requiresReference: true },
+    { value: "cash", label: "Cash", description: "Record cash received by authorized staff.", enabled: true, requiresReference: false },
+    { value: "cheque", label: "Cheque", description: "Record cheque number and bank details.", enabled: true, requiresReference: true },
+    { value: "debit_card", label: "Debit Card", description: "Debit card payment via approved payment terminal or gateway.", enabled: true, requiresReference: true },
+    { value: "credit_card", label: "Credit Card", description: "Credit card payment via approved payment terminal or gateway.", enabled: true, requiresReference: true },
+    { value: "international_card", label: "International Card", description: "International donor card payment through Stripe Checkout.", enabled: true, requiresReference: false, gateway: "stripe" },
+    { value: "stripe", label: "Stripe", description: "Secure Stripe Checkout for international cards.", enabled: true, requiresReference: false, gateway: "stripe" },
+    { value: "netbanking", label: "Netbanking", description: "Bank netbanking transfer reference.", enabled: true, requiresReference: true },
+    { value: "online_banking", label: "Online banking", description: "Online banking or NEFT/IMPS transfer reference.", enabled: true, requiresReference: true },
+    { value: "other", label: "Other", description: "Any approved custom payment mode.", enabled: true, requiresReference: false },
+  ],
+  instructions: [
+    "Scan the QR code for UPI, GPay, or QR Code payments.",
+    "Enter the transaction reference so the finance team can verify payment.",
+    "For international card payments, continue to Stripe Checkout after submitting the donation form.",
+    "Receipts are issued after payment status is marked paid.",
+  ],
+  supportContact: siteSettingContent.contactEmail,
   publishedAt: now(),
 };
 
@@ -737,6 +769,7 @@ async function main() {
       await upsertBySlug(app, uids.publicPage, page);
     }
     await upsertBySlug(app, uids.internshipAnnouncement, internshipContent);
+    await upsertBySlug(app, uids.donationPaymentSetting, donationPaymentSettingContent);
     for (const designation of designationContents) {
       await upsertBySlug(app, uids.designation, designation);
     }

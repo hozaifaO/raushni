@@ -20,9 +20,15 @@ def normalize_role(value: str | None) -> UserRole:
     normalized = value.strip().upper()
     aliases = {
         "ADMINISTRATOR": UserRole.ADMIN,
+        "RAUSHNI_ADMIN": UserRole.ADMIN,
+        "REALM_ADMIN": UserRole.ADMIN,
+        "MANAGER": UserRole.STAFF,
+        "RAUSHNI_STAFF": UserRole.STAFF,
+        "USER": UserRole.STAFF,
         "READ_ONLY": UserRole.GUEST,
         "READONLY": UserRole.GUEST,
         "VIEWER": UserRole.GUEST,
+        "RAUSHNI_GUEST": UserRole.GUEST,
         "DEFAULT": UserRole.GUEST,
     }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { RefreshCw, Save, Settings, ShieldCheck, Users } from "lucide-react";
+import { Brush, RefreshCw, Save, Settings, ShieldCheck, Users } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { canAdmin, getStoredUser } from "@/lib/auth/permissions";
 import { getSettingsDashboard, updatePlatformSettings, updateUserAccount } from "@/services/api/settings";
@@ -20,6 +20,16 @@ const emptyPlatform: PlatformSettings = {
   receipt_prefix: "RSH-DON",
   public_donations_enabled: true,
   maintenance_mode: false,
+  theme_name: "Raushni Professional",
+  primary_color: "#ea580c",
+  accent_color: "#166534",
+  header_theme: "dark",
+  footer_theme: "dark",
+  page_background: "#f9fafb",
+  surface_radius: "8px",
+  logo_diameter: "1.5in",
+  public_logo_url: "/logo.png",
+  stamp_logo_url: "/stamplogo.png",
 };
 
 function fallbackSettings(): SettingsDashboard {
@@ -324,6 +334,147 @@ export default function Page() {
           </div>
         </div>
 
+        <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+          <div className="mb-5 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
+              <Brush size={20} aria-hidden="true" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-gray-950">Theme</h2>
+              <p className="text-sm text-gray-600">Control brand colors, header/footer appearance, logo assets, and dashboard surface styling.</p>
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <label className="grid gap-2 text-sm font-medium text-gray-700">
+              Theme name
+              <input
+                disabled={!isAdmin}
+                value={platform.theme_name}
+                onChange={(event) => updatePlatformField("theme_name", event.target.value)}
+                className="min-h-11 rounded-lg border border-gray-300 px-3 text-gray-950 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100 disabled:bg-gray-50"
+              />
+            </label>
+            <ColorField
+              label="Primary color"
+              disabled={!isAdmin}
+              value={platform.primary_color}
+              onChange={(value) => updatePlatformField("primary_color", value)}
+            />
+            <ColorField
+              label="Accent color"
+              disabled={!isAdmin}
+              value={platform.accent_color}
+              onChange={(value) => updatePlatformField("accent_color", value)}
+            />
+            <ColorField
+              label="Page background"
+              disabled={!isAdmin}
+              value={platform.page_background}
+              onChange={(value) => updatePlatformField("page_background", value)}
+            />
+            <label className="grid gap-2 text-sm font-medium text-gray-700">
+              Header theme
+              <select
+                disabled={!isAdmin}
+                value={platform.header_theme}
+                onChange={(event) => updatePlatformField("header_theme", event.target.value as PlatformSettings["header_theme"])}
+                className="min-h-11 rounded-lg border border-gray-300 px-3 text-gray-950 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100 disabled:bg-gray-50"
+              >
+                <option value="dark">Dark</option>
+                <option value="light">Light</option>
+                <option value="brand">Brand</option>
+              </select>
+            </label>
+            <label className="grid gap-2 text-sm font-medium text-gray-700">
+              Footer theme
+              <select
+                disabled={!isAdmin}
+                value={platform.footer_theme}
+                onChange={(event) => updatePlatformField("footer_theme", event.target.value as PlatformSettings["footer_theme"])}
+                className="min-h-11 rounded-lg border border-gray-300 px-3 text-gray-950 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100 disabled:bg-gray-50"
+              >
+                <option value="dark">Dark</option>
+                <option value="light">Light</option>
+                <option value="brand">Brand</option>
+              </select>
+            </label>
+            <label className="grid gap-2 text-sm font-medium text-gray-700">
+              Surface radius
+              <input
+                disabled={!isAdmin}
+                value={platform.surface_radius}
+                onChange={(event) => updatePlatformField("surface_radius", event.target.value)}
+                className="min-h-11 rounded-lg border border-gray-300 px-3 text-gray-950 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100 disabled:bg-gray-50"
+              />
+            </label>
+            <label className="grid gap-2 text-sm font-medium text-gray-700">
+              Logo diameter
+              <input
+                disabled={!isAdmin}
+                value={platform.logo_diameter}
+                onChange={(event) => updatePlatformField("logo_diameter", event.target.value)}
+                className="min-h-11 rounded-lg border border-gray-300 px-3 text-gray-950 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100 disabled:bg-gray-50"
+              />
+            </label>
+            <label className="grid gap-2 text-sm font-medium text-gray-700">
+              Public logo URL
+              <input
+                disabled={!isAdmin}
+                value={platform.public_logo_url}
+                onChange={(event) => updatePlatformField("public_logo_url", event.target.value)}
+                className="min-h-11 rounded-lg border border-gray-300 px-3 text-gray-950 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100 disabled:bg-gray-50"
+              />
+            </label>
+            <label className="grid gap-2 text-sm font-medium text-gray-700">
+              Stamp logo URL
+              <input
+                disabled={!isAdmin}
+                value={platform.stamp_logo_url}
+                onChange={(event) => updatePlatformField("stamp_logo_url", event.target.value)}
+                className="min-h-11 rounded-lg border border-gray-300 px-3 text-gray-950 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100 disabled:bg-gray-50"
+              />
+            </label>
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 md:col-span-2 xl:col-span-1">
+              <p className="text-sm font-semibold text-gray-800">Preview</p>
+              <div
+                className="mt-3 overflow-hidden border border-gray-200 bg-white shadow-sm"
+                style={{ borderRadius: platform.surface_radius }}
+              >
+                <div
+                  className="px-4 py-3 text-sm font-bold text-white"
+                  style={{ background: platform.header_theme === "light" ? "#ffffff" : platform.header_theme === "brand" ? platform.primary_color : "#111827", color: platform.header_theme === "light" ? "#111827" : "#ffffff" }}
+                >
+                  Header
+                </div>
+                <div className="px-4 py-5" style={{ background: platform.page_background }}>
+                  <div className="h-14 w-14 rounded-full border border-gray-300 bg-white" />
+                  <p className="mt-3 text-sm font-semibold text-gray-900">Dashboard surface</p>
+                  <div className="mt-2 h-2 rounded-full" style={{ background: platform.primary_color }} />
+                </div>
+                <div
+                  className="px-4 py-3 text-sm font-bold"
+                  style={{ background: platform.footer_theme === "light" ? "#ffffff" : platform.footer_theme === "brand" ? platform.accent_color : "#111827", color: platform.footer_theme === "light" ? "#111827" : "#ffffff" }}
+                >
+                  Footer
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-5 flex justify-end">
+            <button
+              type="button"
+              disabled={!isAdmin || saving}
+              onClick={() => void savePlatform()}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-orange-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <Save size={18} aria-hidden="true" />
+              {saving ? "Saving" : "Save theme"}
+            </button>
+          </div>
+        </div>
+
         <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
           <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
             <div className="mb-5 flex items-center gap-3">
@@ -434,5 +585,39 @@ export default function Page() {
         </div>
       </div>
     </section>
+  );
+}
+
+function ColorField({
+  label,
+  value,
+  disabled,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  disabled: boolean;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="grid gap-2 text-sm font-medium text-gray-700">
+      {label}
+      <span className="flex min-h-11 overflow-hidden rounded-lg border border-gray-300 bg-white focus-within:border-orange-500 focus-within:ring-2 focus-within:ring-orange-100">
+        <input
+          disabled={disabled}
+          type="color"
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className="h-11 w-14 shrink-0 cursor-pointer border-0 bg-transparent p-1 disabled:cursor-not-allowed"
+          aria-label={label}
+        />
+        <input
+          disabled={disabled}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className="min-w-0 flex-1 px-3 text-gray-950 outline-none disabled:bg-gray-50"
+        />
+      </span>
+    </label>
   );
 }

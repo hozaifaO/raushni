@@ -1,6 +1,7 @@
 import { authHeaders } from "@/lib/auth/permissions";
 import type {
   Donation,
+  DonationCheckoutSession,
   DonationFormValues,
   DonationListResponse,
   DonationPaymentStatus,
@@ -87,6 +88,14 @@ export async function registerPublicDonation(values: DonationFormValues): Promis
     body: JSON.stringify({ ...cleanPayload(values), payment_status: "pending" }),
   });
   return parseResponse<Donation>(response);
+}
+
+export async function createDonationCheckout(id: string): Promise<DonationCheckoutSession> {
+  const response = await fetch(`${DONATIONS_ENDPOINT}/${id}/checkout`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+  return parseResponse<DonationCheckoutSession>(response);
 }
 
 export async function updateDonation(id: string, values: DonationFormValues): Promise<Donation> {

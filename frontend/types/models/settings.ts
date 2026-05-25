@@ -30,6 +30,16 @@ export type PlatformSettings = {
   receipt_prefix: string;
   public_donations_enabled: boolean;
   maintenance_mode: boolean;
+  theme_name: string;
+  primary_color: string;
+  accent_color: string;
+  header_theme: "light" | "dark" | "brand";
+  footer_theme: "light" | "dark" | "brand";
+  page_background: string;
+  surface_radius: string;
+  logo_diameter: string;
+  public_logo_url: string;
+  stamp_logo_url: string;
 };
 
 export type AccountProfile = {

@@ -51,6 +51,14 @@ services:
       DATABASE_URL: ${BACKEND_DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/raushni_backend}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
       CMS_INTERNAL_URL: ${CMS_INTERNAL_URL:-http://strapi:1337}
+      OIDC_ISSUER: ${OIDC_ISSUER:-http://keycloak:8080/realms/raushni}
+      OIDC_AUDIENCE: ${OIDC_AUDIENCE:-raushni-frontend}
+      OIDC_VERIFY_AUDIENCE: ${OIDC_VERIFY_AUDIENCE:-false}
+      REQUIRE_AUTH: ${REQUIRE_AUTH:-false}
+      APP_PUBLIC_URL: ${APP_PUBLIC_URL:-http://localhost:3000}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
       ENVIRONMENT: ${ENVIRONMENT:-production}
       DEBUG: ${DEBUG:-false}
     depends_on:
@@ -58,6 +66,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      keycloak:
+        condition: service_started
     networks:
       - raushni_network
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
@@ -118,11 +128,21 @@ services:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
       NEXT_PUBLIC_PYTHON_URL: ${NEXT_PUBLIC_PYTHON_URL:-http://localhost:8000}
       NEXT_PUBLIC_CMS_URL: ${NEXT_PUBLIC_CMS_URL:-http://localhost:1337}
+      NEXT_PUBLIC_REQUIRE_AUTH: ${NEXT_PUBLIC_REQUIRE_AUTH:-false}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-replace-with-local-nextauth-secret}
+      KEYCLOAK_ISSUER: ${KEYCLOAK_ISSUER:-http://keycloak:8080/realms/raushni}
+      KEYCLOAK_INTERNAL_ISSUER: ${KEYCLOAK_INTERNAL_ISSUER:-http://keycloak:8080/realms/raushni}
+      KEYCLOAK_PUBLIC_ISSUER: ${KEYCLOAK_PUBLIC_ISSUER:-http://localhost:8080/realms/raushni}
+      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID:-raushni-frontend}
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:-local-dev-secret}
       API_INTERNAL_URL: ${API_INTERNAL_URL:-http://backend:8000}
       CMS_INTERNAL_URL: ${CMS_INTERNAL_URL:-http://strapi:1337}
       NODE_ENV: ${NODE_ENV:-development}
     depends_on:
       backend:
+        condition: service_started
+      keycloak:
         condition: service_started
       strapi:
         condition: service_healthy
@@ -144,10 +164,30 @@ services:
     networks:
       - raushni_network
 
+  # Identity Provider (Keycloak OIDC / OAuth2)
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: raushni-keycloak
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./keycloak/realm-raushni.json:/opt/keycloak/data/import/realm-raushni.json:ro
+      - keycloak_data:/opt/keycloak/data
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME_STRICT: "false"
+      KC_PROXY_HEADERS: xforwarded
+    command: start-dev --import-realm
+    networks:
+      - raushni_network
+
 volumes:
   postgres_data:
   redis_data:
   strapi_uploads:
+  keycloak_data:
 
 networks:
   raushni_network:

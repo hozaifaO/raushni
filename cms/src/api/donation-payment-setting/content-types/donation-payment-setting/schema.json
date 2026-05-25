@@ -1,0 +1,50 @@
+{
+  "kind": "collectionType",
+  "collectionName": "donation_payment_settings",
+  "info": {
+    "singularName": "donation-payment-setting",
+    "pluralName": "donation-payment-settings",
+    "displayName": "Donation Payment Setting",
+    "description": "CMS-managed donation payment methods, UPI details, and QR code configuration"
+  },
+  "options": {
+    "draftAndPublish": false,
+    "populateCreatorFields": true
+  },
+  "attributes": {
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true
+    },
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "intro": {
+      "type": "text",
+      "required": true
+    },
+    "upiId": {
+      "type": "string"
+    },
+    "qrImageUrl": {
+      "type": "string",
+      "required": true
+    },
+    "accountName": {
+      "type": "string",
+      "required": true
+    },
+    "paymentOptions": {
+      "type": "json",
+      "required": true
+    },
+    "instructions": {
+      "type": "json"
+    },
+    "supportContact": {
+      "type": "string"
+    }
+  }
+}

@@ -2,14 +2,44 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { HeartHandshake, Menu, X } from "lucide-react";
+import { HeartHandshake, Menu, Moon, Sun, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { defaultSiteSettings, type CmsSiteSettings } from "@/lib/cms/publicContent";
+
+type PublicTheme = "light" | "dark";
 
 export default function PublicHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [settings, setSettings] = useState<CmsSiteSettings>(defaultSiteSettings);
+  const [theme, setTheme] = useState<PublicTheme>("light");
+
+  useEffect(() => {
+    const stored = window.localStorage.getItem("raushni-public-theme");
+    const nextTheme: PublicTheme = stored === "dark" ? "dark" : "light";
+    setTheme(nextTheme);
+    if (nextTheme === "dark") {
+      document.documentElement.dataset.publicTheme = "dark";
+    } else {
+      delete document.documentElement.dataset.publicTheme;
+    }
+    return () => {
+      delete document.documentElement.dataset.publicTheme;
+    };
+  }, []);
+
+  const toggleTheme = () => {
+    setTheme((current) => {
+      const nextTheme: PublicTheme = current === "dark" ? "light" : "dark";
+      window.localStorage.setItem("raushni-public-theme", nextTheme);
+      if (nextTheme === "dark") {
+        document.documentElement.dataset.publicTheme = "dark";
+      } else {
+        delete document.documentElement.dataset.publicTheme;
+      }
+      return nextTheme;
+    });
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -41,15 +71,15 @@ export default function PublicHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[#120f0b]/95 text-white shadow-sm shadow-black/10 backdrop-blur-xl">
-      <div className="mx-auto flex min-h-40 max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-4" aria-label="Raushni home">
+      <div className="mx-auto flex min-h-40 max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+        <Link href="/" className="flex min-w-0 items-center gap-4" aria-label="Raushni home">
           <img
             src={settings.logo}
             alt="Raushni Educational and Social Welfare Trust logo"
             className="rounded-full object-contain ring-2 ring-white/15"
             style={{ width: "1.5in", height: "1.5in" }}
           />
-          <span className="hidden text-xl font-black uppercase leading-tight tracking-wide text-white sm:block">
+          <span className="hidden min-w-0 max-w-56 whitespace-normal text-xl font-black uppercase leading-tight tracking-wide text-white sm:block">
             {settings.brandShortName}
             <span className="block text-sm font-semibold text-amber-200">
               {settings.brandTagline}
@@ -57,14 +87,14 @@ export default function PublicHeader() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-1 lg:flex">
+        <nav className="hidden min-w-0 flex-1 flex-wrap items-center justify-end gap-1 lg:flex">
           {settings.navItems.map((item) => {
             const active = pathname === item.href || (item.href === "/news" && pathname?.startsWith("/blog"));
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`rounded-full px-3 py-2 text-sm font-semibold transition ${
+                className={`max-w-36 whitespace-normal rounded-full px-3 py-2 text-center text-sm font-semibold leading-tight transition ${
                   active
                     ? "bg-amber-400 text-stone-950"
                     : "text-white/75 hover:bg-white/10 hover:text-amber-100"
@@ -78,11 +108,26 @@ export default function PublicHeader() {
 
         <Link
           href="/donate"
-          className="hidden min-h-10 items-center justify-center gap-2 rounded-full bg-amber-400 px-4 text-sm font-bold text-stone-950 shadow-sm shadow-amber-900/10 transition hover:-translate-y-0.5 hover:bg-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-200 focus:ring-offset-2 focus:ring-offset-[#120f0b] md:inline-flex"
+          className="hidden min-h-10 shrink-0 items-center justify-center gap-2 rounded-full bg-amber-400 px-4 text-sm font-bold text-stone-950 shadow-sm shadow-amber-900/10 transition hover:-translate-y-0.5 hover:bg-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-200 focus:ring-offset-2 focus:ring-offset-[#120f0b] md:inline-flex"
         >
           <HeartHandshake size={16} aria-hidden="true" />
           Donate
         </Link>
+
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className={`hidden min-h-10 shrink-0 items-center justify-center gap-2 rounded-full border px-3 text-sm font-bold transition focus:outline-none focus:ring-2 focus:ring-amber-200 focus:ring-offset-2 focus:ring-offset-[#120f0b] sm:inline-flex ${
+            theme === "dark"
+              ? "border-amber-200 bg-white text-stone-950 hover:bg-amber-50"
+              : "border-amber-300 bg-amber-400 text-stone-950 hover:bg-amber-300"
+          }`}
+          aria-label={theme === "dark" ? "Switch public pages to light mode" : "Switch public pages to dark mode"}
+          aria-pressed={theme === "dark"}
+        >
+          {theme === "dark" ? <Sun size={16} aria-hidden="true" /> : <Moon size={16} aria-hidden="true" />}
+          {theme === "dark" ? "Light" : "Dark"}
+        </button>
 
         <button
           type="button"
@@ -102,7 +147,7 @@ export default function PublicHeader() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className="rounded-lg px-3 py-3 text-sm font-semibold text-white/75 transition hover:bg-white/10 hover:text-amber-100"
+                className="whitespace-normal break-words rounded-lg px-3 py-3 text-sm font-semibold leading-tight text-white/75 transition hover:bg-white/10 hover:text-amber-100"
               >
                 {item.label}
               </Link>
@@ -115,6 +160,20 @@ export default function PublicHeader() {
               <HeartHandshake size={16} aria-hidden="true" />
               Donate
             </Link>
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-full border px-4 text-sm font-bold transition ${
+                theme === "dark"
+                  ? "border-amber-200 bg-white text-stone-950 hover:bg-amber-50"
+                  : "border-amber-300 bg-amber-400 text-stone-950 hover:bg-amber-300"
+              }`}
+              aria-label={theme === "dark" ? "Switch public pages to light mode" : "Switch public pages to dark mode"}
+              aria-pressed={theme === "dark"}
+            >
+              {theme === "dark" ? <Sun size={16} aria-hidden="true" /> : <Moon size={16} aria-hidden="true" />}
+              {theme === "dark" ? "Light mode" : "Dark mode"}
+            </button>
           </div>
         </nav>
       )}

@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from app.api.dependencies.auth import require_write_access
 from app.schemas.donation import (
     Donation,
+    DonationCheckoutSession,
     DonationCreate,
     DonationListResponse,
     DonationPaymentStatus,
@@ -18,6 +19,7 @@ from app.services.donation_service import (
     DonationReceiptUnavailableError,
     DonationService,
 )
+from app.services.payment_service import PaymentGatewayError, PaymentGatewayUnavailableError
 
 
 router = APIRouter(prefix="/donations", tags=["donations"])
@@ -52,6 +54,21 @@ def register_public_donation(
 ) -> Donation:
     public_payload = payload.model_copy(update={"payment_status": DonationPaymentStatus.PENDING})
     return service.create_donation(public_payload)
+
+
+@router.post("/{donation_id}/checkout", response_model=DonationCheckoutSession)
+def create_checkout_session(
+    donation_id: UUID,
+    service: DonationService = Depends(get_donation_service),
+) -> DonationCheckoutSession:
+    try:
+        return service.create_checkout_session(donation_id)
+    except DonationNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except PaymentGatewayUnavailableError as exc:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
+    except PaymentGatewayError as exc:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
 
 
 @router.get("/{donation_id}", response_model=Donation)

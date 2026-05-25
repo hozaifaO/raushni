@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.router import api_router
+from app.services.crowdfunding_service import CrowdfundingService
 from app.services.designation_service import DesignationService
 from app.services.donation_service import DonationService
 from app.services.internship_service import InternshipService
@@ -23,6 +24,7 @@ APP_VERSION = "1.0.0"
 def create_app() -> FastAPI:
     app = FastAPI(title=APP_NAME, version=APP_VERSION)
     app.state.member_service = MemberService()
+    app.state.crowdfunding_service = CrowdfundingService()
     app.state.designation_service = DesignationService()
     app.state.donation_service = DonationService()
     app.state.internship_service = InternshipService()
@@ -62,6 +64,11 @@ def create_app() -> FastAPI:
                 "GET /api/v1/landing",
                 "GET /api/v1/donations",
                 "POST /api/v1/donations",
+                "POST /api/v1/donations/{id}/checkout",
+                "POST /api/v1/webhooks/stripe",
+                "GET /api/v1/crowdfunding",
+                "POST /api/v1/crowdfunding",
+                "POST /api/v1/crowdfunding/{id}/donations",
                 "GET /api/v1/designations",
                 "POST /api/v1/designations",
                 "GET /api/v1/internships",

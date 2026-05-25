@@ -149,11 +149,11 @@ const defaultLandingContent: LandingContent = {
 };
 
 const styles = {
-  section: "scroll-mt-24 border-b border-stone-200 px-4 py-24 sm:px-6 lg:px-8",
+  section: "scroll-mt-24 border-b border-stone-200 bg-white px-4 py-24 sm:px-6 lg:px-8",
   sectionInner: "mx-auto max-w-7xl",
   eyebrow: "text-sm font-bold uppercase tracking-[0.18em] text-amber-700",
   heading: "mt-4 text-4xl font-black leading-tight text-stone-950 sm:text-5xl",
-  body: "text-lg leading-9 text-stone-700",
+  body: "text-lg leading-9 text-stone-800",
   card: "rounded-lg border border-stone-200 bg-white p-6 shadow-sm",
   primaryButton:
     "inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-amber-400 px-6 text-sm font-bold text-stone-950 shadow-sm shadow-amber-900/10 transition hover:-translate-y-0.5 hover:bg-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-200 focus:ring-offset-2",
@@ -288,7 +288,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <PublicPageShell mainClassName="bg-[#faf7f2] text-stone-950">
+    <PublicPageShell mainClassName="bg-white text-stone-950">
       <section id="top" className="relative flex min-h-[92vh] items-end overflow-hidden bg-stone-950 text-white">
         <video
           className="absolute inset-0 h-full w-full object-cover opacity-60"
@@ -340,7 +340,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="about" className={`${styles.section} bg-[#faf7f2]`}>
+      <section id="about" className={styles.section}>
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
           <div>
             <p className={styles.eyebrow}>About Us</p>
@@ -354,7 +354,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="mission" className={`${styles.section} bg-[#f4efe7]`}>
+      <section id="mission" className={styles.section}>
         <div className={styles.sectionInner}>
           <div className="max-w-3xl">
             <p className={styles.eyebrow}>Our Mission</p>
@@ -378,7 +378,7 @@ export default function HomePage() {
                     <Icon size={22} aria-hidden="true" />
                   </div>
                   <h3 className="mt-5 text-xl font-black text-stone-950">{area.title}</h3>
-                  <p className="mt-3 text-sm leading-6 text-stone-600">{area.text}</p>
+                  <p className="mt-3 text-sm leading-6 text-stone-700">{area.text}</p>
                 </article>
               );
             })}
@@ -398,7 +398,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="success" className={`${styles.section} bg-[#faf7f2]`}>
+      <section id="success" className={styles.section}>
         <div className={styles.sectionInner}>
           <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
             <div>
@@ -423,7 +423,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="volunteer" className={`${styles.section} bg-[#faf7f2]`}>
+      <section id="volunteer" className={styles.section}>
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1fr_0.9fr] lg:items-center">
           <div>
             <p className={styles.eyebrow}>Volunteer</p>
@@ -455,7 +455,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="contact" className="scroll-mt-24 bg-[#faf7f2] px-4 py-24 sm:px-6 lg:px-8">
+      <section id="contact" className="scroll-mt-24 bg-white px-4 py-24 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr]">
           <div>
             <p className={styles.eyebrow}>Contact</p>
@@ -482,16 +482,16 @@ export default function HomePage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block">
                 <span className="text-sm font-bold text-stone-800">Name</span>
-                <input className="mt-2 min-h-11 w-full rounded-lg border border-stone-300 px-3 outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-200" />
+                <input className="mt-2 min-h-11 w-full rounded-lg border border-stone-300 bg-white px-3 text-stone-950 placeholder:text-stone-500 outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-200" />
               </label>
               <label className="block">
                 <span className="text-sm font-bold text-stone-800">Phone or email</span>
-                <input className="mt-2 min-h-11 w-full rounded-lg border border-stone-300 px-3 outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-200" />
+                <input className="mt-2 min-h-11 w-full rounded-lg border border-stone-300 bg-white px-3 text-stone-950 placeholder:text-stone-500 outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-200" />
               </label>
             </div>
             <label className="mt-4 block">
               <span className="text-sm font-bold text-stone-800">Message</span>
-              <textarea className="mt-2 min-h-32 w-full rounded-lg border border-stone-300 px-3 py-3 outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-200" />
+              <textarea className="mt-2 min-h-32 w-full rounded-lg border border-stone-300 bg-white px-3 py-3 text-stone-950 placeholder:text-stone-500 outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-200" />
             </label>
             <button
               type="button"

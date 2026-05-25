@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LogOut } from 'lucide-react';
+import { signOut } from 'next-auth/react';
 import { DASHBOARD_MODULES } from '@/lib/auth/modules';
 import { canAdmin, getStoredUser, isReadOnly, signOutToGuest } from '@/lib/auth/permissions';
 
@@ -100,7 +101,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                   <p className="text-xs text-gray-500 capitalize">
                     {isReadOnly(user.role) ? 'Guest - read only' : user.role || 'Guest'}
                   </p>
-                  <p className="text-xs text-gray-400 mt-0.5 truncate">{user.email || 'guest@raushni.com'}</p>
+                  <p className="mt-0.5 break-all text-xs text-gray-400">{user.email || 'guest@raushni.com'}</p>
                 </div>
               </div>
             </div>
@@ -126,22 +127,22 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                         key={item.name}
                         href={item.href}
                         onClick={() => setSidebarOpen(false)}
-                        className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group ${
+                        className={`flex items-start gap-3 rounded-lg px-3 py-2 transition-all duration-200 group ${
                           active
                             ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md'
                             : 'text-gray-700 hover:bg-orange-50 hover:text-orange-600'
                         }`}
                       >
-                        <Icon size={18} className={active ? 'text-white' : 'text-gray-400 group-hover:text-orange-500'} />
-                        <span className="text-sm font-medium">{item.name}</span>
+                        <Icon size={18} className={`mt-0.5 shrink-0 ${active ? 'text-white' : 'text-gray-400 group-hover:text-orange-500'}`} />
+                        <span className="min-w-0 flex-1 whitespace-normal break-words text-sm font-medium leading-tight">{item.name}</span>
                         {item.access === 'admin' && (
-                          <span className={`ml-auto rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                          <span className={`ml-auto shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
                             active ? 'bg-white/20 text-white' : 'bg-orange-50 text-orange-700'
                           }`}>
                             Admin
                           </span>
                         )}
-                        {active && <span className="ml-auto w-1.5 h-1.5 bg-white rounded-full" />}
+                        {active && <span className="ml-auto mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-white" />}
                       </Link>
                     );
                   })}
@@ -156,7 +157,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
             <button 
               onClick={() => {
                 signOutToGuest();
-                window.location.href = '/login';
+                void signOut({ callbackUrl: '/login' });
               }}
               className="flex items-center gap-3 px-3 py-2 w-full rounded-lg text-red-600 hover:bg-red-50 transition-colors group"
             >

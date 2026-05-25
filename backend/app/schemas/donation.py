@@ -8,12 +8,18 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class DonationPaymentMethod(StrEnum):
-    CASH = "cash"
     UPI = "upi"
-    BANK_TRANSFER = "bank_transfer"
-    CARD = "card"
+    QR_CODE = "qr_code"
+    GPAY = "gpay"
+    CASH = "cash"
     CHEQUE = "cheque"
-    ONLINE = "online"
+    DEBIT_CARD = "debit_card"
+    CREDIT_CARD = "credit_card"
+    INTERNATIONAL_CARD = "international_card"
+    STRIPE = "stripe"
+    NETBANKING = "netbanking"
+    ONLINE_BANKING = "online_banking"
+    OTHER = "other"
 
 
 class DonationPaymentStatus(StrEnum):
@@ -50,6 +56,10 @@ class DonationBase(DonorBase):
     transaction_reference: str | None = Field(default=None, max_length=120)
     donation_date: date = Field(default_factory=date.today)
     notes: str | None = Field(default=None, max_length=500)
+    gateway_provider: str | None = Field(default=None, max_length=40)
+    gateway_session_id: str | None = Field(default=None, max_length=160)
+    gateway_payment_intent: str | None = Field(default=None, max_length=160)
+    checkout_url: str | None = Field(default=None, max_length=500)
 
 
 class DonationCreate(DonationBase):
@@ -71,6 +81,10 @@ class DonationUpdate(BaseModel):
     transaction_reference: str | None = Field(default=None, max_length=120)
     donation_date: date | None = None
     notes: str | None = Field(default=None, max_length=500)
+    gateway_provider: str | None = Field(default=None, max_length=40)
+    gateway_session_id: str | None = Field(default=None, max_length=160)
+    gateway_payment_intent: str | None = Field(default=None, max_length=160)
+    checkout_url: str | None = Field(default=None, max_length=500)
 
 
 class Donation(DonationBase):
@@ -89,6 +103,14 @@ class DonationReceipt(BaseModel):
     organization: str
     registration_note: str
     donation: Donation
+
+
+class DonationCheckoutSession(BaseModel):
+    donation_id: UUID
+    provider: str
+    checkout_url: str
+    session_id: str
+    publishable_key: str | None = None
 
 
 class DonationListResponse(BaseModel):

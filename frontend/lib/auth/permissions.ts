@@ -96,6 +96,7 @@ export function signInAsAdmin(): AppUser {
 export function signOutToGuest(): AppUser {
   if (typeof window !== "undefined") {
     window.localStorage.removeItem("token");
+    window.localStorage.removeItem("accessToken");
   }
   return setStoredUser(DEFAULT_GUEST_USER);
 }
@@ -114,8 +115,15 @@ export function isReadOnly(role: UserRole | string | undefined): boolean {
 
 export function authHeaders(): HeadersInit {
   const user = getStoredUser();
-  return {
+  const headers: Record<string, string> = {
     "X-User-Role": user.role,
     "X-User-Email": user.email,
   };
+  if (typeof window !== "undefined") {
+    const accessToken = window.localStorage.getItem("accessToken");
+    if (accessToken) {
+      headers.Authorization = `Bearer ${accessToken}`;
+    }
+  }
+  return headers;
 }

@@ -2,6 +2,8 @@
 
 import { Save, X } from "lucide-react";
 import type { FormEvent } from "react";
+import { PaymentMethodIcon } from "@/components/Features/Donations/paymentMethodMeta";
+import { fallbackPaymentOptions, type DonationPaymentOption } from "@/lib/cms/donationSettings";
 import type { DonationFormValues } from "@/types/models/donation";
 
 type DonationFormProps = {
@@ -9,6 +11,7 @@ type DonationFormProps = {
   submitting: boolean;
   submitLabel: string;
   publicMode?: boolean;
+  paymentOptions?: DonationPaymentOption[];
   onChange: <K extends keyof DonationFormValues>(field: K, value: DonationFormValues[K]) => void;
   onCancel?: () => void;
   onSubmit: () => void;
@@ -36,6 +39,7 @@ export default function DonationForm({
   submitting,
   submitLabel,
   publicMode = false,
+  paymentOptions = fallbackPaymentOptions,
   onChange,
   onCancel,
   onSubmit,
@@ -44,6 +48,7 @@ export default function DonationForm({
     event.preventDefault();
     onSubmit();
   };
+  const enabledPaymentOptions = paymentOptions.filter((option) => option.enabled !== false);
 
   return (
     <form onSubmit={handleSubmit} className="grid gap-5">
@@ -136,12 +141,9 @@ export default function DonationForm({
             }
             className="min-h-11 rounded-lg border border-gray-300 px-3 text-gray-950 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
           >
-            <option value="upi">UPI</option>
-            <option value="bank_transfer">Bank transfer</option>
-            <option value="card">Card</option>
-            <option value="cash">Cash</option>
-            <option value="cheque">Cheque</option>
-            <option value="online">Online</option>
+            {enabledPaymentOptions.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
           </select>
         </label>
 
@@ -193,6 +195,36 @@ export default function DonationForm({
             placeholder="UPI, cheque, or bank reference"
           />
         </label>
+      </div>
+
+      <div className="grid gap-2">
+        <p className="text-sm font-semibold text-gray-800">Payment type</p>
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+          {enabledPaymentOptions.map((option) => {
+            const isSelected = values.payment_method === option.value;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => onChange("payment_method", option.value)}
+                className={`flex min-h-16 items-center gap-3 rounded-lg border px-3 text-left text-sm transition ${
+                  isSelected
+                    ? "border-orange-300 bg-orange-50 text-orange-900 ring-2 ring-orange-100"
+                    : "border-gray-200 bg-white text-gray-700 hover:border-orange-200 hover:bg-orange-50/60"
+                }`}
+                aria-pressed={isSelected}
+              >
+                <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${isSelected ? "bg-orange-600 text-white" : "bg-gray-100 text-orange-600"}`}>
+                  <PaymentMethodIcon method={option.value} className={isSelected ? "text-white" : "text-orange-600"} />
+                </span>
+                <span>
+                  <span className="block font-bold">{option.label}</span>
+                  {option.requiresReference && <span className="block text-xs text-gray-500">Reference required</span>}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <label className="grid gap-2 text-sm font-medium text-gray-700">

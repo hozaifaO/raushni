@@ -10,7 +10,7 @@ export default function PublicPageShell({
   mainClassName?: string;
 }) {
   return (
-    <div className="min-h-screen bg-[#fafafa]">
+    <div className="public-site min-h-screen bg-white">
       <PublicHeader />
       <main className={mainClassName}>{children}</main>
       <Footer />

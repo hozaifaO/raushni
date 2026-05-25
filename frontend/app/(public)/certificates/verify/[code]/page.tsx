@@ -37,13 +37,13 @@ export default function Page({ params }: { params: Promise<{ code: string }> }) 
             <div>
               <p className="text-sm font-bold uppercase tracking-[0.18em] text-emerald-700">Certificate verification</p>
               <h1 className="mt-2 text-3xl font-black text-stone-950">Raushni Internship Certificate</h1>
-              <p className="mt-2 text-sm leading-6 text-stone-600">
+              <p className="mt-2 text-sm leading-6 text-stone-800">
                 Verify the authenticity of issued internship completion certificates using the QR code or certificate number.
               </p>
             </div>
           </div>
 
-          {loading && <p className="mt-8 rounded-lg bg-stone-50 p-4 text-sm font-semibold text-stone-600">Checking certificate...</p>}
+          {loading && <p className="mt-8 rounded-lg bg-white p-4 text-sm font-semibold text-stone-800 shadow-sm">Checking certificate...</p>}
 
           {error && (
             <div className="mt-8 rounded-lg border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">
@@ -92,8 +92,8 @@ export default function Page({ params }: { params: Promise<{ code: string }> }) 
 
 function Info({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-stone-200 bg-stone-50 p-3">
-      <p className="text-xs font-bold uppercase text-stone-500">{label}</p>
+    <div className="rounded-lg border border-stone-200 bg-white p-3 shadow-sm">
+      <p className="text-xs font-bold uppercase text-stone-700">{label}</p>
       <p className="mt-1 text-sm font-black capitalize text-stone-950">{value}</p>
     </div>
   );
