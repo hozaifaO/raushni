@@ -1,55 +1,123 @@
-# k8s/postgres-deployment.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init
+  namespace: raushni
+data:
+  01-create-databases.sql: |
+    SELECT 'CREATE DATABASE raushni_cms'
+    WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'raushni_cms')\gexec
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: postgres
   namespace: raushni
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/part-of: raushni-platform
+    app.kubernetes.io/component: database
 spec:
   serviceName: postgres
   replicas: 1
   selector:
     matchLabels:
-      app: postgres
+      app.kubernetes.io/name: postgres
   template:
     metadata:
       labels:
-        app: postgres
+        app.kubernetes.io/name: postgres
+        app.kubernetes.io/part-of: raushni-platform
+        app.kubernetes.io/component: database
+      annotations:
+        ad.datadoghq.com/postgres.logs: '[{"source":"postgresql","service":"raushni-postgres"}]'
     spec:
+      securityContext:
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
       containers:
-      - name: postgres
-        image: postgres:15
-        ports:
-        - containerPort: 5432
-        env:
-        - name: POSTGRES_DB
-          value: raushni
-        - name: POSTGRES_USER
-          value: raushni_user
-        - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: raushni-secrets
-              key: POSTGRES_PASSWORD
-        volumeMounts:
-        - name: postgres-storage
-          mountPath: /var/lib/postgresql/data
+        - name: postgres
+          image: postgres:15-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: postgres
+              containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: raushni_backend
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: raushni-secrets
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: raushni-secrets
+                  key: POSTGRES_PASSWORD
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+            - name: postgres-init
+              mountPath: /docker-entrypoint-initdb.d
+              readOnly: true
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+      volumes:
+        - name: postgres-init
+          configMap:
+            name: postgres-init
   volumeClaimTemplates:
-  - metadata:
-      name: postgres-storage
-    spec:
-      accessModes: ["ReadWriteOnce"]
-      resources:
-        requests:
-          storage: 10Gi
+    - metadata:
+        name: postgres-storage
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 20Gi
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: postgres
   namespace: raushni
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/part-of: raushni-platform
 spec:
+  type: ClusterIP
   selector:
-    app: postgres
+    app.kubernetes.io/name: postgres
   ports:
-  - port: 5432
-    targetPort: 5432
+    - name: postgres
+      port: 5432
+      targetPort: postgres

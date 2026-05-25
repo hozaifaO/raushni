@@ -1,10 +1,37 @@
-# k8s/configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: raushni-config
   namespace: raushni
+  labels:
+    app.kubernetes.io/name: raushni
+    app.kubernetes.io/part-of: raushni-platform
 data:
-  DATABASE_URL: postgresql://raushni_user:raushni_password@postgres:5432/raushni
+  ENVIRONMENT: production
+  DD_ENV: production
+  DD_VERSION: "1.0.0"
+  APP_PUBLIC_URL: https://raushni.com
+  API_PUBLIC_URL: https://api.raushni.com
+  CMS_PUBLIC_URL: https://cms.raushni.com
+  CMS_INTERNAL_URL: http://strapi:1337
+  API_INTERNAL_URL: http://backend:8000
+  NEXT_PUBLIC_API_URL: https://api.raushni.com
+  NEXT_PUBLIC_CMS_URL: https://cms.raushni.com
+  NEXT_PUBLIC_REQUIRE_AUTH: "true"
+  NEXTAUTH_URL: https://raushni.com
   REDIS_URL: redis://redis:6379
-  NEXT_PUBLIC_API_URL: http://backend:5000
+  OIDC_ISSUER: https://auth.raushni.com/realms/raushni
+  OIDC_AUDIENCE: raushni-frontend
+  OIDC_VERIFY_AUDIENCE: "true"
+  REQUIRE_AUTH: "true"
+  KEYCLOAK_ISSUER: https://auth.raushni.com/realms/raushni
+  KEYCLOAK_PUBLIC_ISSUER: https://auth.raushni.com/realms/raushni
+  KEYCLOAK_CLIENT_ID: raushni-frontend
+  OTEL_SDK_DISABLED: "false"
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector.monitoring.svc.cluster.local:4317
+  OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+  OTEL_RESOURCE_ATTRIBUTES: deployment.environment=production,service.namespace=raushni
+  STRAPI_HOST: 0.0.0.0
+  STRAPI_PORT: "1337"
+  STRAPI_NODE_ENV: production
+  CMS_CORS_ORIGINS: https://raushni.com,https://www.raushni.com,https://api.raushni.com,https://cms.raushni.com

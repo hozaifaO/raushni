@@ -1,5 +1,10 @@
-# k8s/namespace.yaml
 apiVersion: v1
 kind: Namespace
 metadata:
   name: raushni
+  labels:
+    app.kubernetes.io/name: raushni
+    app.kubernetes.io/part-of: raushni-platform
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted

@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: document-generator
+  namespace: raushni
+  labels:
+    app.kubernetes.io/name: document-generator
+    app.kubernetes.io/part-of: raushni-platform
+    app.kubernetes.io/component: documents
+spec:
+  replicas: 2
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: document-generator
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: document-generator
+        app.kubernetes.io/part-of: raushni-platform
+        app.kubernetes.io/component: documents
+      annotations:
+        ad.datadoghq.com/document-generator.logs: '[{"source":"python","service":"raushni-document-generator"}]'
+    spec:
+      serviceAccountName: raushni-app
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: document-generator
+          image: ghcr.io/owais4u/raushni-document-generator:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: raushni-config
+          env:
+            - name: DD_SERVICE
+              value: raushni-document-generator
+            - name: OTEL_SERVICE_NAME
+              value: raushni-document-generator
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 150m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 768Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: document-generator
+  namespace: raushni
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: document-generator
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: document-generator
+  namespace: raushni
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: document-generator

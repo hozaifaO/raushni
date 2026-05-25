@@ -13,6 +13,7 @@ This directory contains the nginx reverse proxy for the Raushni platform. It ter
 | `/` | Next.js frontend at `frontend:3000` |
 | `/api/` | Backend API at `backend:8000/api/` |
 | `/api/auth/` | Backend auth API with stricter rate limiting |
+| `/document-service/` | Document generation service at `document-generator:8000` |
 | `/admin` | Strapi admin at `strapi:1337/admin` |
 | `/cms/api/` | Strapi API at `strapi:1337/api/` |
 | `/uploads/` | Strapi uploads at `strapi:1337/uploads/` |

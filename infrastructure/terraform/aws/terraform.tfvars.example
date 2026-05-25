@@ -1,0 +1,11 @@
+aws_region          = "ap-south-1"
+project             = "raushni"
+environment         = "production"
+domain_name         = "raushni.com"
+hosted_zone_id      = ""
+db_master_username  = "raushni_admin"
+db_master_password  = "replace-with-strong-password"
+node_instance_types = ["t3.medium"]
+node_min_size       = 2
+node_desired_size   = 3
+node_max_size       = 6

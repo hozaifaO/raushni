@@ -192,6 +192,7 @@ services:
       - frontend
       - backend
       - strapi
+      - document-generator
     networks:
       - raushni_network
 
