@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
 # Colors for output
 RED='\033[0;31m'
@@ -15,7 +15,7 @@ run_backend_tests() {
     echo -e "${YELLOW}📦 Running Backend Tests...${NC}"
     mkdir -p reports/backend
     PYTHONPATH=backend pytest tests/backend -v \
-        --cov=backend/app \
+        --cov=app \
         --cov-report=term-missing \
         --cov-report=html:reports/backend/htmlcov \
         --cov-report=xml:reports/backend/coverage.xml \
@@ -37,18 +37,19 @@ run_e2e_tests() {
     echo -e "${YELLOW}🌐 Running E2E Tests...${NC}"
 
     # Start services
-    docker-compose -f tests/docker/docker-compose.test.yml up -d
+    docker compose -f tests/docker/docker-compose.test.yml up -d
 
     # Wait for services
     sleep 10
 
     # Run E2E tests
-    cd frontend
-    npm run test:e2e:ci
-    cd ..
+    APP_BASE_URL="${APP_BASE_URL:-http://localhost:3000}" \
+    API_BASE_URL="${API_BASE_URL:-http://localhost:8000}" \
+    CMS_BASE_URL="${CMS_BASE_URL:-http://localhost:1337}" \
+    node scripts/smoke-test.mjs
 
     # Stop services
-    docker-compose -f tests/docker/docker-compose.test.yml down
+    docker compose -f tests/docker/docker-compose.test.yml down
 
     echo -e "${GREEN}✅ E2E Tests Complete${NC}\n"
 }
@@ -69,8 +70,14 @@ case "${1}" in
         run_frontend_tests
         run_e2e_tests
         ;;
+    smoke)
+        node scripts/smoke-test.mjs
+        ;;
+    performance)
+        node scripts/performance-smoke.mjs
+        ;;
     *)
-        echo "Usage: $0 {backend|frontend|e2e|all}"
+        echo "Usage: $0 {backend|frontend|e2e|smoke|performance|all}"
         exit 1
         ;;
 esac

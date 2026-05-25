@@ -96,3 +96,21 @@ variable "redis_node_type" {
   type        = string
   default     = "cache.t4g.micro"
 }
+
+variable "app_secret_name" {
+  description = "AWS Secrets Manager secret name consumed by Kubernetes External Secrets."
+  type        = string
+  default     = "/raushni/production/app"
+}
+
+variable "external_secrets_namespace" {
+  description = "Namespace where External Secrets Operator runs."
+  type        = string
+  default     = "external-secrets"
+}
+
+variable "external_secrets_service_account" {
+  description = "External Secrets Operator service account name used for IRSA."
+  type        = string
+  default     = "external-secrets"
+}

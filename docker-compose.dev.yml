@@ -2,16 +2,27 @@ services:
   backend:
     environment:
       ENVIRONMENT: development
+      DD_ENV: development
       DEBUG: "true"
+      APP_PUBLIC_URL: ${APP_PUBLIC_URL:-https://raushni-dev.com}
+      OIDC_ISSUER: ${OIDC_ISSUER:-https://auth.raushni-dev.com/realms/raushni}
+      OIDC_VERIFY_AUDIENCE: ${OIDC_VERIFY_AUDIENCE:-false}
+      REQUIRE_AUTH: ${REQUIRE_AUTH:-false}
+      OTEL_SDK_DISABLED: ${OTEL_SDK_DISABLED:-true}
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   frontend:
     environment:
       NODE_ENV: development
-      NEXT_PUBLIC_API_URL: http://localhost:8000
-      NEXT_PUBLIC_CMS_URL: http://localhost:1337
+      DD_ENV: development
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.raushni-dev.com}
+      NEXT_PUBLIC_CMS_URL: ${NEXT_PUBLIC_CMS_URL:-https://cms.raushni-dev.com}
+      NEXT_PUBLIC_REQUIRE_AUTH: ${NEXT_PUBLIC_REQUIRE_AUTH:-false}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-https://raushni-dev.com}
       API_INTERNAL_URL: http://backend:8000
       CMS_INTERNAL_URL: http://strapi:1337
+      KEYCLOAK_PUBLIC_ISSUER: ${KEYCLOAK_PUBLIC_ISSUER:-https://auth.raushni-dev.com/realms/raushni}
+      OTEL_SDK_DISABLED: ${OTEL_SDK_DISABLED:-true}
     command: sh -c "rm -rf .next && test -f 'app/(dashboard)/activities/page.tsx' && test -f 'app/(dashboard)/news/page.tsx' && npm run dev"
 
   strapi:
@@ -24,8 +35,13 @@ services:
       - strapi_uploads:/opt/app/public/uploads
     environment:
       NODE_ENV: development
-      APP_KEYS: devKeyA1234567890abcdefghijklmnopqrstuvwxyz,devKeyB1234567890abcdefghijklmnopqrstuvwxyz
-      API_TOKEN_SALT: dev-api-token-salt-change-me
-      ADMIN_JWT_SECRET: dev-admin-jwt-secret-change-me
-      JWT_SECRET: dev-jwt-secret-change-me
-      TRANSFER_TOKEN_SALT: dev-transfer-token-salt-change-me
+      DD_ENV: development
+      PUBLIC_URL: ${CMS_PUBLIC_URL:-https://cms.raushni-dev.com}
+      ADMIN_URL: ${STRAPI_ADMIN_URL:-https://cms.raushni-dev.com/admin}
+      CORS_ORIGINS: ${CMS_CORS_ORIGINS:-https://raushni-dev.com,https://www.raushni-dev.com,https://api.raushni-dev.com,https://cms.raushni-dev.com,http://localhost,http://localhost:3000,http://localhost:1337}
+      APP_KEYS: ${STRAPI_APP_KEYS:-devKeyA1234567890abcdefghijklmnopqrstuvwxyz,devKeyB1234567890abcdefghijklmnopqrstuvwxyz}
+      API_TOKEN_SALT: ${STRAPI_API_TOKEN_SALT:-dev-api-token-salt-change-me}
+      ADMIN_JWT_SECRET: ${STRAPI_ADMIN_JWT_SECRET:-dev-admin-jwt-secret-change-me}
+      JWT_SECRET: ${STRAPI_JWT_SECRET:-dev-jwt-secret-change-me}
+      TRANSFER_TOKEN_SALT: ${STRAPI_TRANSFER_TOKEN_SALT:-dev-transfer-token-salt-change-me}
+      OTEL_SDK_DISABLED: ${OTEL_SDK_DISABLED:-true}

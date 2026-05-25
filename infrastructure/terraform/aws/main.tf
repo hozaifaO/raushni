@@ -10,6 +10,10 @@ locals {
 
 data "aws_caller_identity" "current" {}
 
+data "tls_certificate" "eks_oidc" {
+  url = aws_eks_cluster.main.identity[0].oidc[0].issuer
+}
+
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
@@ -152,6 +156,85 @@ resource "aws_eks_cluster" "main" {
   enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
 
   depends_on = [aws_iam_role_policy_attachment.eks_cluster]
+}
+
+locals {
+  eks_oidc_provider_url = replace(aws_eks_cluster.main.identity[0].oidc[0].issuer, "https://", "")
+}
+
+resource "aws_iam_openid_connect_provider" "eks" {
+  url             = aws_eks_cluster.main.identity[0].oidc[0].issuer
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = [data.tls_certificate.eks_oidc.certificates[0].sha1_fingerprint]
+
+  tags = {
+    Name = "${local.name}-eks-oidc"
+  }
+}
+
+resource "aws_secretsmanager_secret" "app" {
+  name                    = var.app_secret_name
+  description             = "Runtime application secrets for the Raushni platform."
+  recovery_window_in_days = 30
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+data "aws_iam_policy_document" "external_secrets_assume_role" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
+
+    principals {
+      type        = "Federated"
+      identifiers = [aws_iam_openid_connect_provider.eks.arn]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "${local.eks_oidc_provider_url}:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "${local.eks_oidc_provider_url}:sub"
+      values   = ["system:serviceaccount:${var.external_secrets_namespace}:${var.external_secrets_service_account}"]
+    }
+  }
+}
+
+resource "aws_iam_role" "external_secrets" {
+  name               = "${local.name}-external-secrets"
+  assume_role_policy = data.aws_iam_policy_document.external_secrets_assume_role.json
+}
+
+data "aws_iam_policy_document" "external_secrets" {
+  statement {
+    sid    = "ReadRaushniApplicationSecret"
+    effect = "Allow"
+    actions = [
+      "secretsmanager:DescribeSecret",
+      "secretsmanager:GetSecretValue",
+    ]
+    resources = [
+      aws_secretsmanager_secret.app.arn,
+      "${aws_secretsmanager_secret.app.arn}-*",
+    ]
+  }
+}
+
+resource "aws_iam_policy" "external_secrets" {
+  name        = "${local.name}-external-secrets"
+  description = "Allows External Secrets Operator to read Raushni runtime secrets."
+  policy      = data.aws_iam_policy_document.external_secrets.json
+}
+
+resource "aws_iam_role_policy_attachment" "external_secrets" {
+  role       = aws_iam_role.external_secrets.name
+  policy_arn = aws_iam_policy.external_secrets.arn
 }
 
 resource "aws_iam_role" "eks_nodes" {

@@ -35,3 +35,15 @@ output "ecr_repositories" {
 output "certificate_arn" {
   value = aws_acm_certificate.main.arn
 }
+
+output "app_secret_arn" {
+  value = aws_secretsmanager_secret.app.arn
+}
+
+output "app_secret_name" {
+  value = aws_secretsmanager_secret.app.name
+}
+
+output "external_secrets_role_arn" {
+  value = aws_iam_role.external_secrets.arn
+}

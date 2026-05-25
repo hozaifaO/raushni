@@ -30,8 +30,11 @@ htmlcov/
 # Environment files
 .env
 .env.local
+.env.dev
+.env.prod
 .env.*.local
 !.env.example
+!.env.dev.example
 
 # Logs
 logs/
@@ -78,12 +81,18 @@ docker-compose.override.yml
 # Coverage
 coverage/
 .nyc_output/
+reports/**/htmlcov/
+reports/**/*.xml
+frontend/coverage/
 
 # Secrets
 *.pem
 *.key
 *.cert
 *.crt
+terraform.tfvars
+*.tfstate
+*.tfstate.*
 
 # Large binary files
 *.node

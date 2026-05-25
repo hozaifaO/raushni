@@ -1,14 +1,17 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Generate coverage reports for all services
-set -e
+set -euo pipefail
 
 echo "📊 Generating coverage reports..."
 
-# Backend coverage
-cd backend
-pytest tests/ --cov=app --cov-report=html --cov-report=xml
-cd ..
+mkdir -p reports/backend
+PYTHONPATH=backend pytest tests/backend -v \
+  --cov=app \
+  --cov-report=term-missing \
+  --cov-report=html:reports/backend/htmlcov \
+  --cov-report=xml:reports/backend/coverage.xml \
+  --junitxml=reports/backend/junit.xml
 
 # Frontend coverage
 cd frontend
@@ -17,7 +20,7 @@ cd ..
 
 # Merge coverage reports (if using Codecov)
 echo "✅ Coverage reports generated in:"
-echo "  - backend/htmlcov/"
+echo "  - reports/backend/htmlcov/"
 echo "  - frontend/coverage/"
 echo "  - backend/coverage.xml"
 echo "  - frontend/coverage/lcov.info"
