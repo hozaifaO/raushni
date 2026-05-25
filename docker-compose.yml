@@ -61,6 +61,15 @@ services:
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
       ENVIRONMENT: ${ENVIRONMENT:-production}
       DEBUG: ${DEBUG:-false}
+      DD_ENV: ${DD_ENV:-production}
+      DD_SERVICE: raushni-backend
+      DD_VERSION: ${DD_VERSION:-1.0.0}
+      OTEL_SERVICE_NAME: raushni-backend
+      OTEL_SERVICE_VERSION: ${DD_VERSION:-1.0.0}
+      OTEL_SDK_DISABLED: ${OTEL_SDK_DISABLED:-true}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4317}
+      OTEL_EXPORTER_OTLP_PROTOCOL: ${OTEL_EXPORTER_OTLP_PROTOCOL:-grpc}
+      OTEL_RESOURCE_ATTRIBUTES: deployment.environment=${DD_ENV:-production},service.namespace=raushni
     depends_on:
       postgres:
         condition: service_healthy
@@ -101,6 +110,19 @@ services:
       DATABASE_USERNAME: ${CMS_DATABASE_USERNAME:-postgres}
       DATABASE_PASSWORD: ${CMS_DATABASE_PASSWORD:-postgres}
       DATABASE_SSL: ${CMS_DATABASE_SSL:-false}
+      DD_ENV: ${DD_ENV:-production}
+      DD_SERVICE: raushni-cms
+      DD_VERSION: ${DD_VERSION:-1.0.0}
+      NODE_OPTIONS: ${CMS_NODE_OPTIONS:---require @opentelemetry/auto-instrumentations-node/register}
+      OTEL_SERVICE_NAME: raushni-cms
+      OTEL_SERVICE_VERSION: ${DD_VERSION:-1.0.0}
+      OTEL_SDK_DISABLED: ${OTEL_SDK_DISABLED:-true}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4317}
+      OTEL_EXPORTER_OTLP_PROTOCOL: ${OTEL_EXPORTER_OTLP_PROTOCOL:-grpc}
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_METRICS_EXPORTER: otlp
+      OTEL_LOGS_EXPORTER: otlp
+      OTEL_RESOURCE_ATTRIBUTES: deployment.environment=${DD_ENV:-production},service.namespace=raushni
     depends_on:
       postgres:
         condition: service_healthy
@@ -139,6 +161,15 @@ services:
       API_INTERNAL_URL: ${API_INTERNAL_URL:-http://backend:8000}
       CMS_INTERNAL_URL: ${CMS_INTERNAL_URL:-http://strapi:1337}
       NODE_ENV: ${NODE_ENV:-development}
+      DD_ENV: ${DD_ENV:-production}
+      DD_SERVICE: raushni-frontend
+      DD_VERSION: ${DD_VERSION:-1.0.0}
+      OTEL_SERVICE_NAME: raushni-frontend
+      OTEL_SERVICE_VERSION: ${DD_VERSION:-1.0.0}
+      OTEL_SDK_DISABLED: ${OTEL_SDK_DISABLED:-true}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4317}
+      OTEL_EXPORTER_OTLP_PROTOCOL: ${OTEL_EXPORTER_OTLP_PROTOCOL:-grpc}
+      OTEL_RESOURCE_ATTRIBUTES: deployment.environment=${DD_ENV:-production},service.namespace=raushni
     depends_on:
       backend:
         condition: service_started
@@ -164,6 +195,28 @@ services:
     networks:
       - raushni_network
 
+  # Document generation microservice
+  document-generator:
+    build:
+      context: ./services/document_generator
+      dockerfile: Dockerfile
+    container_name: raushni-document-generator
+    ports:
+      - "8001:8000"
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      DD_ENV: ${DD_ENV:-production}
+      DD_SERVICE: raushni-document-generator
+      DD_VERSION: ${DD_VERSION:-1.0.0}
+      OTEL_SERVICE_NAME: raushni-document-generator
+      OTEL_SERVICE_VERSION: ${DD_VERSION:-1.0.0}
+      OTEL_SDK_DISABLED: ${OTEL_SDK_DISABLED:-true}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4317}
+      OTEL_EXPORTER_OTLP_PROTOCOL: ${OTEL_EXPORTER_OTLP_PROTOCOL:-grpc}
+      OTEL_RESOURCE_ATTRIBUTES: deployment.environment=${DD_ENV:-production},service.namespace=raushni
+    networks:
+      - raushni_network
+
   # Identity Provider (Keycloak OIDC / OAuth2)
   keycloak:
     image: quay.io/keycloak/keycloak:24.0
@@ -180,6 +233,52 @@ services:
       KC_HOSTNAME_STRICT: "false"
       KC_PROXY_HEADERS: xforwarded
     command: start-dev --import-realm
+    networks:
+      - raushni_network
+
+  # OpenTelemetry Collector -> Datadog exporter
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.104.0
+    container_name: raushni-otel-collector
+    profiles:
+      - monitoring
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    volumes:
+      - ./monitoring/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    environment:
+      DD_API_KEY: ${DD_API_KEY:-}
+      DD_SITE: ${DD_SITE:-datadoghq.com}
+      DD_HOSTNAME: ${DD_HOSTNAME:-raushni-docker}
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "13133:13133"
+    networks:
+      - raushni_network
+
+  # Datadog Agent for host/container monitoring and optional direct OTLP ingestion
+  datadog-agent:
+    image: gcr.io/datadoghq/agent:7
+    container_name: raushni-datadog-agent
+    profiles:
+      - monitoring
+    environment:
+      DD_API_KEY: ${DD_API_KEY:-}
+      DD_SITE: ${DD_SITE:-datadoghq.com}
+      DD_ENV: ${DD_ENV:-production}
+      DD_VERSION: ${DD_VERSION:-1.0.0}
+      DD_APM_ENABLED: ${DD_APM_ENABLED:-true}
+      DD_LOGS_ENABLED: ${DD_LOGS_ENABLED:-true}
+      DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL: ${DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL:-true}
+      DD_PROCESS_AGENT_ENABLED: ${DD_PROCESS_AGENT_ENABLED:-true}
+      DD_DOCKER_LABELS_AS_TAGS: '{"com.docker.compose.service":"compose_service"}'
+      DD_OTLP_CONFIG_RECEIVER_PROTOCOLS_GRPC_ENDPOINT: 0.0.0.0:4317
+      DD_OTLP_CONFIG_RECEIVER_PROTOCOLS_HTTP_ENDPOINT: 0.0.0.0:4318
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /proc/:/host/proc/:ro
+      - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
     networks:
       - raushni_network
 

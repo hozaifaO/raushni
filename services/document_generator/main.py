@@ -2,7 +2,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 
+from telemetry import configure_telemetry
+
 app = FastAPI(title="Raushni Document Service")
+configure_telemetry(app)
 
 # Configure CORS
 app.add_middleware(

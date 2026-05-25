@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.router import api_router
+from app.core.telemetry import configure_telemetry
 from app.services.crowdfunding_service import CrowdfundingService
 from app.services.designation_service import DesignationService
 from app.services.donation_service import DonationService
@@ -23,6 +24,7 @@ APP_VERSION = "1.0.0"
 
 def create_app() -> FastAPI:
     app = FastAPI(title=APP_NAME, version=APP_VERSION)
+    configure_telemetry(app)
     app.state.member_service = MemberService()
     app.state.crowdfunding_service = CrowdfundingService()
     app.state.designation_service = DesignationService()

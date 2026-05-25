@@ -1,0 +1,80 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  memory_limiter:
+    check_interval: 2s
+    limit_mib: 512
+    spike_limit_mib: 128
+  resource:
+    attributes:
+      - key: app
+        value: raushni
+        action: upsert
+      - key: team
+        value: raushni
+        action: upsert
+  batch:
+    timeout: 10s
+    send_batch_size: 1024
+
+connectors:
+  datadog/connector:
+
+exporters:
+  datadog:
+    api:
+      key: ${env:DD_API_KEY}
+      site: ${env:DD_SITE}
+    hostname: ${env:DD_HOSTNAME}
+  debug:
+    verbosity: basic
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+service:
+  telemetry:
+    logs:
+      level: info
+  extensions:
+    - health_check
+  pipelines:
+    traces:
+      receivers:
+        - otlp
+      processors:
+        - memory_limiter
+        - resource
+        - batch
+      exporters:
+        - datadog/connector
+        - datadog
+        - debug
+    metrics:
+      receivers:
+        - otlp
+        - datadog/connector
+      processors:
+        - memory_limiter
+        - resource
+        - batch
+      exporters:
+        - datadog
+        - debug
+    logs:
+      receivers:
+        - otlp
+      processors:
+        - memory_limiter
+        - resource
+        - batch
+      exporters:
+        - datadog
+        - debug
