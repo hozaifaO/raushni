@@ -23,7 +23,7 @@ services:
       CMS_INTERNAL_URL: http://strapi:1337
       KEYCLOAK_PUBLIC_ISSUER: ${KEYCLOAK_PUBLIC_ISSUER:-https://auth.raushni-dev.com/realms/raushni}
       OTEL_SDK_DISABLED: ${OTEL_SDK_DISABLED:-true}
-    command: sh -c "rm -rf .next && test -f 'app/(dashboard)/activities/page.tsx' && test -f 'app/(dashboard)/news/page.tsx' && npm run dev"
+    command: sh -c "rm -rf .next && test -f 'app/(public)/activities/page.tsx' && test -f 'app/(public)/news/page.tsx' && test -f 'app/(dashboard)/dashboard/internships/page.tsx' && npm run dev"
 
   strapi:
     build:

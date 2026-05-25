@@ -70,7 +70,7 @@ export const DASHBOARD_MODULES: DashboardModuleGroup[] = [
       },
       {
         name: "Internship Management",
-        href: "/internships",
+        href: "/dashboard/internships",
         icon: Briefcase,
         access: "write",
         description: "Manage internship openings, applications, and status updates.",

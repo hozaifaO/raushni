@@ -179,7 +179,7 @@ services:
         condition: service_healthy
     networks:
       - raushni_network
-    command: sh -c "rm -rf .next && test -f 'app/(dashboard)/activities/page.tsx' && test -f 'app/(dashboard)/news/page.tsx' && npm run dev"
+    command: sh -c "rm -rf .next && test -f 'app/(public)/activities/page.tsx' && test -f 'app/(public)/news/page.tsx' && test -f 'app/(dashboard)/dashboard/internships/page.tsx' && npm run dev"
 
   # Nginx Reverse Proxy
   nginx:

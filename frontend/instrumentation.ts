@@ -52,11 +52,5 @@ export async function register() {
 
   await sdk.start();
 
-  const shutdown = async () => {
-    await sdk.shutdown();
-  };
-
   api.diag.debug("OpenTelemetry configured for raushni-frontend");
-  process.once("SIGTERM", shutdown);
-  process.once("SIGINT", shutdown);
 }
