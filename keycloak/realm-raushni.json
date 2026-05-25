@@ -26,14 +26,16 @@
       "serviceAccountsEnabled": false,
       "redirectUris": [
         "http://localhost:3000/api/auth/callback/keycloak",
-        "https://raushni.com/api/auth/callback/keycloak"
+        "https://raushni.com/api/auth/callback/keycloak",
+        "https://raushni-dev.com/api/auth/callback/keycloak"
       ],
       "webOrigins": [
         "http://localhost:3000",
-        "https://raushni.com"
+        "https://raushni.com",
+        "https://raushni-dev.com"
       ],
       "attributes": {
-        "post.logout.redirect.uris": "http://localhost:3000/login##https://raushni.com/login"
+        "post.logout.redirect.uris": "http://localhost:3000/login##https://raushni.com/login##https://raushni-dev.com/login"
       },
       "protocolMappers": [
         {

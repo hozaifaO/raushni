@@ -10,6 +10,13 @@ const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
   turbopack: {},
+  allowedDevOrigins: [
+    'raushni-dev.com',
+    'www.raushni-dev.com',
+    'api.raushni-dev.com',
+    'cms.raushni-dev.com',
+    'auth.raushni-dev.com',
+  ],
 
   images: {
     remotePatterns: [
