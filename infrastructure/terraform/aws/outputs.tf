@@ -47,3 +47,13 @@ output "app_secret_name" {
 output "external_secrets_role_arn" {
   value = aws_iam_role.external_secrets.arn
 }
+
+output "ebs_csi_role_arn" {
+  value = aws_iam_role.ebs_csi.arn
+}
+
+output "eks_managed_addons" {
+  value = {
+    for name, addon in aws_eks_addon.managed : name => addon.id
+  }
+}

@@ -66,6 +66,7 @@ resource "aws_subnet" "private" {
 }
 
 resource "aws_eip" "nat" {
+  count  = var.enable_nat_gateway ? 1 : 0
   domain = "vpc"
 
   tags = {
@@ -74,7 +75,8 @@ resource "aws_eip" "nat" {
 }
 
 resource "aws_nat_gateway" "main" {
-  allocation_id = aws_eip.nat.id
+  count         = var.enable_nat_gateway ? 1 : 0
+  allocation_id = aws_eip.nat[0].id
   subnet_id     = values(aws_subnet.public)[0].id
 
   depends_on = [aws_internet_gateway.main]
@@ -100,9 +102,12 @@ resource "aws_route_table" "public" {
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
 
-  route {
-    cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.main.id
+  dynamic "route" {
+    for_each = var.enable_nat_gateway ? [1] : []
+    content {
+      cidr_block     = "0.0.0.0/0"
+      nat_gateway_id = aws_nat_gateway.main[0].id
+    }
   }
 
   tags = {
@@ -153,7 +158,7 @@ resource "aws_eks_cluster" "main" {
     subnet_ids              = concat(values(aws_subnet.public)[*].id, values(aws_subnet.private)[*].id)
   }
 
-  enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
+  enabled_cluster_log_types = var.eks_enabled_cluster_log_types
 
   depends_on = [aws_iam_role_policy_attachment.eks_cluster]
 }
@@ -206,9 +211,43 @@ data "aws_iam_policy_document" "external_secrets_assume_role" {
   }
 }
 
+data "aws_iam_policy_document" "ebs_csi_assume_role" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
+
+    principals {
+      type        = "Federated"
+      identifiers = [aws_iam_openid_connect_provider.eks.arn]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "${local.eks_oidc_provider_url}:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "${local.eks_oidc_provider_url}:sub"
+      values   = ["system:serviceaccount:kube-system:ebs-csi-controller-sa"]
+    }
+  }
+}
+
 resource "aws_iam_role" "external_secrets" {
   name               = "${local.name}-external-secrets"
   assume_role_policy = data.aws_iam_policy_document.external_secrets_assume_role.json
+}
+
+resource "aws_iam_role" "ebs_csi" {
+  name               = "${local.name}-ebs-csi"
+  assume_role_policy = data.aws_iam_policy_document.ebs_csi_assume_role.json
+}
+
+resource "aws_iam_role_policy_attachment" "ebs_csi" {
+  role       = aws_iam_role.ebs_csi.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
 }
 
 data "aws_iam_policy_document" "external_secrets" {
@@ -271,7 +310,7 @@ resource "aws_eks_node_group" "main" {
   cluster_name    = aws_eks_cluster.main.name
   node_group_name = "${local.name}-main"
   node_role_arn   = aws_iam_role.eks_nodes.arn
-  subnet_ids      = values(aws_subnet.private)[*].id
+  subnet_ids      = var.node_subnet_tier == "private" ? values(aws_subnet.private)[*].id : values(aws_subnet.public)[*].id
   instance_types  = var.node_instance_types
 
   scaling_config {
@@ -288,6 +327,27 @@ resource "aws_eks_node_group" "main" {
     aws_iam_role_policy_attachment.eks_worker_node,
     aws_iam_role_policy_attachment.eks_cni,
     aws_iam_role_policy_attachment.eks_ecr,
+  ]
+}
+
+resource "aws_eks_addon" "managed" {
+  for_each = var.enable_eks_managed_addons ? toset([
+    "vpc-cni",
+    "coredns",
+    "kube-proxy",
+    "aws-ebs-csi-driver",
+  ]) : toset([])
+
+  cluster_name                = aws_eks_cluster.main.name
+  addon_name                  = each.key
+  addon_version               = lookup(var.eks_addon_versions, each.key, null)
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
+  service_account_role_arn    = each.key == "aws-ebs-csi-driver" ? aws_iam_role.ebs_csi.arn : null
+
+  depends_on = [
+    aws_eks_node_group.main,
+    aws_iam_role_policy_attachment.ebs_csi,
   ]
 }
 
@@ -335,12 +395,12 @@ resource "aws_db_instance" "postgres" {
   password                  = var.db_master_password
   db_subnet_group_name      = aws_db_subnet_group.main.name
   vpc_security_group_ids    = [aws_security_group.data.id]
-  backup_retention_period   = 14
-  deletion_protection       = true
+  backup_retention_period   = var.db_backup_retention_period
+  deletion_protection       = var.db_deletion_protection
   skip_final_snapshot       = false
   final_snapshot_identifier = "${local.name}-postgres-final"
   storage_encrypted         = true
-  multi_az                  = length(var.availability_zones) > 1
+  multi_az                  = var.db_multi_az
 }
 
 resource "aws_elasticache_subnet_group" "main" {
@@ -354,8 +414,8 @@ resource "aws_elasticache_replication_group" "redis" {
   engine                     = "redis"
   engine_version             = "7.1"
   node_type                  = var.redis_node_type
-  num_cache_clusters         = 2
-  automatic_failover_enabled = true
+  num_cache_clusters         = var.redis_num_cache_clusters
+  automatic_failover_enabled = var.redis_num_cache_clusters > 1
   subnet_group_name          = aws_elasticache_subnet_group.main.name
   security_group_ids         = [aws_security_group.data.id]
   at_rest_encryption_enabled = true
@@ -377,6 +437,42 @@ resource "aws_ecr_repository" "services" {
   image_scanning_configuration {
     scan_on_push = true
   }
+}
+
+resource "aws_ecr_lifecycle_policy" "services" {
+  for_each   = aws_ecr_repository.services
+  repository = each.value.name
+
+  policy = jsonencode({
+    rules = [
+      {
+        rulePriority = 1
+        description  = "Keep the latest 20 tagged images for nonprod cost control"
+        selection = {
+          tagStatus     = "tagged"
+          tagPrefixList = ["dev", "staging", "main", "prod", "v"]
+          countType     = "imageCountMoreThan"
+          countNumber   = 20
+        }
+        action = {
+          type = "expire"
+        }
+      },
+      {
+        rulePriority = 2
+        description  = "Expire untagged images after 7 days"
+        selection = {
+          tagStatus   = "untagged"
+          countType   = "sinceImagePushed"
+          countUnit   = "days"
+          countNumber = 7
+        }
+        action = {
+          type = "expire"
+        }
+      },
+    ]
+  })
 }
 
 resource "aws_acm_certificate" "main" {

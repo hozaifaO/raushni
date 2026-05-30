@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../namespace.yaml
+  - ../../serviceaccount.yaml
+  - ../../configmap.yaml
+  - ../../secrets.yaml
+  - ../../postgres-deployment.yaml
+  - ../../redis-deployment.yaml
+  - ../../backend-deployment.yaml
+  - ../../frontend-deployment.yaml
+  - ../../strapi-deployment.yaml
+  - ../../document-generator-deployment.yaml
+  - ../../ingress.yaml
+  - ../../network-policy.yaml
+
+patches:
+  - path: configmap-dev.yaml
+  - path: ingress-dev.yaml
+  - path: external-secret-dev.yaml
+  - path: replicas-dev.yaml

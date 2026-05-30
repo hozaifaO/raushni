@@ -21,6 +21,8 @@ Production-oriented Kubernetes manifests for the Raushni platform.
 - External Secrets Operator for AWS Secrets Manager integration
 - Datadog Agent/OpenTelemetry Collector if `OTEL_SDK_DISABLED=false`
 
+On EKS, Terraform provisions the managed `vpc-cni`, `coredns`, `kube-proxy`, and `aws-ebs-csi-driver` add-ons. Install the remaining operational add-ons with Helm after `aws eks update-kubeconfig`.
+
 ## Secrets
 
 `raushni-secrets` is created by External Secrets Operator from AWS Secrets Manager. Do not store runtime secrets in this repository.
@@ -89,6 +91,30 @@ kubectl apply -k k8s/external-secrets
 kubectl apply -k k8s/external-secret-store
 kubectl apply -k k8s
 ```
+
+## Nonprod Like Production
+
+Use the nonprod overlay to run `raushni-dev.com` with production-style topology, TLS ingress, HPA/PDBs, External Secrets, OpenTelemetry, and Datadog labels while keeping the development secret path:
+
+```bash
+kubectl kustomize --load-restrictor LoadRestrictionsNone k8s/overlays/nonprod | kubectl apply -f -
+```
+
+The lighter `k8s/overlays/development` overlay remains available for low-cost local or single-node environments.
+
+## Kubernetes Dashboard
+
+The dashboard add-on is private by default. It creates a read-only viewer service account and exposes the UI through `kubectl port-forward`, not public ingress.
+
+```bash
+kubectl apply -k k8s/addons/kubernetes-dashboard
+kubectl -n kubernetes-dashboard rollout status deploy/kubernetes-dashboard
+kubectl -n kubernetes-dashboard rollout status deploy/dashboard-metrics-scraper
+kubectl -n kubernetes-dashboard get secret raushni-dashboard-viewer-token -o jsonpath='{.data.token}' | base64 --decode
+kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard 10443:443
+```
+
+Open `https://localhost:10443` and use the viewer token. Create a separate, time-limited admin token only when cluster administration requires it.
 
 ## Image Tags
 

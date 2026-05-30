@@ -1,0 +1,118 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kubernetes-dashboard
+  namespace: kubernetes-dashboard
+  labels:
+    app.kubernetes.io/name: kubernetes-dashboard
+    app.kubernetes.io/part-of: raushni-platform
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: raushni-dashboard-admin
+  namespace: kubernetes-dashboard
+  labels:
+    app.kubernetes.io/name: raushni-dashboard-admin
+    app.kubernetes.io/part-of: raushni-platform
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: raushni-dashboard-viewer
+  namespace: kubernetes-dashboard
+  labels:
+    app.kubernetes.io/name: raushni-dashboard-viewer
+    app.kubernetes.io/part-of: raushni-platform
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: raushni-dashboard-viewer-token
+  namespace: kubernetes-dashboard
+  annotations:
+    kubernetes.io/service-account.name: raushni-dashboard-viewer
+type: kubernetes.io/service-account-token
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: raushni-dashboard-admin
+  labels:
+    app.kubernetes.io/name: raushni-dashboard-admin
+    app.kubernetes.io/part-of: raushni-platform
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: raushni-dashboard-admin
+    namespace: kubernetes-dashboard
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: raushni-dashboard-viewer
+  labels:
+    app.kubernetes.io/name: raushni-dashboard-viewer
+    app.kubernetes.io/part-of: raushni-platform
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: view
+subjects:
+  - kind: ServiceAccount
+    name: raushni-dashboard-viewer
+    namespace: kubernetes-dashboard
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: kubernetes-dashboard
+  namespace: kubernetes-dashboard
+  labels:
+    app.kubernetes.io/name: kubernetes-dashboard
+    app.kubernetes.io/part-of: raushni-platform
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+      - configmaps
+      - services
+    resourceNames:
+      - kubernetes-dashboard-key-holder
+      - kubernetes-dashboard-csrf
+      - kubernetes-dashboard-settings
+      - heapster
+      - dashboard-metrics-scraper
+    verbs:
+      - get
+      - update
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - get
+      - update
+      - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kubernetes-dashboard
+  namespace: kubernetes-dashboard
+  labels:
+    app.kubernetes.io/name: kubernetes-dashboard
+    app.kubernetes.io/part-of: raushni-platform
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kubernetes-dashboard
+subjects:
+  - kind: ServiceAccount
+    name: kubernetes-dashboard
+    namespace: kubernetes-dashboard

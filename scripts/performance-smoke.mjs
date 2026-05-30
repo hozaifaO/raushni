@@ -1,11 +1,17 @@
 #!/usr/bin/env node
 
+import http from "node:http";
+import https from "node:https";
+
 const appUrl = process.env.APP_BASE_URL || process.env.APP_PUBLIC_URL || "https://raushni-dev.com";
 const apiUrl = process.env.API_BASE_URL || process.env.API_PUBLIC_URL || "https://api.raushni-dev.com";
 const vus = Number(process.env.PERF_VUS || 8);
 const iterations = Number(process.env.PERF_ITERATIONS || 40);
 const maxP95Ms = Number(process.env.PERF_MAX_P95_MS || 1200);
 const maxErrorRate = Number(process.env.PERF_MAX_ERROR_RATE || 0.02);
+const localResolve = process.env.LOCAL_RESOLVE === "1";
+const allowSelfSigned = process.env.ALLOW_SELF_SIGNED === "1" || localResolve;
+const timeoutMs = Number(process.env.PERF_TIMEOUT_MS || 10000);
 
 const targets = [
   `${appUrl.replace(/\/$/, "")}/`,
@@ -13,14 +19,54 @@ const targets = [
   `${apiUrl.replace(/\/$/, "")}/api`,
 ];
 
+function request(url, redirectCount = 0) {
+  return new Promise((resolve, reject) => {
+    const target = new URL(url);
+    const transport = target.protocol === "http:" ? http : https;
+    const hostname = localResolve ? "127.0.0.1" : target.hostname;
+    const req = transport.request(
+      {
+        protocol: target.protocol,
+        hostname,
+        port: target.port || (target.protocol === "https:" ? 443 : 80),
+        path: `${target.pathname}${target.search}`,
+        method: "GET",
+        timeout: timeoutMs,
+        servername: target.hostname,
+        rejectUnauthorized: !allowSelfSigned,
+        headers: {
+          Host: target.host,
+          "User-Agent": "raushni-performance-smoke/1.0",
+        },
+      },
+      (response) => {
+        response.resume();
+        response.on("end", async () => {
+          const status = response.statusCode || 0;
+          const location = response.headers.location;
+          if ([301, 302, 303, 307, 308].includes(status) && location && redirectCount < 5) {
+            try {
+              resolve(await request(new URL(location, target).toString(), redirectCount + 1));
+            } catch (error) {
+              reject(error);
+            }
+            return;
+          }
+          resolve({ status });
+        });
+      },
+    );
+
+    req.on("timeout", () => req.destroy(new Error(`timeout after ${timeoutMs}ms`)));
+    req.on("error", reject);
+    req.end();
+  });
+}
+
 async function timedFetch(url) {
   const started = performance.now();
   try {
-    const response = await fetch(url, {
-      headers: {
-        "User-Agent": "raushni-performance-smoke/1.0",
-      },
-    });
+    const response = await request(url);
     return {
       url,
       ok: response.status >= 200 && response.status < 400,

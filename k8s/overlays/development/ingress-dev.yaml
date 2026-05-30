@@ -1,0 +1,68 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: raushni-public
+  namespace: raushni
+spec:
+  rules:
+    - host: raushni-dev.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: backend
+                port:
+                  name: http
+            path: /api
+            pathType: Prefix
+          - backend:
+              service:
+                name: strapi
+                port:
+                  name: http
+            path: /uploads
+            pathType: Prefix
+          - backend:
+              service:
+                name: frontend
+                port:
+                  name: http
+            path: /
+            pathType: Prefix
+    - host: www.raushni-dev.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: frontend
+                port:
+                  name: http
+            path: /
+            pathType: Prefix
+    - host: api.raushni-dev.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: backend
+                port:
+                  name: http
+            path: /
+            pathType: Prefix
+    - host: cms.raushni-dev.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: strapi
+                port:
+                  name: http
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - raushni-dev.com
+        - www.raushni-dev.com
+        - api.raushni-dev.com
+        - cms.raushni-dev.com
+      secretName: raushni-dev-tls

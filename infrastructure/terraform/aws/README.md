@@ -1,18 +1,20 @@
 # Raushni AWS Terraform
 
-This Terraform stack provisions a production foundation for Raushni:
+This Terraform stack provisions an AWS foundation for Raushni. Defaults are tuned for nonprod/development so the platform can be made available without production-sized fixed cost. Production settings are provided in `terraform.prod.tfvars.example`.
 
 - VPC across two availability zones
-- Public/private subnets with NAT
+- Public/private subnets with optional NAT
 - EKS cluster and managed node group
-- RDS PostgreSQL with encryption, backups, Multi-AZ, and deletion protection
-- ElastiCache Redis with encryption and failover
+- EKS managed add-ons for VPC CNI, CoreDNS, kube-proxy, and EBS CSI
+- RDS PostgreSQL with encryption and configurable backups/Multi-AZ/deletion protection
+- ElastiCache Redis with encryption and optional failover
 - ECR repositories for application images
+- ECR lifecycle cleanup for old images
 - AWS Secrets Manager secret for application runtime secrets
 - IAM role for External Secrets Operator through EKS IRSA
 - ACM certificate for `raushni.com`, `www`, `api`, `cms`, and `auth`
 
-## Usage
+## Nonprod Usage
 
 ```bash
 cd infrastructure/terraform/aws
@@ -21,6 +23,30 @@ terraform init
 terraform plan
 terraform apply
 ```
+
+The default example creates:
+
+- one small EKS node in public subnets
+- EKS managed add-ons enabled
+- no NAT gateway
+- single-AZ RDS
+- single Redis node
+- short RDS backup retention
+- no EKS control-plane log ingestion
+
+This is intended for `raushni-dev.com` / development. Use it for validation and demos, not production resilience.
+
+## Production Usage
+
+```bash
+cd infrastructure/terraform/aws
+cp terraform.prod.tfvars.example terraform.tfvars
+terraform init
+terraform plan
+terraform apply
+```
+
+Production enables private worker nodes behind NAT, RDS Multi-AZ, Redis failover, deletion protection, and EKS control-plane logs.
 
 Keep `terraform.tfvars` out of git when it contains real passwords.
 
@@ -37,7 +63,7 @@ From the repository root, export the required values and push them:
 
 ```bash
 export AWS_REGION=ap-south-1
-export AWS_SECRET_ID=/raushni/production/app
+export AWS_SECRET_ID=/raushni/development/app
 export POSTGRES_USER=...
 export POSTGRES_PASSWORD=...
 export BACKEND_DATABASE_URL=...
@@ -67,7 +93,7 @@ Patch `k8s/external-secrets/serviceaccount.yaml` with `external_secrets_role_arn
 ```bash
 aws eks update-kubeconfig \
   --region ap-south-1 \
-  --name raushni-production-eks
+  --name raushni-development-eks
 ```
 
 Then deploy Kubernetes resources from the repository root:
@@ -75,11 +101,24 @@ Then deploy Kubernetes resources from the repository root:
 ```bash
 kubectl apply -k k8s/external-secrets
 kubectl apply -k k8s/external-secret-store
-kubectl apply -k k8s
+kubectl kustomize --load-restrictor LoadRestrictionsNone k8s/overlays/nonprod | kubectl apply -f -
+kubectl apply -k k8s/addons/kubernetes-dashboard
 ```
+
+Use `terraform output external_secrets_role_arn` to annotate the External Secrets service account before installing the operator. Use `terraform output ebs_csi_role_arn` if you need to inspect the EBS CSI IRSA role.
 
 ## DNS and TLS
 
 If `hosted_zone_id` is set, Terraform creates DNS validation records for ACM. If DNS is managed elsewhere, copy the ACM validation records from the AWS console and create them with your DNS provider.
 
 For Kubernetes ingress TLS, install nginx ingress and cert-manager in the cluster, then make sure a `letsencrypt-prod` `ClusterIssuer` exists.
+
+## Cost Controls
+
+- Keep `enable_nat_gateway=false` in development to avoid NAT fixed hourly/data processing charges.
+- Keep `node_desired_size=1` for nonprod and scale only during test windows.
+- Use `db_multi_az=false` and `redis_num_cache_clusters=1` in development.
+- Leave `eks_enabled_cluster_log_types=[]` in development unless actively debugging.
+- Keep `enable_eks_managed_addons=true`; these add-ons are part of the EKS runtime baseline, not optional application capacity.
+- ECR lifecycle policies expire old/untagged images automatically.
+- Stop or destroy the development stack when it is not needed.

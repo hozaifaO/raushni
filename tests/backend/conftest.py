@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import os
 from collections.abc import Generator
 from datetime import datetime
 
 import pytest
 from fastapi.testclient import TestClient
+
+os.environ.setdefault("OTEL_SDK_DISABLED", "true")
 
 from app.main import app
 

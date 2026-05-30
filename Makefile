@@ -1,4 +1,4 @@
-.PHONY: help dev-hosts dev-up dev-down push-aws-secrets test test-backend test-backend-unit test-backend-integration test-frontend test-e2e test-all coverage smoke performance validate test-docker test-backend-docker
+.PHONY: help dev-hosts dev-up dev-down push-aws-secrets test test-backend test-backend-unit test-backend-integration test-frontend test-e2e test-all coverage smoke link-check performance validate k8s-validate k8s-deploy-nonprod k8s-deploy-dashboard k8s-dashboard-token k8s-dashboard-port-forward test-docker test-backend-docker
 
 APP_BASE_URL ?= https://raushni-dev.com
 API_BASE_URL ?= https://api.raushni-dev.com
@@ -13,7 +13,12 @@ help:
 	@echo "  make test                   Run backend and frontend tests"
 	@echo "  make coverage               Generate backend/frontend coverage"
 	@echo "  make smoke                  Run URL smoke tests against raushni-dev.com"
+	@echo "  make link-check             Crawl and verify public/internal links"
 	@echo "  make performance            Run lightweight performance smoke"
+	@echo "  make k8s-validate           Render production, nonprod, and dashboard K8s manifests"
+	@echo "  make k8s-deploy-nonprod     Deploy production-like nonprod overlay"
+	@echo "  make k8s-deploy-dashboard   Deploy Kubernetes Dashboard add-on"
+	@echo "  make k8s-dashboard-token    Print dashboard viewer token"
 
 dev-hosts:
 	@echo "Run this once so raushni-dev.com resolves locally:"
@@ -71,6 +76,9 @@ coverage:
 smoke:
 	APP_BASE_URL=$(APP_BASE_URL) API_BASE_URL=$(API_BASE_URL) CMS_BASE_URL=$(CMS_BASE_URL) node scripts/smoke-test.mjs
 
+link-check:
+	APP_BASE_URL=$(APP_BASE_URL) API_BASE_URL=$(API_BASE_URL) CMS_BASE_URL=$(CMS_BASE_URL) node scripts/link-check.mjs
+
 performance:
 	APP_BASE_URL=$(APP_BASE_URL) API_BASE_URL=$(API_BASE_URL) node scripts/performance-smoke.mjs
 
@@ -78,10 +86,31 @@ validate:
 	npm --prefix frontend run type-check
 	ruby -e 'require "yaml"; Dir["k8s/**/*.yaml"].sort.each { |f| YAML.load_stream(File.read(f)); puts "OK #{f}" }'
 	kubectl kustomize k8s >/tmp/raushni-kustomize.yaml
+	kubectl kustomize --load-restrictor LoadRestrictionsNone k8s/overlays/nonprod >/tmp/raushni-nonprod.yaml
+	kubectl kustomize k8s/addons/kubernetes-dashboard >/tmp/raushni-dashboard.yaml
 	kubectl kustomize k8s/external-secrets >/tmp/raushni-external-secrets.yaml
 	kubectl kustomize k8s/external-secret-store >/tmp/raushni-external-secret-store.yaml
 	docker compose config --quiet
 	sh nginx/scripts/test-nginx.sh
+
+k8s-validate:
+	ruby -e 'require "yaml"; Dir["k8s/**/*.yaml"].sort.each { |f| YAML.load_stream(File.read(f)); puts "OK #{f}" }'
+	kubectl kustomize k8s >/tmp/raushni-kustomize.yaml
+	kubectl kustomize --load-restrictor LoadRestrictionsNone k8s/overlays/nonprod >/tmp/raushni-nonprod.yaml
+	kubectl kustomize k8s/addons/kubernetes-dashboard >/tmp/raushni-dashboard.yaml
+
+k8s-deploy-nonprod:
+	kubectl kustomize --load-restrictor LoadRestrictionsNone k8s/overlays/nonprod | kubectl apply -f -
+
+k8s-deploy-dashboard:
+	kubectl apply -k k8s/addons/kubernetes-dashboard
+
+k8s-dashboard-token:
+	kubectl -n kubernetes-dashboard get secret raushni-dashboard-viewer-token -o jsonpath='{.data.token}' | base64 --decode
+	@echo
+
+k8s-dashboard-port-forward:
+	kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard 10443:443
 
 # Run tests in Docker
 test-docker:

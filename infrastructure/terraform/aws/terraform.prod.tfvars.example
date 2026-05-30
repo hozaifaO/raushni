@@ -1,0 +1,36 @@
+aws_region          = "ap-south-1"
+project             = "raushni"
+environment         = "production"
+domain_name         = "raushni.com"
+hosted_zone_id      = ""
+db_master_username  = "raushni_admin"
+db_master_password  = "replace-with-strong-password"
+
+enable_nat_gateway  = true
+node_subnet_tier    = "private"
+node_instance_types = [
+  "t3.medium"
+]
+node_min_size       = 2
+node_desired_size   = 3
+node_max_size       = 6
+
+db_instance_class           = "db.t4g.micro"
+db_allocated_storage        = 30
+db_backup_retention_period  = 14
+db_deletion_protection      = true
+db_multi_az                 = true
+
+redis_node_type          = "cache.t4g.micro"
+redis_num_cache_clusters = 2
+
+eks_enabled_cluster_log_types = [
+  "api",
+  "audit",
+  "authenticator",
+  "controllerManager",
+  "scheduler"
+]
+enable_eks_managed_addons = true
+eks_addon_versions        = {}
+app_secret_name           = "/raushni/production/app"

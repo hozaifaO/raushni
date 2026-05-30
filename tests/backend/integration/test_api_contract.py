@@ -31,12 +31,12 @@ def test_api_root_returns_discoverable_contract(client: TestClient) -> None:
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload == {
-        "name": APP_NAME,
-        "version": APP_VERSION,
-        "status": "running",
-        "endpoints": ["GET /health", "GET /api"],
-    }
+    assert payload["name"] == APP_NAME
+    assert payload["version"] == APP_VERSION
+    assert payload["status"] == "running"
+    assert "GET /health" in payload["endpoints"]
+    assert "GET /api" in payload["endpoints"]
+    assert "GET /api/v1/dashboard/status" in payload["endpoints"]
 
 
 def test_cors_preflight_allows_browser_clients(client: TestClient) -> None:
