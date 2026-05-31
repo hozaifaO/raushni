@@ -1,0 +1,37 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../namespace.yaml
+  - ../../serviceaccount.yaml
+  - ../../configmap.yaml
+  - ../../postgres-deployment.yaml
+  - ../../redis-deployment.yaml
+  - ../../backend-deployment.yaml
+  - ../../frontend-deployment.yaml
+  - ../../strapi-deployment.yaml
+  - ../../document-generator-deployment.yaml
+  - ../../ingress.yaml
+  - ../../network-policy.yaml
+
+images:
+  - name: ghcr.io/owais4u/raushni-backend
+    newName: raushni-backend
+    newTag: local
+  - name: ghcr.io/owais4u/raushni-frontend
+    newName: raushni-frontend
+    newTag: local
+  - name: ghcr.io/owais4u/raushni-cms
+    newName: raushni-cms
+    newTag: local
+  - name: ghcr.io/owais4u/raushni-document-generator
+    newName: raushni-document-generator
+    newTag: local
+
+patches:
+  - path: configmap-local.yaml
+  - path: ingress-local.yaml
+  - path: images-local.yaml
+  - path: replicas-local.yaml
+  - path: remove-local-scalers.yaml
+  - path: security-local.yaml

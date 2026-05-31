@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: raushni
+spec:
+  template:
+    spec:
+      containers:
+        - name: backend
+          imagePullPolicy: Never
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: raushni
+spec:
+  template:
+    spec:
+      containers:
+        - name: frontend
+          imagePullPolicy: Never
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: strapi
+  namespace: raushni
+spec:
+  template:
+    spec:
+      containers:
+        - name: strapi
+          imagePullPolicy: Never
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: document-generator
+  namespace: raushni
+spec:
+  template:
+    spec:
+      containers:
+        - name: document-generator
+          imagePullPolicy: Never
+

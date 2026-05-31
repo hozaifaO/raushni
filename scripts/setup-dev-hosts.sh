@@ -10,7 +10,6 @@ HOST_BLOCK="$(cat <<'HOSTS'
 127.0.0.1 www.raushni-dev.com
 127.0.0.1 api.raushni-dev.com
 127.0.0.1 cms.raushni-dev.com
-127.0.0.1 auth.raushni-dev.com
 # <<< raushni dev hosts <<<
 HOSTS
 )"

@@ -5,8 +5,6 @@ services:
       DD_ENV: development
       DEBUG: "true"
       APP_PUBLIC_URL: ${APP_PUBLIC_URL:-https://raushni-dev.com}
-      OIDC_ISSUER: ${OIDC_ISSUER:-https://auth.raushni-dev.com/realms/raushni}
-      OIDC_VERIFY_AUDIENCE: ${OIDC_VERIFY_AUDIENCE:-false}
       REQUIRE_AUTH: ${REQUIRE_AUTH:-false}
       OTEL_SDK_DISABLED: ${OTEL_SDK_DISABLED:-true}
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
@@ -19,9 +17,12 @@ services:
       NEXT_PUBLIC_CMS_URL: ${NEXT_PUBLIC_CMS_URL:-https://cms.raushni-dev.com}
       NEXT_PUBLIC_REQUIRE_AUTH: ${NEXT_PUBLIC_REQUIRE_AUTH:-false}
       NEXTAUTH_URL: ${NEXTAUTH_URL:-https://raushni-dev.com}
+      NEXTAUTH_ADMIN_EMAIL: ${NEXTAUTH_ADMIN_EMAIL:-admin@raushni.com}
+      NEXTAUTH_ADMIN_PASSWORD: ${NEXTAUTH_ADMIN_PASSWORD:-ChangeMe@12345}
+      NEXTAUTH_STAFF_EMAIL: ${NEXTAUTH_STAFF_EMAIL:-staff@raushni.com}
+      NEXTAUTH_STAFF_PASSWORD: ${NEXTAUTH_STAFF_PASSWORD:-ChangeMe@12345}
       API_INTERNAL_URL: http://backend:8000
       CMS_INTERNAL_URL: http://strapi:1337
-      KEYCLOAK_PUBLIC_ISSUER: ${KEYCLOAK_PUBLIC_ISSUER:-https://auth.raushni-dev.com/realms/raushni}
       OTEL_SDK_DISABLED: ${OTEL_SDK_DISABLED:-true}
     command: sh -c "rm -rf .next && test -f 'app/(public)/activities/page.tsx' && test -f 'app/(public)/news/page.tsx' && test -f 'app/(dashboard)/dashboard/internships/page.tsx' && npm run dev"
 

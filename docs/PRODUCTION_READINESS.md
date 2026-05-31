@@ -16,7 +16,6 @@ Development domains:
 - `https://raushni-dev.com`
 - `https://api.raushni-dev.com`
 - `https://cms.raushni-dev.com`
-- `https://auth.raushni-dev.com`
 
 For local DNS testing, map these domains to `127.0.0.1` in `/etc/hosts` or use your development DNS provider.
 

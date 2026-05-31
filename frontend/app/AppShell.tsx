@@ -44,9 +44,6 @@ export default function AppShell({
         accessLevel: session.user.accessLevel,
         profileImage: session.user.image ?? null,
       });
-      if (session.accessToken) {
-        window.localStorage.setItem("accessToken", session.accessToken);
-      }
       setReadOnly(isReadOnly(user.role));
     } else {
       setReadOnly(isReadOnly(getStoredUser().role));

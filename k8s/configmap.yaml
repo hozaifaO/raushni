@@ -20,13 +20,7 @@ data:
   NEXT_PUBLIC_REQUIRE_AUTH: "true"
   NEXTAUTH_URL: https://raushni.com
   REDIS_URL: redis://redis:6379
-  OIDC_ISSUER: https://auth.raushni.com/realms/raushni
-  OIDC_AUDIENCE: raushni-frontend
-  OIDC_VERIFY_AUDIENCE: "true"
   REQUIRE_AUTH: "true"
-  KEYCLOAK_ISSUER: https://auth.raushni.com/realms/raushni
-  KEYCLOAK_PUBLIC_ISSUER: https://auth.raushni.com/realms/raushni
-  KEYCLOAK_CLIENT_ID: raushni-frontend
   OTEL_SDK_DISABLED: "false"
   OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector.monitoring.svc.cluster.local:4317
   OTEL_EXPORTER_OTLP_PROTOCOL: grpc

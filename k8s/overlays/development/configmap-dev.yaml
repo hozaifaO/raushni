@@ -10,11 +10,8 @@ data:
   CMS_PUBLIC_URL: https://cms.raushni-dev.com
   DD_ENV: development
   ENVIRONMENT: development
-  KEYCLOAK_ISSUER: https://auth.raushni-dev.com/realms/raushni
-  KEYCLOAK_PUBLIC_ISSUER: https://auth.raushni-dev.com/realms/raushni
   NEXT_PUBLIC_API_URL: https://api.raushni-dev.com
   NEXT_PUBLIC_CMS_URL: https://cms.raushni-dev.com
   NEXTAUTH_URL: https://raushni-dev.com
-  OIDC_ISSUER: https://auth.raushni-dev.com/realms/raushni
   OTEL_RESOURCE_ATTRIBUTES: deployment.environment=development,service.namespace=raushni
   STRAPI_NODE_ENV: production

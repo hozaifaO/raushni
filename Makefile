@@ -1,4 +1,4 @@
-.PHONY: help dev-hosts dev-up dev-down push-aws-secrets test test-backend test-backend-unit test-backend-integration test-frontend test-e2e test-all coverage smoke link-check performance validate k8s-validate k8s-deploy-nonprod k8s-deploy-dashboard k8s-dashboard-token k8s-dashboard-port-forward test-docker test-backend-docker
+.PHONY: help dev-hosts dev-up dev-down push-aws-secrets test test-backend test-backend-unit test-backend-integration test-frontend test-e2e test-all coverage smoke link-check performance validate k8s-validate k8s-local-check k8s-local-install-ingress k8s-local-hosts k8s-local-secret k8s-local-build k8s-local-deploy k8s-local-stop k8s-local-start k8s-local-clean k8s-local-clean-cache k8s-local-deep-clean k8s-local-status k8s-local-smoke k8s-deploy-nonprod k8s-deploy-dashboard k8s-dashboard-token k8s-dashboard-admin-token k8s-dashboard-port-forward test-docker test-backend-docker
 
 APP_BASE_URL ?= https://raushni-dev.com
 API_BASE_URL ?= https://api.raushni-dev.com
@@ -19,6 +19,13 @@ help:
 	@echo "  make k8s-deploy-nonprod     Deploy production-like nonprod overlay"
 	@echo "  make k8s-deploy-dashboard   Deploy Kubernetes Dashboard add-on"
 	@echo "  make k8s-dashboard-token    Print dashboard viewer token"
+	@echo "  make k8s-dashboard-admin-token Print dashboard admin token for local/dev"
+	@echo "  make k8s-local-deploy       Deploy one-node local K8s overlay"
+	@echo "  make k8s-local-stop         Scale app workloads to zero"
+	@echo "  make k8s-local-status       Show local K8s pods, services, ingress, dashboard"
+	@echo "  make k8s-local-smoke        Run smoke/link checks through raushni-dev.com"
+	@echo "  make k8s-local-clean-cache  Clean repo caches and Docker build cache"
+	@echo "  YES=true make k8s-local-deep-clean  Prune unused Docker data and volumes"
 
 dev-hosts:
 	@echo "Run this once so raushni-dev.com resolves locally:"
@@ -86,6 +93,7 @@ validate:
 	npm --prefix frontend run type-check
 	ruby -e 'require "yaml"; Dir["k8s/**/*.yaml"].sort.each { |f| YAML.load_stream(File.read(f)); puts "OK #{f}" }'
 	kubectl kustomize k8s >/tmp/raushni-kustomize.yaml
+	kubectl kustomize --load-restrictor LoadRestrictionsNone k8s/overlays/local-min >/tmp/raushni-local-min.yaml
 	kubectl kustomize --load-restrictor LoadRestrictionsNone k8s/overlays/nonprod >/tmp/raushni-nonprod.yaml
 	kubectl kustomize k8s/addons/kubernetes-dashboard >/tmp/raushni-dashboard.yaml
 	kubectl kustomize k8s/external-secrets >/tmp/raushni-external-secrets.yaml
@@ -96,8 +104,48 @@ validate:
 k8s-validate:
 	ruby -e 'require "yaml"; Dir["k8s/**/*.yaml"].sort.each { |f| YAML.load_stream(File.read(f)); puts "OK #{f}" }'
 	kubectl kustomize k8s >/tmp/raushni-kustomize.yaml
+	kubectl kustomize --load-restrictor LoadRestrictionsNone k8s/overlays/local-min >/tmp/raushni-local-min.yaml
 	kubectl kustomize --load-restrictor LoadRestrictionsNone k8s/overlays/nonprod >/tmp/raushni-nonprod.yaml
 	kubectl kustomize k8s/addons/kubernetes-dashboard >/tmp/raushni-dashboard.yaml
+
+k8s-local-check:
+	scripts/raushni-k8s-dev.sh check
+
+k8s-local-install-ingress:
+	scripts/raushni-k8s-dev.sh install-ingress
+
+k8s-local-hosts:
+	scripts/raushni-k8s-dev.sh hosts
+
+k8s-local-secret:
+	scripts/raushni-k8s-dev.sh secret
+
+k8s-local-build:
+	scripts/raushni-k8s-dev.sh build
+
+k8s-local-deploy:
+	scripts/raushni-k8s-dev.sh deploy
+
+k8s-local-stop:
+	scripts/raushni-k8s-dev.sh stop
+
+k8s-local-start:
+	scripts/raushni-k8s-dev.sh start
+
+k8s-local-clean:
+	scripts/raushni-k8s-dev.sh clean
+
+k8s-local-clean-cache:
+	scripts/raushni-k8s-dev.sh clean-cache
+
+k8s-local-deep-clean:
+	YES=true scripts/raushni-k8s-dev.sh deep-clean
+
+k8s-local-status:
+	scripts/raushni-k8s-dev.sh status
+
+k8s-local-smoke:
+	scripts/raushni-k8s-dev.sh smoke
 
 k8s-deploy-nonprod:
 	kubectl kustomize --load-restrictor LoadRestrictionsNone k8s/overlays/nonprod | kubectl apply -f -
@@ -108,6 +156,9 @@ k8s-deploy-dashboard:
 k8s-dashboard-token:
 	kubectl -n kubernetes-dashboard get secret raushni-dashboard-viewer-token -o jsonpath='{.data.token}' | base64 --decode
 	@echo
+
+k8s-dashboard-admin-token:
+	kubectl -n kubernetes-dashboard create token raushni-dashboard-admin --duration=12h
 
 k8s-dashboard-port-forward:
 	kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard 10443:443

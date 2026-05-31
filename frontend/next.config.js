@@ -15,7 +15,6 @@ const nextConfig = {
     'www.raushni-dev.com',
     'api.raushni-dev.com',
     'cms.raushni-dev.com',
-    'auth.raushni-dev.com',
   ],
 
   images: {

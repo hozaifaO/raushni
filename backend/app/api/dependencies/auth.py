@@ -21,11 +21,11 @@ def _auth_required() -> bool:
 
 
 def _oidc_issuer() -> str | None:
-    return os.getenv("OIDC_ISSUER") or os.getenv("KEYCLOAK_ISSUER")
+    return os.getenv("OIDC_ISSUER")
 
 
 def _oidc_audience() -> str | None:
-    return os.getenv("OIDC_AUDIENCE") or os.getenv("KEYCLOAK_CLIENT_ID") or "raushni-frontend"
+    return os.getenv("OIDC_AUDIENCE")
 
 
 def _verify_audience() -> bool:

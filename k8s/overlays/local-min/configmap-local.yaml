@@ -4,13 +4,16 @@ metadata:
   name: raushni-config
   namespace: raushni
 data:
-  ENVIRONMENT: nonprod
-  DD_ENV: nonprod
+  ENVIRONMENT: local
+  DD_ENV: local
+  OTEL_SDK_DISABLED: "true"
   APP_PUBLIC_URL: https://raushni-dev.com
   API_PUBLIC_URL: https://api.raushni-dev.com
   CMS_PUBLIC_URL: https://cms.raushni-dev.com
   NEXTAUTH_URL: https://raushni-dev.com
   NEXT_PUBLIC_API_URL: https://api.raushni-dev.com
   NEXT_PUBLIC_CMS_URL: https://cms.raushni-dev.com
+  NEXT_PUBLIC_REQUIRE_AUTH: "false"
+  REQUIRE_AUTH: "false"
   CMS_CORS_ORIGINS: https://raushni-dev.com,https://www.raushni-dev.com,https://api.raushni-dev.com,https://cms.raushni-dev.com
-  OTEL_RESOURCE_ATTRIBUTES: deployment.environment=nonprod,service.namespace=raushni
+  OTEL_RESOURCE_ATTRIBUTES: deployment.environment=local,service.namespace=raushni

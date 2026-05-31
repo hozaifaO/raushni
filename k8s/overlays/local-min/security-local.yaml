@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: raushni
+spec:
+  template:
+    spec:
+      containers:
+        - name: postgres
+          securityContext:
+            allowPrivilegeEscalation: true
+            runAsNonRoot: false
+            runAsUser: 0
+            capabilities:
+              add:
+                - CHOWN
+                - DAC_OVERRIDE
+                - FOWNER
+              drop: []
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: raushni
+spec:
+  template:
+    spec:
+      containers:
+        - name: backend
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 999
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: raushni
+spec:
+  template:
+    spec:
+      containers:
+        - name: frontend
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: document-generator
+  namespace: raushni
+spec:
+  template:
+    spec:
+      containers:
+        - name: document-generator
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: strapi
+  namespace: raushni
+spec:
+  template:
+    spec:
+      securityContext:
+        fsGroup: 100
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: strapi
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 100

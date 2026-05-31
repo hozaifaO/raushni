@@ -1,49 +1,44 @@
 import NextAuth, { type NextAuthOptions } from "next-auth";
-import KeycloakProvider from "next-auth/providers/keycloak";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { normalizeRole } from "@/lib/auth/permissions";
 
-function keycloakRoles(profile: unknown, account: unknown): string[] {
-  const profileRoles = (profile as { realm_access?: { roles?: string[] } } | null)?.realm_access?.roles ?? [];
-  const token = (account as { access_token?: string } | null)?.access_token;
-  if (!token) return profileRoles;
-  try {
-    const payload = JSON.parse(Buffer.from(token.split(".")[1] ?? "", "base64url").toString("utf8"));
-    const realmRoles = payload?.realm_access?.roles ?? [];
-    const clientRoles = Object.values(payload?.resource_access ?? {}).flatMap((entry) =>
-      Array.isArray((entry as { roles?: unknown[] }).roles) ? (entry as { roles: string[] }).roles : [],
-    );
-    return [...profileRoles, ...realmRoles, ...clientRoles];
-  } catch {
-    return profileRoles;
-  }
-}
-
-function roleFromProvider(profile: unknown, account: unknown) {
-  const roles = keycloakRoles(profile, account).map((role) => role.toUpperCase());
-  if (roles.includes("RAUSHNI_ADMIN") || roles.includes("ADMIN")) return "ADMIN";
-  if (roles.includes("RAUSHNI_STAFF") || roles.includes("STAFF")) return "STAFF";
-  return "GUEST";
-}
-
-const keycloakInternalIssuer =
-  process.env.KEYCLOAK_INTERNAL_ISSUER ??
-  process.env.KEYCLOAK_ISSUER ??
-  "http://keycloak:8080/realms/raushni";
-const keycloakPublicIssuer =
-  process.env.KEYCLOAK_PUBLIC_ISSUER ?? process.env.KEYCLOAK_ISSUER ?? "http://localhost:8080/realms/raushni";
+const adminEmail = process.env.NEXTAUTH_ADMIN_EMAIL ?? "admin@raushni.com";
+const adminPassword = process.env.NEXTAUTH_ADMIN_PASSWORD ?? "ChangeMe@12345";
+const staffEmail = process.env.NEXTAUTH_STAFF_EMAIL ?? "staff@raushni.com";
+const staffPassword = process.env.NEXTAUTH_STAFF_PASSWORD ?? "ChangeMe@12345";
 
 export const authOptions: NextAuthOptions = {
   providers: [
-    KeycloakProvider({
-      clientId: process.env.KEYCLOAK_CLIENT_ID ?? "raushni-frontend",
-      clientSecret: process.env.KEYCLOAK_CLIENT_SECRET ?? "local-dev-secret",
-      issuer: keycloakInternalIssuer,
-      authorization: {
-        url: `${keycloakPublicIssuer}/protocol/openid-connect/auth`,
-        params: { scope: "openid email profile" },
+    CredentialsProvider({
+      name: "Raushni account",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
       },
-      token: `${keycloakInternalIssuer}/protocol/openid-connect/token`,
-      userinfo: `${keycloakInternalIssuer}/protocol/openid-connect/userinfo`,
+      async authorize(credentials) {
+        const email = credentials?.email?.trim().toLowerCase();
+        const password = credentials?.password ?? "";
+
+        if (email === adminEmail.toLowerCase() && password === adminPassword) {
+          return {
+            id: "raushni-admin",
+            name: "Admin User",
+            email: adminEmail,
+            role: "ADMIN",
+          };
+        }
+
+        if (email === staffEmail.toLowerCase() && password === staffPassword) {
+          return {
+            id: "raushni-staff",
+            name: "Staff User",
+            email: staffEmail,
+            role: "STAFF",
+          };
+        }
+
+        return null;
+      },
     }),
   ],
   session: {
@@ -53,12 +48,9 @@ export const authOptions: NextAuthOptions = {
     signIn: "/login",
   },
   callbacks: {
-    async jwt({ token, account, profile }) {
-      if (account?.access_token) {
-        token.accessToken = account.access_token;
-        token.idToken = account.id_token;
-        token.provider = account.provider;
-        token.role = roleFromProvider(profile, account);
+    async jwt({ token, user }) {
+      if (user) {
+        token.role = normalizeRole((user as { role?: string }).role);
       }
       token.role = normalizeRole(token.role);
       return token;
@@ -69,7 +61,6 @@ export const authOptions: NextAuthOptions = {
         role: normalizeRole(token.role),
         accessLevel: normalizeRole(token.role) === "GUEST" ? "read" : "write",
       };
-      session.accessToken = typeof token.accessToken === "string" ? token.accessToken : undefined;
       return session;
     },
   },

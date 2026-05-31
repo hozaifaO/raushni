@@ -48,11 +48,26 @@ spec:
                 secretKeyRef:
                   name: raushni-secrets
                   key: NEXTAUTH_SECRET
-            - name: KEYCLOAK_CLIENT_SECRET
+            - name: NEXTAUTH_ADMIN_EMAIL
               valueFrom:
                 secretKeyRef:
                   name: raushni-secrets
-                  key: KEYCLOAK_CLIENT_SECRET
+                  key: NEXTAUTH_ADMIN_EMAIL
+            - name: NEXTAUTH_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: raushni-secrets
+                  key: NEXTAUTH_ADMIN_PASSWORD
+            - name: NEXTAUTH_STAFF_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: raushni-secrets
+                  key: NEXTAUTH_STAFF_EMAIL
+            - name: NEXTAUTH_STAFF_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: raushni-secrets
+                  key: NEXTAUTH_STAFF_PASSWORD
             - name: DD_SERVICE
               value: raushni-frontend
             - name: OTEL_SERVICE_NAME
