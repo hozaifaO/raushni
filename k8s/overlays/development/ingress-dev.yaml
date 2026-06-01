@@ -10,6 +10,41 @@ spec:
         paths:
           - backend:
               service:
+                name: frontend
+                port:
+                  name: http
+            path: /api/auth
+            pathType: Prefix
+          - backend:
+              service:
+                name: frontend
+                port:
+                  name: http
+            path: /api/cms
+            pathType: Prefix
+          - backend:
+              service:
+                name: frontend
+                port:
+                  name: http
+            path: /api/revalidate
+            pathType: Prefix
+          - backend:
+              service:
+                name: frontend
+                port:
+                  name: http
+            path: /api/upload
+            pathType: Prefix
+          - backend:
+              service:
+                name: frontend
+                port:
+                  name: http
+            path: /api/webhook
+            pathType: Prefix
+          - backend:
+              service:
                 name: backend
                 port:
                   name: http

@@ -16,6 +16,13 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+ARG NEXT_PUBLIC_API_URL=https://api.raushni-dev.com
+ARG NEXT_PUBLIC_CMS_URL=https://cms.raushni-dev.com
+ARG NEXTAUTH_URL=https://raushni-dev.com
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_CMS_URL=$NEXT_PUBLIC_CMS_URL
+ENV NEXTAUTH_URL=$NEXTAUTH_URL
+
 # Copy dependencies
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .

@@ -1,4 +1,5 @@
 import { authHeaders } from "@/lib/auth/permissions";
+import { getApiBaseUrl } from "./baseUrl";
 import type {
   Donation,
   DonationCheckoutSession,
@@ -8,8 +9,7 @@ import type {
   DonationReceipt,
 } from "@/types/models/donation";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_PYTHON_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_BASE_URL = getApiBaseUrl();
 const DONATIONS_ENDPOINT = `${API_BASE_URL}/api/v1/donations`;
 
 type ListDonationsOptions = {

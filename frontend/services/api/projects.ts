@@ -1,8 +1,8 @@
 import { authHeaders } from "@/lib/auth/permissions";
+import { getApiBaseUrl } from "./baseUrl";
 import type { Project, ProjectFormValues, ProjectListResponse, ProjectStatus } from "@/types/models/project";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_PYTHON_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_BASE_URL = getApiBaseUrl();
 const PROJECTS_ENDPOINT = `${API_BASE_URL}/api/v1/projects`;
 
 type ListProjectsOptions = {

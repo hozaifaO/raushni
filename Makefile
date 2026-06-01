@@ -1,4 +1,4 @@
-.PHONY: help dev-hosts dev-up dev-down push-aws-secrets test test-backend test-backend-unit test-backend-integration test-frontend test-e2e test-all coverage smoke link-check performance validate k8s-validate k8s-local-check k8s-local-install-ingress k8s-local-hosts k8s-local-secret k8s-local-build k8s-local-deploy k8s-local-stop k8s-local-start k8s-local-clean k8s-local-clean-cache k8s-local-deep-clean k8s-local-status k8s-local-smoke k8s-deploy-nonprod k8s-deploy-dashboard k8s-dashboard-token k8s-dashboard-admin-token k8s-dashboard-port-forward test-docker test-backend-docker
+.PHONY: help dev-hosts dev-up dev-down push-aws-secrets test test-backend test-backend-unit test-backend-integration test-frontend test-e2e test-all coverage smoke link-check crud-smoke performance validate k8s-validate k8s-local-check k8s-local-install-ingress k8s-local-hosts k8s-local-secret k8s-local-build k8s-local-deploy k8s-local-seed-cms k8s-local-stop k8s-local-start k8s-local-clean k8s-local-clean-cache k8s-local-deep-clean k8s-local-status k8s-local-smoke k8s-local-crud-smoke k8s-deploy-nonprod k8s-deploy-dashboard k8s-dashboard-token k8s-dashboard-admin-token k8s-dashboard-port-forward test-docker test-backend-docker
 
 APP_BASE_URL ?= https://raushni-dev.com
 API_BASE_URL ?= https://api.raushni-dev.com
@@ -13,6 +13,7 @@ help:
 	@echo "  make test                   Run backend and frontend tests"
 	@echo "  make coverage               Generate backend/frontend coverage"
 	@echo "  make smoke                  Run URL smoke tests against raushni-dev.com"
+	@echo "  make crud-smoke             Run dashboard CRUD smoke tests"
 	@echo "  make link-check             Crawl and verify public/internal links"
 	@echo "  make performance            Run lightweight performance smoke"
 	@echo "  make k8s-validate           Render production, nonprod, and dashboard K8s manifests"
@@ -21,9 +22,11 @@ help:
 	@echo "  make k8s-dashboard-token    Print dashboard viewer token"
 	@echo "  make k8s-dashboard-admin-token Print dashboard admin token for local/dev"
 	@echo "  make k8s-local-deploy       Deploy one-node local K8s overlay"
+	@echo "  make k8s-local-seed-cms     Seed Strapi CMS content and public permissions"
 	@echo "  make k8s-local-stop         Scale app workloads to zero"
 	@echo "  make k8s-local-status       Show local K8s pods, services, ingress, dashboard"
 	@echo "  make k8s-local-smoke        Run smoke/link checks through raushni-dev.com"
+	@echo "  make k8s-local-crud-smoke   Run dashboard CRUD smoke tests through K8s"
 	@echo "  make k8s-local-clean-cache  Clean repo caches and Docker build cache"
 	@echo "  YES=true make k8s-local-deep-clean  Prune unused Docker data and volumes"
 
@@ -83,6 +86,9 @@ coverage:
 smoke:
 	APP_BASE_URL=$(APP_BASE_URL) API_BASE_URL=$(API_BASE_URL) CMS_BASE_URL=$(CMS_BASE_URL) node scripts/smoke-test.mjs
 
+crud-smoke:
+	API_BASE_URL=$(API_BASE_URL) node scripts/dashboard-crud-smoke.mjs
+
 link-check:
 	APP_BASE_URL=$(APP_BASE_URL) API_BASE_URL=$(API_BASE_URL) CMS_BASE_URL=$(CMS_BASE_URL) node scripts/link-check.mjs
 
@@ -126,6 +132,9 @@ k8s-local-build:
 k8s-local-deploy:
 	scripts/raushni-k8s-dev.sh deploy
 
+k8s-local-seed-cms:
+	scripts/raushni-k8s-dev.sh seed-cms
+
 k8s-local-stop:
 	scripts/raushni-k8s-dev.sh stop
 
@@ -146,6 +155,9 @@ k8s-local-status:
 
 k8s-local-smoke:
 	scripts/raushni-k8s-dev.sh smoke
+
+k8s-local-crud-smoke:
+	NODE_TLS_REJECT_UNAUTHORIZED=0 API_BASE_URL=$(API_BASE_URL) node scripts/dashboard-crud-smoke.mjs
 
 k8s-deploy-nonprod:
 	kubectl kustomize --load-restrictor LoadRestrictionsNone k8s/overlays/nonprod | kubectl apply -f -

@@ -1,8 +1,8 @@
 import type { Member, MemberFormValues, MemberListResponse, MemberStatus } from "@/types/models/member";
 import { authHeaders } from "@/lib/auth/permissions";
+import { getApiBaseUrl } from "./baseUrl";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_PYTHON_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_BASE_URL = getApiBaseUrl();
 const MEMBERS_ENDPOINT = `${API_BASE_URL}/api/v1/members`;
 
 type ListMembersOptions = {

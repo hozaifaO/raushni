@@ -1,4 +1,5 @@
 import { authHeaders } from "@/lib/auth/permissions";
+import { getApiBaseUrl } from "./baseUrl";
 import type {
   Designation,
   DesignationFormValues,
@@ -6,8 +7,7 @@ import type {
   DesignationStatus,
 } from "@/types/models/designation";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_PYTHON_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_BASE_URL = getApiBaseUrl();
 const DESIGNATIONS_ENDPOINT = `${API_BASE_URL}/api/v1/designations`;
 
 type ListDesignationsOptions = {

@@ -14,8 +14,15 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setUser(getStoredUser());
+    const syncUser = () => setUser(getStoredUser());
+    syncUser();
     setLoading(false);
+    window.addEventListener('raushni:user-change', syncUser);
+    window.addEventListener('storage', syncUser);
+    return () => {
+      window.removeEventListener('raushni:user-change', syncUser);
+      window.removeEventListener('storage', syncUser);
+    };
   }, []);
 
   const isActive = (href) => {

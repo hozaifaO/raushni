@@ -1,4 +1,5 @@
 import { authHeaders } from "@/lib/auth/permissions";
+import { getApiBaseUrl } from "./baseUrl";
 import type {
   AccountProfile,
   PlatformSettings,
@@ -7,8 +8,7 @@ import type {
   UserAccountUpdate,
 } from "@/types/models/settings";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_PYTHON_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_BASE_URL = getApiBaseUrl();
 
 async function parseResponse<T>(response: Response, fallbackMessage: string): Promise<T> {
   if (!response.ok) {

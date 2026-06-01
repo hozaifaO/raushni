@@ -1,5 +1,12 @@
-import ComingSoonPage from "../../_components/ComingSoonPage";
+import SimpleCrudPage from "@/components/Dashboard/SimpleCrudPage";
 
 export default function Page() {
-  return <ComingSoonPage title="News" />;
+  return (
+    <SimpleCrudPage
+      title="News Management"
+      modulePath="news"
+      defaultCategory="announcement"
+      description="Manage news items, announcements, publishing status, source notes, and content workflow records."
+    />
+  );
 }

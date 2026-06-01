@@ -16,6 +16,14 @@ export const DEFAULT_ADMIN_USER: AppUser = {
   profileImage: null,
 };
 
+export const DEFAULT_STAFF_USER: AppUser = {
+  name: "Staff User",
+  email: "staff@raushni.com",
+  role: "STAFF",
+  accessLevel: "write",
+  profileImage: null,
+};
+
 const WRITE_ROLES = new Set<UserRole>(["ADMIN", "STAFF"]);
 const READ_ONLY_ROLES = new Set<UserRole>(["GUEST"]);
 
@@ -81,6 +89,7 @@ export function setStoredUser(user: AppUser): AppUser {
   const normalizedUser = normalizeUser(user);
   if (typeof window !== "undefined") {
     window.localStorage.setItem("user", JSON.stringify(normalizedUser));
+    window.dispatchEvent(new CustomEvent("raushni:user-change", { detail: normalizedUser }));
   }
   return normalizedUser;
 }

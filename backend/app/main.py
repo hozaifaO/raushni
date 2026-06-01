@@ -16,6 +16,7 @@ from app.services.document_service import DocumentService
 from app.services.member_service import MemberService
 from app.services.project_service import ProjectService
 from app.services.settings_service import SettingsService
+from app.services.simple_crud_service import SimpleCrudService
 
 
 APP_NAME = "Raushni NGO API"
@@ -26,10 +27,16 @@ def create_app() -> FastAPI:
     app = FastAPI(title=APP_NAME, version=APP_VERSION)
     configure_telemetry(app)
     app.state.member_service = MemberService()
+    app.state.activity_service = SimpleCrudService("activities")
+    app.state.beneficiary_service = SimpleCrudService("beneficiaries")
     app.state.crowdfunding_service = CrowdfundingService()
     app.state.designation_service = DesignationService()
     app.state.donation_service = DonationService()
+    app.state.enquiry_service = SimpleCrudService("enquiries")
+    app.state.event_service = SimpleCrudService("events")
+    app.state.expense_service = SimpleCrudService("expenses")
     app.state.internship_service = InternshipService()
+    app.state.news_service = SimpleCrudService("news")
     app.state.document_service = DocumentService()
     app.state.settings_service = SettingsService()
     app.state.project_service = ProjectService()
@@ -64,6 +71,10 @@ def create_app() -> FastAPI:
                 "GET /api/v1/account/profile",
                 "GET /api/v1/settings",
                 "GET /api/v1/landing",
+                "GET /api/v1/activities",
+                "POST /api/v1/activities",
+                "GET /api/v1/beneficiaries",
+                "POST /api/v1/beneficiaries",
                 "GET /api/v1/donations",
                 "POST /api/v1/donations",
                 "POST /api/v1/donations/{id}/checkout",
@@ -76,6 +87,12 @@ def create_app() -> FastAPI:
                 "GET /api/v1/internships",
                 "POST /api/v1/internships/applications/public",
                 "POST /api/v1/internships/applications/{id}/certificate",
+                "GET /api/v1/events",
+                "POST /api/v1/events",
+                "GET /api/v1/expenses",
+                "POST /api/v1/expenses",
+                "GET /api/v1/news",
+                "POST /api/v1/news",
                 "GET /api/v1/members",
                 "POST /api/v1/members",
             ],

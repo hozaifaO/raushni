@@ -1,4 +1,5 @@
 import { authHeaders } from "@/lib/auth/permissions";
+import { getApiBaseUrl } from "./baseUrl";
 import type {
   Campaign,
   CampaignDonationFormValues,
@@ -7,8 +8,7 @@ import type {
   CampaignStatus,
 } from "@/types/models/crowdfunding";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_PYTHON_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_BASE_URL = getApiBaseUrl();
 const CROWDFUNDING_ENDPOINT = `${API_BASE_URL}/api/v1/crowdfunding`;
 
 type ListCampaignOptions = {

@@ -5,19 +5,36 @@ import { ExternalLink, Lock, ShieldCheck } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { canAdmin, getStoredUser } from "@/lib/auth/permissions";
 
+const DEFAULT_CMS_URL = "https://cms.raushni-dev.com";
+
+function resolveCmsPublicUrl() {
+  const configuredUrl = process.env.NEXT_PUBLIC_CMS_URL;
+  if (configuredUrl && !configuredUrl.includes("localhost")) {
+    return configuredUrl.replace(/\/$/, "");
+  }
+
+  if (typeof window === "undefined") {
+    return DEFAULT_CMS_URL;
+  }
+
+  const { protocol, hostname } = window.location;
+  if (hostname === "localhost" || hostname === "127.0.0.1") {
+    return "http://localhost:1337";
+  }
+
+  const rootHost = hostname.startsWith("www.") ? hostname.slice(4) : hostname;
+  return `${protocol}//${rootHost.startsWith("cms.") ? rootHost : `cms.${rootHost}`}`;
+}
+
 export default function Page() {
   const [isAdmin, setIsAdmin] = useState(false);
-  const cmsAdminUrl = useMemo(
-    () => `${process.env.NEXT_PUBLIC_CMS_URL ?? "http://localhost:1337"}/admin`,
-    [],
-  );
-  const cmsApiUrl = useMemo(
-    () => `${process.env.NEXT_PUBLIC_CMS_URL ?? "http://localhost:1337"}/api/landing-page?populate=*`,
-    [],
-  );
+  const [cmsBaseUrl, setCmsBaseUrl] = useState(DEFAULT_CMS_URL);
+  const cmsAdminUrl = useMemo(() => `${cmsBaseUrl}/admin`, [cmsBaseUrl]);
+  const cmsApiUrl = useMemo(() => `${cmsBaseUrl}/api/landing-page?populate=*`, [cmsBaseUrl]);
 
   useEffect(() => {
     setIsAdmin(canAdmin(getStoredUser().role));
+    setCmsBaseUrl(resolveCmsPublicUrl());
   }, []);
 
   return (

@@ -22,6 +22,7 @@ Commands:
   secret                Create/update local raushni-secrets in Kubernetes
   build                 Build Raushni app images for the current Docker/K8s runtime
   deploy                Validate and deploy the local-min one-node overlay
+  seed-cms              Seed Strapi CMS content and public read permissions
   stop                  Scale app workloads to zero but keep data volumes and namespace
   start                 Scale app workloads back to one replica
   clean                 Delete Raushni app resources and dashboard, keep Docker images
@@ -113,7 +114,11 @@ build() {
   need docker
   docker build -t "ghcr.io/owais4u/raushni-backend:${IMAGE_TAG}" "$ROOT_DIR/backend"
   docker tag "ghcr.io/owais4u/raushni-backend:${IMAGE_TAG}" "raushni-backend:local"
-  docker build -t "ghcr.io/owais4u/raushni-frontend:${IMAGE_TAG}" "$ROOT_DIR/frontend"
+  docker build \
+    --build-arg NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-https://api.raushni-dev.com}" \
+    --build-arg NEXT_PUBLIC_CMS_URL="${NEXT_PUBLIC_CMS_URL:-https://cms.raushni-dev.com}" \
+    --build-arg NEXTAUTH_URL="${NEXTAUTH_URL:-https://raushni-dev.com}" \
+    -t "ghcr.io/owais4u/raushni-frontend:${IMAGE_TAG}" "$ROOT_DIR/frontend"
   docker tag "ghcr.io/owais4u/raushni-frontend:${IMAGE_TAG}" "raushni-frontend:local"
   docker build -t "ghcr.io/owais4u/raushni-cms:${IMAGE_TAG}" "$ROOT_DIR/cms"
   docker tag "ghcr.io/owais4u/raushni-cms:${IMAGE_TAG}" "raushni-cms:local"
@@ -143,6 +148,13 @@ deploy() {
   kubectl -n "$NAMESPACE" rollout status deploy/frontend --timeout=240s
   kubectl -n "$NAMESPACE" rollout status deploy/strapi --timeout=360s
   kubectl -n "$NAMESPACE" rollout status deploy/document-generator --timeout=240s
+  seed_cms
+}
+
+seed_cms() {
+  need kubectl
+  kubectl -n "$NAMESPACE" rollout status deploy/strapi --timeout=360s
+  kubectl -n "$NAMESPACE" exec deploy/strapi -- npm run seed:raushni
 }
 
 stop() {
@@ -228,6 +240,7 @@ main() {
     secret) secret ;;
     build) build ;;
     deploy) deploy ;;
+    seed-cms) seed_cms ;;
     stop) stop ;;
     start) start ;;
     clean) clean ;;

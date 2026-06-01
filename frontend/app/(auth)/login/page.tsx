@@ -4,7 +4,7 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { Eye, KeyRound, ShieldCheck } from "lucide-react";
 import { signIn, signOut, useSession } from "next-auth/react";
-import { signOutToGuest } from "@/lib/auth/permissions";
+import { DEFAULT_ADMIN_USER, DEFAULT_STAFF_USER, setStoredUser, signOutToGuest } from "@/lib/auth/permissions";
 
 export default function Page() {
   const { data: session, status } = useSession();
@@ -30,6 +30,8 @@ export default function Page() {
       return;
     }
 
+    const normalizedEmail = email.trim().toLowerCase();
+    setStoredUser(normalizedEmail === DEFAULT_STAFF_USER.email ? DEFAULT_STAFF_USER : DEFAULT_ADMIN_USER);
     window.location.href = result?.url ?? "/dashboard";
   };
 

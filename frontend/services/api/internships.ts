@@ -1,4 +1,5 @@
 import { authHeaders } from "@/lib/auth/permissions";
+import { getApiBaseUrl } from "./baseUrl";
 import type {
   InternshipAnnouncement,
   InternshipAnnouncementFormValues,
@@ -9,8 +10,7 @@ import type {
   InternshipListResponse,
 } from "@/types/models/internship";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_PYTHON_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_BASE_URL = getApiBaseUrl();
 const INTERNSHIPS_ENDPOINT = `${API_BASE_URL}/api/v1/internships`;
 
 type ListInternshipsOptions = {

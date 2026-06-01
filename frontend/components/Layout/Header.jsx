@@ -12,12 +12,19 @@ export default function Header({ sidebarOpen, setSidebarOpen }) {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    setUser(getStoredUser());
+    const syncUser = () => setUser(getStoredUser());
+    syncUser();
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
     };
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('raushni:user-change', syncUser);
+    window.addEventListener('storage', syncUser);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('raushni:user-change', syncUser);
+      window.removeEventListener('storage', syncUser);
+    };
   }, []);
 
   const displayUser = user ?? {
