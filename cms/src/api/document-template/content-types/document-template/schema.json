@@ -15,7 +15,7 @@
     "name": { "type": "string", "required": true },
     "category": {
       "type": "enumeration",
-      "enum": ["member_id", "donation_receipt", "certificate", "appointment_letter", "qr_code"],
+      "enum": ["member_id", "donation_receipt", "invoice", "certificate", "appointment_letter", "qr_code"],
       "required": true
     },
     "description": { "type": "text" },

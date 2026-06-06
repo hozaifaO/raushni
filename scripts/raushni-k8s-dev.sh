@@ -159,19 +159,19 @@ seed_cms() {
 
 stop() {
   need kubectl
-  kubectl -n "$NAMESPACE" scale deploy/backend --replicas=0 --ignore-not-found
-  kubectl -n "$NAMESPACE" scale deploy/frontend --replicas=0 --ignore-not-found
-  kubectl -n "$NAMESPACE" scale deploy/strapi --replicas=0 --ignore-not-found
-  kubectl -n "$NAMESPACE" scale deploy/document-generator --replicas=0 --ignore-not-found
+  for deployment in backend frontend strapi document-generator; do
+    if kubectl -n "$NAMESPACE" get "deploy/$deployment" >/dev/null 2>&1; then
+      kubectl -n "$NAMESPACE" scale "deploy/$deployment" --replicas=0
+    fi
+  done
   echo "Application deployments scaled to zero. Postgres and Redis stateful data remains."
 }
 
 start() {
   need kubectl
-  kubectl -n "$NAMESPACE" scale deploy/backend --replicas=1
-  kubectl -n "$NAMESPACE" scale deploy/frontend --replicas=1
-  kubectl -n "$NAMESPACE" scale deploy/strapi --replicas=1
-  kubectl -n "$NAMESPACE" scale deploy/document-generator --replicas=1
+  for deployment in backend frontend strapi document-generator; do
+    kubectl -n "$NAMESPACE" scale "deploy/$deployment" --replicas=1
+  done
 }
 
 clean() {

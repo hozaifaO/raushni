@@ -17,7 +17,7 @@ const footerStyles = {
 };
 
 const defaultFooterContent = {
-  title: 'Raushni Educational & Social Welfare Trust',
+  title: '',
   description:
     'Empowering underserved communities through education, healthcare access, livelihood development, and social welfare programs.',
   contactAddress: 'Rauzah Apartment, Bhatauna Road, Marwan Khurd, Muzaffarpur, Bihar 843113',
@@ -122,14 +122,8 @@ export default function Footer() {
                 src={content.logo}
                 alt="Raushni Educational and Social Welfare Trust logo"
                 className="rounded-full object-contain ring-2 ring-white/15"
-                style={{ width: "1.5in", height: "1.5in" }}
+                style={{ width: "3in", height: "2.5in" }}
               />
-              <span className="text-base font-black uppercase leading-tight tracking-wide">
-                Raushni
-                <span className="block text-xs font-semibold text-amber-200">
-                  Educational & Social Welfare Trust
-                </span>
-              </span>
             </Link>
 
             <p className="mt-5 max-w-sm text-sm leading-7 text-white/70">
@@ -225,7 +219,7 @@ export default function Footer() {
 
         <div className="mt-8 flex flex-col gap-3 border-t border-white/10 pt-8 text-sm text-white/55 md:flex-row md:items-center md:justify-between">
           <p>
-            © {currentYear} {content.title}. All rights reserved.
+            © {currentYear}. All rights reserved.
           </p>
           <p className="inline-flex items-center gap-2 text-xs">
             {content.footerNote}

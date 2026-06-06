@@ -1,6 +1,7 @@
 export type DocumentTemplateCategory =
   | "member_id"
   | "donation_receipt"
+  | "invoice"
   | "certificate"
   | "appointment_letter"
   | "qr_code";
@@ -68,6 +69,25 @@ export const fallbackDocumentTemplates: Record<string, CmsDocumentTemplate> = {
     htmlTemplate: "",
     placeholders: ["receipt_number", "issued_at", "donor_name", "amount", "purpose", "payment_method", "transaction_reference"],
     settings: { organization: "Raushni Educational & Social Welfare Trust", receiptPrefix: "RSH-DON" },
+  },
+  "invoice": {
+    key: "invoice",
+    name: "Invoice",
+    category: "invoice",
+    description: "Professional invoice template for services, program fees, reimbursements, and institutional billing.",
+    title: "Invoice",
+    subtitle: "Official billing document",
+    body: "This invoice is issued for approved services, program support, or operational billing recorded by Raushni Educational & Social Welfare Trust.",
+    footer: "Payment is subject to finance verification and dashboard reconciliation.",
+    legalNote: "Registered under Section 8 of Companies Act, 2013 | 12A & 80G Tax Exempted",
+    thankYouNote: "Thank you for your support.",
+    signatoryLabel: "Authorized signatory",
+    logoUrl: "/assets/brand/raushni-logo.png",
+    stampUrl: "/assets/brand/raushni-stamp-logo.png",
+    accentColor: "#0f766e",
+    htmlTemplate: "",
+    placeholders: ["invoice_number", "issued_at", "bill_to", "line_items", "subtotal", "tax", "total", "payment_terms", "qr_code"],
+    settings: { organization: "Raushni Educational & Social Welfare Trust", invoicePrefix: "RSH-INV", includeQr: true },
   },
   "internship-completion-certificate": {
     key: "internship-completion-certificate",

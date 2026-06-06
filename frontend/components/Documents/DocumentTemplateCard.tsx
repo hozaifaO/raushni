@@ -4,6 +4,7 @@ import type { CmsDocumentTemplate } from "@/lib/cms/documentTemplates";
 const iconMap = {
   member_id: CreditCard,
   donation_receipt: Receipt,
+  invoice: FileText,
   certificate: BadgeCheck,
   appointment_letter: ScrollText,
   qr_code: QrCode,
