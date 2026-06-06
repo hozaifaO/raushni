@@ -1,4 +1,4 @@
-.PHONY: help dev-hosts dev-up dev-down push-aws-secrets test test-backend test-backend-unit test-backend-integration test-frontend test-e2e test-all coverage smoke link-check crud-smoke performance validate k8s-validate k8s-local-check k8s-local-install-ingress k8s-local-hosts k8s-local-secret k8s-local-build k8s-local-deploy k8s-local-seed-cms k8s-local-stop k8s-local-start k8s-local-clean k8s-local-clean-cache k8s-local-deep-clean k8s-local-status k8s-local-smoke k8s-local-crud-smoke k8s-deploy-nonprod k8s-deploy-dashboard k8s-dashboard-token k8s-dashboard-admin-token k8s-dashboard-port-forward test-docker test-backend-docker
+.PHONY: help dev-hosts dev-up dev-down push-aws-secrets test test-backend test-backend-unit test-backend-integration test-frontend test-e2e test-all coverage smoke link-check crud-smoke performance validate k8s-validate k8s-aws-saas-render k8s-deploy-aws-saas k8s-local-check k8s-local-install-ingress k8s-local-hosts k8s-local-secret k8s-local-build k8s-local-deploy k8s-local-seed-cms k8s-local-stop k8s-local-start k8s-local-clean k8s-local-clean-cache k8s-local-deep-clean k8s-local-status k8s-local-smoke k8s-local-crud-smoke k8s-deploy-nonprod k8s-deploy-dashboard k8s-dashboard-token k8s-dashboard-admin-token k8s-dashboard-port-forward test-docker test-backend-docker
 
 APP_BASE_URL ?= https://raushni-dev.com
 API_BASE_URL ?= https://api.raushni-dev.com
@@ -17,6 +17,8 @@ help:
 	@echo "  make link-check             Crawl and verify public/internal links"
 	@echo "  make performance            Run lightweight performance smoke"
 	@echo "  make k8s-validate           Render production, nonprod, and dashboard K8s manifests"
+	@echo "  make k8s-aws-saas-render    Render AWS SaaS EKS overlay"
+	@echo "  make k8s-deploy-aws-saas    Deploy AWS SaaS EKS overlay"
 	@echo "  make k8s-deploy-nonprod     Deploy production-like nonprod overlay"
 	@echo "  make k8s-deploy-dashboard   Deploy Kubernetes Dashboard add-on"
 	@echo "  make k8s-dashboard-token    Print dashboard viewer token"
@@ -101,6 +103,7 @@ validate:
 	kubectl kustomize k8s >/tmp/raushni-kustomize.yaml
 	kubectl kustomize --load-restrictor LoadRestrictionsNone k8s/overlays/local-min >/tmp/raushni-local-min.yaml
 	kubectl kustomize --load-restrictor LoadRestrictionsNone k8s/overlays/nonprod >/tmp/raushni-nonprod.yaml
+	kubectl kustomize --load-restrictor LoadRestrictionsNone k8s/overlays/aws-saas >/tmp/raushni-aws-saas.yaml
 	kubectl kustomize k8s/addons/kubernetes-dashboard >/tmp/raushni-dashboard.yaml
 	kubectl kustomize k8s/external-secrets >/tmp/raushni-external-secrets.yaml
 	kubectl kustomize k8s/external-secret-store >/tmp/raushni-external-secret-store.yaml
@@ -112,7 +115,14 @@ k8s-validate:
 	kubectl kustomize k8s >/tmp/raushni-kustomize.yaml
 	kubectl kustomize --load-restrictor LoadRestrictionsNone k8s/overlays/local-min >/tmp/raushni-local-min.yaml
 	kubectl kustomize --load-restrictor LoadRestrictionsNone k8s/overlays/nonprod >/tmp/raushni-nonprod.yaml
+	kubectl kustomize --load-restrictor LoadRestrictionsNone k8s/overlays/aws-saas >/tmp/raushni-aws-saas.yaml
 	kubectl kustomize k8s/addons/kubernetes-dashboard >/tmp/raushni-dashboard.yaml
+
+k8s-aws-saas-render:
+	kubectl kustomize --load-restrictor LoadRestrictionsNone k8s/overlays/aws-saas
+
+k8s-deploy-aws-saas:
+	kubectl kustomize --load-restrictor LoadRestrictionsNone k8s/overlays/aws-saas | kubectl apply -f -
 
 k8s-local-check:
 	scripts/raushni-k8s-dev.sh check

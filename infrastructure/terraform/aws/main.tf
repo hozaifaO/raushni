@@ -477,12 +477,12 @@ resource "aws_ecr_lifecycle_policy" "services" {
 
 resource "aws_acm_certificate" "main" {
   domain_name = var.domain_name
-  subject_alternative_names = [
+  subject_alternative_names = distinct(concat([
     "www.${var.domain_name}",
     "api.${var.domain_name}",
     "cms.${var.domain_name}",
     "auth.${var.domain_name}",
-  ]
+  ], var.additional_subject_alternative_names))
   validation_method = "DNS"
 
   lifecycle {

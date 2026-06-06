@@ -66,9 +66,15 @@ spec:
             - name: DATABASE_CLIENT
               value: postgres
             - name: DATABASE_HOST
-              value: postgres
+              valueFrom:
+                secretKeyRef:
+                  name: raushni-secrets
+                  key: CMS_DATABASE_HOST
             - name: DATABASE_PORT
-              value: "5432"
+              valueFrom:
+                secretKeyRef:
+                  name: raushni-secrets
+                  key: CMS_DATABASE_PORT
             - name: DATABASE_NAME
               valueFrom:
                 secretKeyRef:
@@ -85,7 +91,10 @@ spec:
                   name: raushni-secrets
                   key: CMS_DATABASE_PASSWORD
             - name: DATABASE_SSL
-              value: "false"
+              valueFrom:
+                secretKeyRef:
+                  name: raushni-secrets
+                  key: CMS_DATABASE_SSL
             - name: APP_KEYS
               valueFrom:
                 secretKeyRef:

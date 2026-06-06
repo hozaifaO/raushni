@@ -22,6 +22,12 @@ variable "domain_name" {
   default     = "raushni.com"
 }
 
+variable "additional_subject_alternative_names" {
+  description = "Additional ACM certificate subject alternative names, useful for SaaS tenant subdomains."
+  type        = list(string)
+  default     = ["*.raushni.com"]
+}
+
 variable "hosted_zone_id" {
   description = "Optional Route53 hosted zone id for DNS validation records. Leave empty to create ACM cert only."
   type        = string

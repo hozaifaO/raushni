@@ -2,6 +2,9 @@ aws_region          = "ap-south-1"
 project             = "raushni"
 environment         = "production"
 domain_name         = "raushni.com"
+additional_subject_alternative_names = [
+  "*.raushni.com"
+]
 hosted_zone_id      = ""
 db_master_username  = "raushni_admin"
 db_master_password  = "replace-with-strong-password"

@@ -1,0 +1,43 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: raushni
+
+resources:
+  - ../../namespace.yaml
+  - ../../serviceaccount.yaml
+  - ../../configmap.yaml
+  - ../../secrets.yaml
+  - ../../backend-deployment.yaml
+  - ../../frontend-deployment.yaml
+  - ../../strapi-deployment.yaml
+  - ../../document-generator-deployment.yaml
+  - ../../ingress.yaml
+  - ../../network-policy.yaml
+
+images:
+  - name: ghcr.io/owais4u/raushni-backend
+    newName: 000000000000.dkr.ecr.ap-south-1.amazonaws.com/raushni-backend
+    newTag: prod
+  - name: ghcr.io/owais4u/raushni-frontend
+    newName: 000000000000.dkr.ecr.ap-south-1.amazonaws.com/raushni-frontend
+    newTag: prod
+  - name: ghcr.io/owais4u/raushni-cms
+    newName: 000000000000.dkr.ecr.ap-south-1.amazonaws.com/raushni-cms
+    newTag: prod
+  - name: ghcr.io/owais4u/raushni-document-generator
+    newName: 000000000000.dkr.ecr.ap-south-1.amazonaws.com/raushni-document-generator
+    newTag: prod
+
+patches:
+  - path: configmap-aws-saas.yaml
+  - path: external-secret-aws-saas.yaml
+  - path: ingress-aws-alb.yaml
+  - path: replicas-aws-saas.yaml
+  - path: storage-aws-saas.yaml
+
+labels:
+  - pairs:
+      app.kubernetes.io/managed-by: kustomize
+      app.kubernetes.io/environment: production
+      app.kubernetes.io/product: raushni-saas

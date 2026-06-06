@@ -89,8 +89,11 @@ secret() {
     --from-literal=POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-ChangeMe@12345}" \
     --from-literal=BACKEND_DATABASE_URL="${BACKEND_DATABASE_URL:-postgresql+asyncpg://raushni_admin:ChangeMe@12345@postgres:5432/raushni_backend}" \
     --from-literal=CMS_DATABASE_NAME="${CMS_DATABASE_NAME:-raushni_cms}" \
+    --from-literal=CMS_DATABASE_HOST="${CMS_DATABASE_HOST:-postgres}" \
+    --from-literal=CMS_DATABASE_PORT="${CMS_DATABASE_PORT:-5432}" \
     --from-literal=CMS_DATABASE_USERNAME="${CMS_DATABASE_USERNAME:-raushni_admin}" \
     --from-literal=CMS_DATABASE_PASSWORD="${CMS_DATABASE_PASSWORD:-ChangeMe@12345}" \
+    --from-literal=CMS_DATABASE_SSL="${CMS_DATABASE_SSL:-false}" \
     --from-literal=REDIS_PASSWORD="${REDIS_PASSWORD:-ChangeMe@12345}" \
     --from-literal=REDIS_URL="${REDIS_URL:-redis://:ChangeMe@12345@redis:6379}" \
     --from-literal=NEXTAUTH_SECRET="${NEXTAUTH_SECRET:-ChangeMeNextAuthSecret123456789}" \
