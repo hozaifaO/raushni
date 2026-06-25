@@ -9,7 +9,7 @@ metadata:
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
     alb.ingress.kubernetes.io/ssl-redirect: "443"
-    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-south-1:000000000000:certificate/REPLACE_WITH_ACM_CERTIFICATE_ID
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-south-1:301142909770:certificate/REPLACE_WITH_ACM_CERTIFICATE_ID
     alb.ingress.kubernetes.io/healthcheck-path: /
     alb.ingress.kubernetes.io/group.name: raushni-saas
     alb.ingress.kubernetes.io/tags: Project=raushni,Environment=production,Product=ngo-saas

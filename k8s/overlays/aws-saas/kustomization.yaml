@@ -17,16 +17,16 @@ resources:
 
 images:
   - name: ghcr.io/owais4u/raushni-backend
-    newName: 000000000000.dkr.ecr.ap-south-1.amazonaws.com/raushni-backend
+    newName: 301142909770.dkr.ecr.ap-south-1.amazonaws.com/raushni-backend
     newTag: prod
   - name: ghcr.io/owais4u/raushni-frontend
-    newName: 000000000000.dkr.ecr.ap-south-1.amazonaws.com/raushni-frontend
+    newName: 301142909770.dkr.ecr.ap-south-1.amazonaws.com/raushni-frontend
     newTag: prod
   - name: ghcr.io/owais4u/raushni-cms
-    newName: 000000000000.dkr.ecr.ap-south-1.amazonaws.com/raushni-cms
+    newName: 301142909770.dkr.ecr.ap-south-1.amazonaws.com/raushni-cms
     newTag: prod
   - name: ghcr.io/owais4u/raushni-document-generator
-    newName: 000000000000.dkr.ecr.ap-south-1.amazonaws.com/raushni-document-generator
+    newName: 301142909770.dkr.ecr.ap-south-1.amazonaws.com/raushni-document-generator
     newTag: prod
 
 patches:
