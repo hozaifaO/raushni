@@ -89,10 +89,37 @@ kubectl -n raushni logs <pod-name> --tail=200
 
 If Cloudflare returns 525 or 526:
 
-- Confirm ALB HTTPS listener exists.
-- Confirm ACM certificate ARN is correct.
-- Confirm Cloudflare SSL/TLS mode is `Full (strict)`.
-- Temporarily set Cloudflare DNS record to DNS-only to isolate proxy issues.
+- Confirm public DNS records point to the ALB hostname, not a private IP such as `192.168.x.x`:
+
+```bash
+dig +short raushni.com
+dig +short www.raushni.com
+dig +short api.raushni.com
+dig +short cms.raushni.com
+```
+
+- Confirm the production ingress has a real ACM certificate ARN and not the placeholder:
+
+```bash
+kubectl -n raushni get ingress raushni-public \
+  -o jsonpath='{.metadata.annotations.alb\.ingress\.kubernetes\.io/certificate-arn}{"\n"}'
+```
+
+- Confirm ALB HTTPS is healthy before involving Cloudflare. In Cloudflare, temporarily set the affected record to DNS-only, wait for DNS propagation, then run:
+
+```bash
+curl -Iv https://raushni.com --max-time 20
+curl -Iv https://api.raushni.com/health --max-time 20
+```
+
+- If direct ALB HTTPS fails, check the AWS Load Balancer Controller and the ALB listener/certificate:
+
+```bash
+kubectl -n raushni describe ingress raushni-public
+kubectl -n kube-system logs deploy/aws-load-balancer-controller --tail=200
+```
+
+- If direct ALB HTTPS works but proxied Cloudflare still returns 525, set Cloudflare SSL/TLS mode to `Full (strict)`, keep the DNS target on the ALB hostname, and disable/re-enable proxy on the record after validation.
 
 ### 2. API Health Fails
 
@@ -480,4 +507,3 @@ Also collect:
 - Recent AWS Secrets Manager changes.
 - Terraform output for cluster, RDS, Redis, and certificate.
 - Smoke and CRUD command output.
-

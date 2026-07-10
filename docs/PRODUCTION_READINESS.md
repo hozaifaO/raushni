@@ -2,6 +2,8 @@
 
 This project is prepared for local development, staging at `raushni-dev.com`, and production deployment.
 
+For the target SaaS architecture, including Cloudflare CDN, AWS ALB, Kong/API gateway, EKS workloads, data services, and observability, see [SYSTEM_DESIGN.md](SYSTEM_DESIGN.md). For local development and production-like non-prod deployment, see [DEV_NONPROD_PLAYBOOK.md](deployment/DEV_NONPROD_PLAYBOOK.md).
+
 ## Development Environment
 
 Use the checked-in development template:

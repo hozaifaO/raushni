@@ -2,6 +2,8 @@
 
 This guide deploys Raushni as a SaaS-ready NGO platform on AWS Kubernetes.
 
+For the complete system design, including Cloudflare CDN, Kong/API gateway, traffic flow, security layers, and observability, see [../SYSTEM_DESIGN.md](../SYSTEM_DESIGN.md).
+
 ## SaaS Model
 
 The first production-ready SaaS shape is a shared platform with tenant-aware application data:
@@ -24,6 +26,7 @@ The first production-ready SaaS shape is a shared platform with tenant-aware app
 - AWS Certificate Manager for TLS on `raushni.com` and `*.raushni.com`.
 - Route 53 for DNS.
 - S3 is recommended for Strapi uploads and generated document storage.
+- Kong API Gateway is recommended inside EKS for API routing, rate limiting, request controls, auth policy enforcement, and gateway telemetry.
 
 ## 1. Prerequisites
 
