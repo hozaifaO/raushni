@@ -22,8 +22,8 @@ COPY . .
 EXPOSE 3000
 
 # Set environment
-ENV NODE_ENV development
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV=development
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # Run in development mode with a clean Next cache so deleted route files do not stay in Tailwind tracking.
 CMD ["sh", "-c", "rm -rf .next && npm run dev"]
