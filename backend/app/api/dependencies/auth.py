@@ -15,6 +15,8 @@ from app.repositories.organization_repository import OrganizationRepository
 
 
 READ_ONLY_MESSAGE = "Guest users have read-only access."
+MEMBERSHIP_REQUIRED_MESSAGE = "You are not a member of this organization."
+EMAIL_REQUIRED_MESSAGE = "X-User-Email is required for write access."
 
 
 def _auth_required() -> bool:
@@ -107,11 +109,14 @@ def get_current_role(
     x_user_role: str | None = Header(default=None, alias="X-User-Role"),
 ) -> UserRole:
     """
-    Resolve caller role.
+    Resolve caller role for read paths.
 
     - REQUIRE_AUTH=true: INTERNAL_API_KEY required; role comes from X-User-Role
       asserted by the Next.js BFF after getServerSession.
     - REQUIRE_AUTH=false: allow local DX; prefer valid API key when present.
+
+    Write/admin paths must use require_write_access / require_admin_access, which
+    resolve role from organization_memberships instead of trusting this header alone.
     """
     provided = _extract_api_key(x_api_key, authorization)
     key_ok = _api_key_valid(provided)
@@ -122,23 +127,48 @@ def get_current_role(
             detail="Valid service API key is required.",
         )
 
-    # With a valid service key, trust BFF-asserted role headers.
-    if key_ok:
-        return normalize_role(x_user_role)
-
-    # Local-only fallback when REQUIRE_AUTH is false and no key was sent.
     return normalize_role(x_user_role)
 
 
-def require_write_access(
-    authorization: str | None = Header(default=None),
-    x_api_key: str | None = Header(default=None, alias="X-API-Key"),
-    x_user_role: str | None = Header(default=None, alias="X-User-Role"),
+async def resolve_membership_role(
+    *,
+    organization: OrganizationModel,
+    session: AsyncSession,
+    email: str | None,
 ) -> UserRole:
-    role = get_current_role(
-        authorization=authorization,
-        x_api_key=x_api_key,
-        x_user_role=x_user_role,
+    """
+    Resolve the caller's role from organization_memberships for the current org.
+
+    X-User-Role is intentionally ignored here so a shared INTERNAL_API_KEY cannot
+    elevate privileges or write into another tenant by spoofing headers.
+    """
+    if not email or not email.strip():
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=EMAIL_REQUIRED_MESSAGE,
+        )
+
+    membership = await OrganizationRepository(session).get_membership_by_email(
+        organization.id,
+        email,
+    )
+    if membership is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=MEMBERSHIP_REQUIRED_MESSAGE,
+        )
+    return normalize_role(membership.role)
+
+
+async def require_write_access(
+    organization: OrganizationModel = Depends(get_current_organization),
+    session: AsyncSession = Depends(get_db),
+    x_user_email: str | None = Header(default=None, alias="X-User-Email"),
+) -> UserRole:
+    role = await resolve_membership_role(
+        organization=organization,
+        session=session,
+        email=x_user_email,
     )
     if not can_write(role):
         raise HTTPException(
@@ -148,15 +178,15 @@ def require_write_access(
     return role
 
 
-def require_admin_access(
-    authorization: str | None = Header(default=None),
-    x_api_key: str | None = Header(default=None, alias="X-API-Key"),
-    x_user_role: str | None = Header(default=None, alias="X-User-Role"),
+async def require_admin_access(
+    organization: OrganizationModel = Depends(get_current_organization),
+    session: AsyncSession = Depends(get_db),
+    x_user_email: str | None = Header(default=None, alias="X-User-Email"),
 ) -> UserRole:
-    role = get_current_role(
-        authorization=authorization,
-        x_api_key=x_api_key,
-        x_user_role=x_user_role,
+    role = await resolve_membership_role(
+        organization=organization,
+        session=session,
+        email=x_user_email,
     )
     if role != UserRole.ADMIN:
         raise HTTPException(

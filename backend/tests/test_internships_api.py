@@ -113,4 +113,5 @@ def test_guest_can_read_but_cannot_create_internship_announcement(client: TestCl
         json=announcement_payload(slug="blocked"),
     )
     assert create_response.status_code == 403
-    assert create_response.json()["detail"] == "Guest users have read-only access."
+    detail = create_response.json()["detail"].lower()
+    assert "read-only" in detail or "not a member" in detail

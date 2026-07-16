@@ -256,6 +256,47 @@ def test_public_donate_with_tenant_header_isolated(two_org_client: TestClient) -
     assert same.json()["donor_name"] == "Acme Donor"
 
 
+def test_cross_tenant_write_blocked_without_membership(two_org_client: TestClient) -> None:
+    """API key + spoofed ADMIN role cannot write into another tenant."""
+    spoof = {
+        "X-API-Key": API_KEY,
+        "X-User-Role": "ADMIN",
+        "X-User-Email": "admin@raushni.com",
+        "X-Tenant-Slug": "acme-trust",
+    }
+    response = two_org_client.post(
+        "/api/v1/members",
+        headers=spoof,
+        json={
+            "full_name": "Should Not Create",
+            "email": "intruder@example.org",
+            "phone": "+91 9555555555",
+            "role": "Volunteer",
+            "status": "active",
+            "joined_on": "2026-07-01",
+        },
+    )
+    assert response.status_code == 403
+    assert "not a member" in response.json()["detail"].lower()
+
+
+def test_staff_cannot_spoof_admin_via_role_header(two_org_client: TestClient) -> None:
+    """Membership role from DB wins over X-User-Role for admin endpoints."""
+    spoof_staff_as_admin = {
+        "X-API-Key": API_KEY,
+        "X-User-Role": "ADMIN",
+        "X-User-Email": "staff@raushni.com",
+        "X-Tenant-Slug": "raushni",
+    }
+    response = two_org_client.patch(
+        "/api/v1/settings/platform",
+        headers=spoof_staff_as_admin,
+        json={"support_email": "nope@raushni.example"},
+    )
+    assert response.status_code == 403
+    assert "administrator" in response.json()["detail"].lower()
+
+
 def test_cross_org_user_update_returns_404(two_org_client: TestClient) -> None:
     list_a = two_org_client.get("/api/v1/settings", headers=ADMIN_HEADERS)
     assert list_a.status_code == 200

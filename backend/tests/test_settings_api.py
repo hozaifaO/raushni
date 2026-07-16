@@ -53,12 +53,24 @@ def test_settings_platform_persists_across_app_restart(client: TestClient) -> No
 def test_non_admin_cannot_update_settings(client: TestClient) -> None:
     response = client.patch(
         "/api/v1/settings/platform",
-        headers=GUEST_HEADERS,
+        headers=STAFF_HEADERS,
         json={"maintenance_mode": True},
     )
 
     assert response.status_code == 403
     assert response.json()["detail"] == "Administrator access is required."
+
+
+def test_guest_without_membership_cannot_update_settings(client: TestClient) -> None:
+    response = client.patch(
+        "/api/v1/settings/platform",
+        headers=GUEST_HEADERS,
+        json={"maintenance_mode": True},
+    )
+
+    assert response.status_code == 403
+    detail = response.json()["detail"].lower()
+    assert "not a member" in detail or "administrator" in detail
 
 
 def test_admin_can_update_user_role_and_status(client: TestClient) -> None:

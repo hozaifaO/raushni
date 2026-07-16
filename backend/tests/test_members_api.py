@@ -91,7 +91,8 @@ def test_guest_can_read_but_cannot_mutate_members(client: TestClient) -> None:
         },
     )
     assert create_response.status_code == 403
-    assert create_response.json()["detail"] == "Guest users have read-only access."
+    detail = create_response.json()["detail"].lower()
+    assert "read-only" in detail or "not a member" in detail
 
 
 def test_member_survives_new_app_instance(client: TestClient) -> None:
