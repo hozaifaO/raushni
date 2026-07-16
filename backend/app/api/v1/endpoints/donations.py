@@ -22,6 +22,7 @@ from app.schemas.donation import (
 from app.services.donation_service import (
     DonationMarkPaidError,
     DonationNotFoundError,
+    DonationPublicDisabledError,
     DonationReceiptFrozenError,
     DonationReceiptUnavailableError,
     DonationService,
@@ -63,11 +64,14 @@ async def register_public_donation(
     payload: PublicDonationCreate,
     service: DonationService = Depends(get_donation_service),
 ) -> Donation:
-    return await service.create_donation(
-        payload.to_donation_create(),
-        actor_role="public",
-        actor_email=None,
-    )
+    try:
+        return await service.create_donation(
+            payload.to_donation_create(),
+            actor_role="public",
+            actor_email=None,
+        )
+    except DonationPublicDisabledError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
 
 
 @router.post("/{donation_id}/checkout", response_model=DonationCheckoutSession)

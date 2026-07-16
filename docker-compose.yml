@@ -58,9 +58,9 @@ services:
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
-      ENVIRONMENT: ${ENVIRONMENT:-production}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
       DEBUG: ${DEBUG:-false}
-      DD_ENV: ${DD_ENV:-production}
+      DD_ENV: ${DD_ENV:-development}
       DD_SERVICE: raushni-backend
       DD_VERSION: ${DD_VERSION:-1.0.0}
       OTEL_SERVICE_NAME: raushni-backend
@@ -68,7 +68,7 @@ services:
       OTEL_SDK_DISABLED: ${OTEL_SDK_DISABLED:-true}
       OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4317}
       OTEL_EXPORTER_OTLP_PROTOCOL: ${OTEL_EXPORTER_OTLP_PROTOCOL:-grpc}
-      OTEL_RESOURCE_ATTRIBUTES: deployment.environment=${DD_ENV:-production},service.namespace=raushni
+      OTEL_RESOURCE_ATTRIBUTES: deployment.environment=${DD_ENV:-development},service.namespace=raushni
       ALEMBIC_AUTO_UPGRADE: ${ALEMBIC_AUTO_UPGRADE:-true}
       REDIS_CACHE_TTL_SECONDS: ${REDIS_CACHE_TTL_SECONDS:-60}
     depends_on:

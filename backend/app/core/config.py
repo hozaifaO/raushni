@@ -78,7 +78,8 @@ class Settings(BaseSettings):
     internal_api_key: str = Field(default="", alias="INTERNAL_API_KEY")
     cms_api_token: str = Field(default="", alias="CMS_API_TOKEN")
     redis_cache_ttl_seconds: int = Field(default=60, alias="REDIS_CACHE_TTL_SECONDS")
-    alembic_auto_upgrade: bool = Field(default=True, alias="ALEMBIC_AUTO_UPGRADE")
+    # Default off so production pods do not migrate on boot; local compose sets true.
+    alembic_auto_upgrade: bool = Field(default=False, alias="ALEMBIC_AUTO_UPGRADE")
     default_tenant_slug: str = Field(default="raushni", alias="DEFAULT_TENANT_SLUG")
     # Stub for future per-org Secrets Manager paths: /raushni/{env}/orgs/{slug}/…
     # See docs/MULTI_TENANT.md. Razorpay is not wired yet.

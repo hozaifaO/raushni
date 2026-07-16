@@ -43,6 +43,10 @@ class DonationMarkPaidError(ValueError):
     pass
 
 
+class DonationPublicDisabledError(PermissionError):
+    pass
+
+
 def _method_requires_utr(method: str | DonationPaymentMethod) -> bool:
     value = method.value if isinstance(method, DonationPaymentMethod) else method
     return value in {item.value for item in UTR_REQUIRED_METHODS}
@@ -150,6 +154,13 @@ class DonationService:
         actor_role: str | None = None,
         actor_email: str | None = None,
     ) -> Donation:
+        if actor_role == "public":
+            if self._settings_repository is None:
+                raise DonationPublicDisabledError("Public donations are not available.")
+            settings = await self._settings_repository.get_or_create()
+            if not settings.public_donations_enabled:
+                raise DonationPublicDisabledError("Public donations are currently disabled.")
+
         if payload.payment_status == DonationPaymentStatus.PAID:
             self._assert_utr_for_paid(payload.payment_method, payload.transaction_reference)
 

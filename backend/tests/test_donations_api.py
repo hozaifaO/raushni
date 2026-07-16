@@ -233,6 +233,30 @@ def test_public_donation_is_registered_pending(client: TestClient) -> None:
     assert created["receipt_issued"] is False
 
 
+def test_public_donation_blocked_when_disabled(client: TestClient) -> None:
+    disable = client.patch(
+        "/api/v1/settings/platform",
+        headers=ADMIN_HEADERS,
+        json={"public_donations_enabled": False},
+    )
+    assert disable.status_code == 200
+    assert disable.json()["public_donations_enabled"] is False
+
+    response = client.post(
+        "/api/v1/donations/public",
+        json={**donation_payload(), "donor_name": "Blocked Donor"},
+    )
+    assert response.status_code == 403
+    assert "disabled" in response.json()["detail"].lower()
+
+    enable = client.patch(
+        "/api/v1/settings/platform",
+        headers=ADMIN_HEADERS,
+        json={"public_donations_enabled": True},
+    )
+    assert enable.status_code == 200
+
+
 def test_guest_can_read_but_cannot_mutate_donations(client: TestClient) -> None:
     list_response = client.get("/api/v1/donations", headers=GUEST_HEADERS)
     assert list_response.status_code == 200
