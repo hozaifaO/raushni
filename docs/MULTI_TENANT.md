@@ -125,16 +125,21 @@ Prod target: tenant subdomains hit the **frontend** (Next.js middleware resolves
 
 [`services/document_generator`](../services/document_generator/STUB.md) stays **stubbed**. Tenancy work does not revive or deploy it. Issued receipts use DB snapshots; PDF archive to S3 is deferred.
 
-## Migration order
+## Schema baseline
+
+Fresh installs use a single Alembic revision (`0001_initial_schema`) that creates the
+multi-tenant shape up front: `organizations` / `organization_memberships`, domain tables
+with `organization_id`, and tenant-scoped uniques. There is no pre-tenant migration chain
+to run through on greenfield databases.
+
+## Migration order (product waves)
 
 | Wave | Focus |
 | --- | --- |
 | **0** | This doc + [DEFERRED.md](DEFERRED.md); shared contracts only. |
 | **1** | Product honesty: public enquiry/contact, donate UTR/anonymous/QR, receipt freeze + mark-paid, ComingSoon nav cleanup, shallow white-label. |
-| **2** | `organizations` + backfill `organization_id`, repo scoping + isolation tests; middleware/BFF/CMS `tenantSlug`; secrets/webhook/k8s notes. |
+| **2** | Org-scoped repos + isolation tests; middleware/BFF/CMS `tenantSlug`; secrets/webhook/k8s notes. |
 | **3** | Per-org settings, membership-scoped staff, ingress wildcard, more isolation tests. |
-
-**Suggested merge order after Wave 0:** donation integrity migration → public donate → contact/ComingSoon + white-label → org schema → frontend host/CMS → secrets/ops notes → verify.
 
 ## Related
 
