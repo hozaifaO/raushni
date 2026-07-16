@@ -67,12 +67,31 @@ TRUNCATE TABLE
 RESTART IDENTITY CASCADE
 """
 
+_ENSURE_MEMBERSHIPS_SQL = """
+INSERT INTO organization_memberships (id, organization_id, email, role)
+SELECT gen_random_uuid(), o.id, CAST(:member_email AS text), CAST(:member_role AS text)
+FROM organizations o
+WHERE o.slug = 'raushni'
+  AND NOT EXISTS (
+    SELECT 1 FROM organization_memberships m
+    WHERE m.organization_id = o.id AND m.email = CAST(:member_email AS text)
+  )
+"""
+
 
 async def _truncate_async() -> None:
     settings = get_settings()
     engine = create_async_engine(settings.async_database_url)
     async with engine.begin() as conn:
         await conn.execute(text(_TRUNCATE_SQL))
+        for email, role in (
+            ("admin@raushni.com", "ADMIN"),
+            ("staff@raushni.com", "STAFF"),
+        ):
+            await conn.execute(
+                text(_ENSURE_MEMBERSHIPS_SQL),
+                {"member_email": email, "member_role": role},
+            )
     await engine.dispose()
 
 

@@ -36,8 +36,8 @@ _DOMAIN_TABLES = (
 
 
 def _seed_membership_emails() -> tuple[str, str]:
-    admin = (os.getenv("NEXTAUTH_ADMIN_EMAIL") or "").strip() or "admin@raushni.local"
-    staff = (os.getenv("NEXTAUTH_STAFF_EMAIL") or "").strip() or "staff@raushni.local"
+    admin = (os.getenv("NEXTAUTH_ADMIN_EMAIL") or "").strip() or "admin@raushni.com"
+    staff = (os.getenv("NEXTAUTH_STAFF_EMAIL") or "").strip() or "staff@raushni.com"
     return admin.lower(), staff.lower()
 
 
