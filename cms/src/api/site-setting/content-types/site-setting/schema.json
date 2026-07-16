@@ -1,16 +1,21 @@
 {
-  "kind": "singleType",
+  "kind": "collectionType",
   "collectionName": "site_settings",
   "info": {
     "singularName": "site-setting",
     "pluralName": "site-settings",
     "displayName": "Site Setting",
-    "description": "Shared public website navigation, brand, contact, footer, and social content"
+    "description": "Per-tenant public website navigation, brand, contact, footer, and social content"
   },
   "options": {
     "draftAndPublish": true
   },
   "attributes": {
+    "tenantSlug": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
     "siteName": { "type": "string", "required": true, "default": "Raushni Educational & Social Welfare Trust" },
     "brandShortName": { "type": "string", "default": "Raushni" },
     "brandTagline": { "type": "string", "default": "Educational & Social Welfare Trust" },

@@ -1,7 +1,15 @@
 -- Create extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "postgis";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+-- PostGIS is optional (image may not ship the control file for every Postgres build).
+DO $$
+BEGIN
+  CREATE EXTENSION IF NOT EXISTS postgis;
+EXCEPTION
+  WHEN OTHERS THEN
+    RAISE NOTICE 'postgis extension unavailable; continuing without it';
+END $$;
 
 -- Create databases
 CREATE DATABASE raushni_backend;

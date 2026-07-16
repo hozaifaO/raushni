@@ -1,4 +1,3 @@
-import { authHeaders } from "@/lib/auth/permissions";
 import { getApiBaseUrl } from "./baseUrl";
 import type {
   Campaign,
@@ -71,7 +70,7 @@ export async function listCampaigns(options: ListCampaignOptions = {}): Promise<
   const query = params.toString();
   const response = await fetch(`${CROWDFUNDING_ENDPOINT}${query ? `?${query}` : ""}`, {
     cache: "no-store",
-    headers: authHeaders(),
+    headers: { "Content-Type": "application/json" },
   });
   return parseResponse<CampaignListResponse>(response);
 }
@@ -79,7 +78,7 @@ export async function listCampaigns(options: ListCampaignOptions = {}): Promise<
 export async function createCampaign(values: CampaignFormValues): Promise<Campaign> {
   const response = await fetch(CROWDFUNDING_ENDPOINT, {
     method: "POST",
-    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(campaignPayload(values)),
   });
   return parseResponse<Campaign>(response);
@@ -88,7 +87,7 @@ export async function createCampaign(values: CampaignFormValues): Promise<Campai
 export async function updateCampaign(id: string, values: CampaignFormValues): Promise<Campaign> {
   const response = await fetch(`${CROWDFUNDING_ENDPOINT}/${id}`, {
     method: "PATCH",
-    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(campaignPayload(values)),
   });
   return parseResponse<Campaign>(response);
@@ -97,7 +96,7 @@ export async function updateCampaign(id: string, values: CampaignFormValues): Pr
 export async function setCampaignStatus(id: string, status: CampaignStatus): Promise<Campaign> {
   const response = await fetch(`${CROWDFUNDING_ENDPOINT}/${id}/status/${status}`, {
     method: "POST",
-    headers: authHeaders(),
+    headers: { "Content-Type": "application/json" },
   });
   return parseResponse<Campaign>(response);
 }
@@ -105,7 +104,7 @@ export async function setCampaignStatus(id: string, status: CampaignStatus): Pro
 export async function deleteCampaign(id: string): Promise<void> {
   const response = await fetch(`${CROWDFUNDING_ENDPOINT}/${id}`, {
     method: "DELETE",
-    headers: authHeaders(),
+    headers: { "Content-Type": "application/json" },
   });
   await parseResponse<void>(response);
 }
@@ -113,7 +112,7 @@ export async function deleteCampaign(id: string): Promise<void> {
 export async function recordCampaignDonation(id: string, values: CampaignDonationFormValues): Promise<Campaign> {
   const response = await fetch(`${CROWDFUNDING_ENDPOINT}/${id}/donations`, {
     method: "POST",
-    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       donor_name: values.donor_name.trim(),
       amount: Number(values.amount),

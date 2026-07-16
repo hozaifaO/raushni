@@ -37,6 +37,20 @@ spec:
                 name: frontend
                 port:
                   name: http
+          - path: /api/v1
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  name: http
+          - path: /cms/api
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  name: http
           - path: /api/cms
             pathType: Prefix
             backend:

@@ -3,20 +3,16 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.router import api_router
+from app.core.db import check_db
+from app.core.lifespan import lifespan
+from app.core.redis import check_redis
 from app.core.telemetry import configure_telemetry
-from app.services.crowdfunding_service import CrowdfundingService
-from app.services.designation_service import DesignationService
-from app.services.donation_service import DonationService
-from app.services.internship_service import InternshipService
 from app.services.document_service import DocumentService
-from app.services.member_service import MemberService
-from app.services.project_service import ProjectService
-from app.services.settings_service import SettingsService
-from app.services.simple_crud_service import SimpleCrudService
+from app.services.settings_service import UserAccountStore
 
 
 APP_NAME = "Raushni NGO API"
@@ -24,22 +20,11 @@ APP_VERSION = "1.0.0"
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title=APP_NAME, version=APP_VERSION)
+    app = FastAPI(title=APP_NAME, version=APP_VERSION, lifespan=lifespan)
     configure_telemetry(app)
-    app.state.member_service = MemberService()
-    app.state.activity_service = SimpleCrudService("activities")
-    app.state.beneficiary_service = SimpleCrudService("beneficiaries")
-    app.state.crowdfunding_service = CrowdfundingService()
-    app.state.designation_service = DesignationService()
-    app.state.donation_service = DonationService()
-    app.state.enquiry_service = SimpleCrudService("enquiries")
-    app.state.event_service = SimpleCrudService("events")
-    app.state.expense_service = SimpleCrudService("expenses")
-    app.state.internship_service = InternshipService()
-    app.state.news_service = SimpleCrudService("news")
+    # Staff user mirror only (not auth SoT). Domain services use Depends(get_db).
+    app.state.user_account_store = UserAccountStore()
     app.state.document_service = DocumentService()
-    app.state.settings_service = SettingsService()
-    app.state.project_service = ProjectService()
 
     app.add_middleware(
         CORSMiddleware,
@@ -58,6 +43,21 @@ def create_app() -> FastAPI:
             "version": APP_VERSION,
         }
 
+    @app.get("/health/ready")
+    async def health_ready(response: Response) -> dict[str, Any]:
+        db_ok = await check_db()
+        redis_ok = await check_redis()
+        ready = db_ok
+        if not ready:
+            response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+        return {
+            "status": "ready" if ready and redis_ok else ("degraded" if ready else "unavailable"),
+            "database": "ok" if db_ok else "error",
+            "redis": "ok" if redis_ok else "error",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "version": APP_VERSION,
+        }
+
     @app.get("/api")
     async def api_root() -> dict[str, Any]:
         return {
@@ -66,6 +66,7 @@ def create_app() -> FastAPI:
             "status": "running",
             "endpoints": [
                 "GET /health",
+                "GET /health/ready",
                 "GET /api",
                 "GET /api/v1/dashboard/status",
                 "GET /api/v1/account/profile",

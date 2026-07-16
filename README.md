@@ -11,6 +11,8 @@ Raushni is a digital operations platform for Raushni Educational & Social Welfar
 
 The repository is organized as a full-stack platform with a Next.js frontend, FastAPI backend, Strapi CMS, PostgreSQL database, Redis cache, PDF/document generation utilities, nginx, Docker Compose, and Kubernetes manifests.
 
+Multi-tenant design: [docs/MULTI_TENANT.md](docs/MULTI_TENANT.md). Deferred / ComingSoon work: [docs/DEFERRED.md](docs/DEFERRED.md).
+
 ## Product Scope
 
 Raushni is designed to support the day-to-day workflows of an educational and social welfare organization:

@@ -760,6 +760,7 @@ export interface ApiDocumentTemplateDocumentTemplate
     draftAndPublish: true;
   };
   attributes: {
+    tenantSlug: Attribute.String & Attribute.Required;
     key: Attribute.UID<'api::document-template.document-template', 'name'> &
       Attribute.Required;
     name: Attribute.String & Attribute.Required;
@@ -767,6 +768,7 @@ export interface ApiDocumentTemplateDocumentTemplate
       [
         'member_id',
         'donation_receipt',
+        'invoice',
         'certificate',
         'appointment_letter',
         'qr_code'
@@ -821,6 +823,7 @@ export interface ApiDonationPaymentSettingDonationPaymentSetting
     populateCreatorFields: true;
   };
   attributes: {
+    tenantSlug: Attribute.String & Attribute.Required;
     slug: Attribute.UID<
       'api::donation-payment-setting.donation-payment-setting',
       'title'
@@ -829,7 +832,8 @@ export interface ApiDonationPaymentSettingDonationPaymentSetting
     title: Attribute.String & Attribute.Required;
     intro: Attribute.Text & Attribute.Required;
     upiId: Attribute.String;
-    qrImageUrl: Attribute.String & Attribute.Required;
+    qrImage: Attribute.Media;
+    qrImageUrl: Attribute.String;
     accountName: Attribute.String & Attribute.Required;
     paymentOptions: Attribute.JSON & Attribute.Required;
     instructions: Attribute.JSON;
@@ -906,18 +910,19 @@ export interface ApiInternshipAnnouncementInternshipAnnouncement
   };
 }
 
-export interface ApiLandingPageLandingPage extends Schema.SingleType {
+export interface ApiLandingPageLandingPage extends Schema.CollectionType {
   collectionName: 'landing_pages';
   info: {
     singularName: 'landing-page';
     pluralName: 'landing-pages';
     displayName: 'Landing Page';
-    description: 'Public Raushni landing page content';
+    description: 'Per-tenant public landing page content';
   };
   options: {
     draftAndPublish: true;
   };
   attributes: {
+    tenantSlug: Attribute.String & Attribute.Required & Attribute.Unique;
     title: Attribute.String &
       Attribute.Required &
       Attribute.DefaultTo<'Raushni Educational & Social Welfare Trust'>;
@@ -1038,6 +1043,7 @@ export interface ApiPublicPagePublicPage extends Schema.CollectionType {
     draftAndPublish: true;
   };
   attributes: {
+    tenantSlug: Attribute.String & Attribute.Required;
     slug: Attribute.UID<'api::public-page.public-page', 'title'> &
       Attribute.Required;
     title: Attribute.String & Attribute.Required;
@@ -1069,18 +1075,19 @@ export interface ApiPublicPagePublicPage extends Schema.CollectionType {
   };
 }
 
-export interface ApiSiteSettingSiteSetting extends Schema.SingleType {
+export interface ApiSiteSettingSiteSetting extends Schema.CollectionType {
   collectionName: 'site_settings';
   info: {
     singularName: 'site-setting';
     pluralName: 'site-settings';
     displayName: 'Site Setting';
-    description: 'Shared public website navigation, brand, contact, footer, and social content';
+    description: 'Per-tenant public website navigation, brand, contact, footer, and social content';
   };
   options: {
     draftAndPublish: true;
   };
   attributes: {
+    tenantSlug: Attribute.String & Attribute.Required & Attribute.Unique;
     siteName: Attribute.String &
       Attribute.Required &
       Attribute.DefaultTo<'Raushni Educational & Social Welfare Trust'>;

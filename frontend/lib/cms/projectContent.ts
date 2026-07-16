@@ -1,3 +1,5 @@
+import { cmsFetchJson } from "@/lib/cms/client";
+
 export type CmsProjectContent = {
   slug: string;
   title: string;
@@ -19,11 +21,6 @@ export type CmsProjectContent = {
   timeline: Array<{ quarter: string; milestone: string }>;
   budgetBreakdown: Array<{ head: string; amount: number }>;
 };
-
-const CMS_BASE_URL =
-  process.env.CMS_INTERNAL_URL ??
-  process.env.NEXT_PUBLIC_CMS_URL ??
-  "http://localhost:1337";
 
 export const fallbackProjectContent: CmsProjectContent = {
   slug: "project-sparsh-watsan-muzaffarpur",
@@ -51,40 +48,46 @@ export const fallbackProjectContent: CmsProjectContent = {
   budgetBreakdown: [],
 };
 
-async function fetchCmsJson(path: string) {
-  try {
-    const response = await fetch(`${CMS_BASE_URL}/api${path}`, { cache: "no-store" });
-    if (!response.ok) return null;
-    return response.json();
-  } catch {
-    return null;
-  }
+type CmsListPayload = {
+  data?: Array<{ attributes?: Record<string, unknown> }>;
+};
+
+function asString(value: unknown, fallback: string): string {
+  return typeof value === "string" ? value : fallback;
 }
 
 export async function getProjectContent(slug = "project-sparsh-watsan-muzaffarpur"): Promise<CmsProjectContent> {
-  const payload = await fetchCmsJson(`/project-contents?filters[slug][$eq]=${encodeURIComponent(slug)}&populate=*`);
+  const payload = (await cmsFetchJson(
+    `/project-contents?filters[slug][$eq]=${encodeURIComponent(slug)}&populate=*`,
+  )) as CmsListPayload | null;
   const attrs = payload?.data?.[0]?.attributes;
   if (!attrs) return fallbackProjectContent;
   return {
     ...fallbackProjectContent,
-    slug: attrs.slug ?? fallbackProjectContent.slug,
-    title: attrs.title ?? fallbackProjectContent.title,
-    shortTitle: attrs.shortTitle ?? fallbackProjectContent.shortTitle,
-    summary: attrs.summary ?? fallbackProjectContent.summary,
-    rationale: attrs.rationale ?? fallbackProjectContent.rationale,
-    location: attrs.location ?? fallbackProjectContent.location,
-    duration: attrs.duration ?? fallbackProjectContent.duration,
-    budget: attrs.budget ?? fallbackProjectContent.budget,
-    beneficiaries: attrs.beneficiaries ?? fallbackProjectContent.beneficiaries,
-    status: attrs.status ?? fallbackProjectContent.status,
-    focusArea: attrs.focusArea ?? fallbackProjectContent.focusArea,
-    coverImageUrl: attrs.coverImageUrl ?? fallbackProjectContent.coverImageUrl,
-    proposalDocumentUrl: attrs.proposalDocumentUrl ?? fallbackProjectContent.proposalDocumentUrl,
-    objectives: Array.isArray(attrs.objectives) ? attrs.objectives : fallbackProjectContent.objectives,
-    activities: Array.isArray(attrs.activities) ? attrs.activities : fallbackProjectContent.activities,
-    outcomes: Array.isArray(attrs.outcomes) ? attrs.outcomes : fallbackProjectContent.outcomes,
-    sdgs: Array.isArray(attrs.sdgs) ? attrs.sdgs : fallbackProjectContent.sdgs,
-    timeline: Array.isArray(attrs.timeline) ? attrs.timeline : fallbackProjectContent.timeline,
-    budgetBreakdown: Array.isArray(attrs.budgetBreakdown) ? attrs.budgetBreakdown : fallbackProjectContent.budgetBreakdown,
+    slug: asString(attrs.slug, fallbackProjectContent.slug),
+    title: asString(attrs.title, fallbackProjectContent.title),
+    shortTitle: asString(attrs.shortTitle, fallbackProjectContent.shortTitle),
+    summary: asString(attrs.summary, fallbackProjectContent.summary),
+    rationale: asString(attrs.rationale, fallbackProjectContent.rationale),
+    location: asString(attrs.location, fallbackProjectContent.location),
+    duration: asString(attrs.duration, fallbackProjectContent.duration),
+    budget: asString(attrs.budget, fallbackProjectContent.budget),
+    beneficiaries: asString(attrs.beneficiaries, fallbackProjectContent.beneficiaries),
+    status: asString(attrs.status, fallbackProjectContent.status),
+    focusArea: asString(attrs.focusArea, fallbackProjectContent.focusArea),
+    coverImageUrl: asString(attrs.coverImageUrl, fallbackProjectContent.coverImageUrl),
+    proposalDocumentUrl: asString(attrs.proposalDocumentUrl, fallbackProjectContent.proposalDocumentUrl),
+    objectives: Array.isArray(attrs.objectives) ? (attrs.objectives as string[]) : fallbackProjectContent.objectives,
+    activities: Array.isArray(attrs.activities)
+      ? (attrs.activities as CmsProjectContent["activities"])
+      : fallbackProjectContent.activities,
+    outcomes: Array.isArray(attrs.outcomes) ? (attrs.outcomes as string[]) : fallbackProjectContent.outcomes,
+    sdgs: Array.isArray(attrs.sdgs) ? (attrs.sdgs as string[]) : fallbackProjectContent.sdgs,
+    timeline: Array.isArray(attrs.timeline)
+      ? (attrs.timeline as CmsProjectContent["timeline"])
+      : fallbackProjectContent.timeline,
+    budgetBreakdown: Array.isArray(attrs.budgetBreakdown)
+      ? (attrs.budgetBreakdown as CmsProjectContent["budgetBreakdown"])
+      : fallbackProjectContent.budgetBreakdown,
   };
 }

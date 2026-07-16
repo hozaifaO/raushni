@@ -4,37 +4,46 @@ import Link from "next/link";
 import { ExternalLink, Lock, ShieldCheck } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { canAdmin, getStoredUser } from "@/lib/auth/permissions";
+import { getBrowserTenantSlug } from "@/lib/tenant";
 
-const DEFAULT_CMS_URL = "https://cms.raushni-dev.com";
+const DEFAULT_CMS_URL = "http://localhost:1337";
 
 function resolveCmsPublicUrl() {
-  const configuredUrl = process.env.NEXT_PUBLIC_CMS_URL;
-  if (configuredUrl && !configuredUrl.includes("localhost")) {
-    return configuredUrl.replace(/\/$/, "");
+  if (typeof window !== "undefined") {
+    const { protocol, hostname } = window.location;
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
+      // Prefer direct Strapi port locally; nginx TLS path is https://localhost/admin
+      return "http://localhost:1337";
+    }
+
+    const configuredUrl = process.env.NEXT_PUBLIC_CMS_URL?.replace(/\/$/, "");
+    if (configuredUrl && !configuredUrl.includes("localhost")) {
+      return configuredUrl;
+    }
+
+    const rootHost = hostname.startsWith("www.") ? hostname.slice(4) : hostname;
+    return `${protocol}//${rootHost.startsWith("cms.") ? rootHost : `cms.${rootHost}`}`;
   }
 
-  if (typeof window === "undefined") {
-    return DEFAULT_CMS_URL;
-  }
-
-  const { protocol, hostname } = window.location;
-  if (hostname === "localhost" || hostname === "127.0.0.1") {
-    return "http://localhost:1337";
-  }
-
-  const rootHost = hostname.startsWith("www.") ? hostname.slice(4) : hostname;
-  return `${protocol}//${rootHost.startsWith("cms.") ? rootHost : `cms.${rootHost}`}`;
+  const configuredUrl = process.env.NEXT_PUBLIC_CMS_URL?.replace(/\/$/, "");
+  return configuredUrl || DEFAULT_CMS_URL;
 }
 
 export default function Page() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [cmsBaseUrl, setCmsBaseUrl] = useState(DEFAULT_CMS_URL);
+  const [tenantSlug, setTenantSlug] = useState("raushni");
   const cmsAdminUrl = useMemo(() => `${cmsBaseUrl}/admin`, [cmsBaseUrl]);
-  const cmsApiUrl = useMemo(() => `${cmsBaseUrl}/api/landing-page?populate=*`, [cmsBaseUrl]);
+  const cmsApiUrl = useMemo(
+    () =>
+      `${cmsBaseUrl}/api/landing-pages?filters[tenantSlug][$eq]=${encodeURIComponent(tenantSlug)}&populate=*`,
+    [cmsBaseUrl, tenantSlug],
+  );
 
   useEffect(() => {
     setIsAdmin(canAdmin(getStoredUser().role));
     setCmsBaseUrl(resolveCmsPublicUrl());
+    setTenantSlug(getBrowserTenantSlug());
   }, []);
 
   return (
@@ -55,8 +64,8 @@ export default function Page() {
 
           <div className="mt-6 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
             <p>
-              <span className="font-semibold text-gray-900">Project:</span>{" "}
-              /raushni
+              <span className="font-semibold text-gray-900">Tenant:</span>{" "}
+              {tenantSlug}
             </p>
             <p>
               <span className="font-semibold text-gray-900">Admin email:</span>{" "}

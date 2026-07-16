@@ -7,12 +7,14 @@ import DonationList from "@/components/Features/Donations/DonationList";
 import DonationReceipt from "@/components/Features/Donations/DonationReceipt";
 import { PaymentMethodIcon } from "@/components/Features/Donations/paymentMethodMeta";
 import { canWrite, getStoredUser } from "@/lib/auth/permissions";
-import { fallbackDonationPaymentSettings, type DonationPaymentSettings } from "@/lib/cms/donationSettings";
+import { fallbackDonationPaymentSettings, mapDonationPaymentSettingsAttrs, type DonationPaymentSettings } from "@/lib/cms/donationSettingsShared";
 import {
   createDonation,
   deleteDonation,
   issueDonationReceipt,
   listDonations,
+  markDonationPaid,
+  paymentMethodRequiresUtr,
   updateDonation,
 } from "@/services/api/donations";
 import type {
@@ -39,10 +41,11 @@ function donationToForm(donation: Donation): DonationFormValues {
   return {
     donor_name: donation.donor_name,
     donor_email: donation.donor_email ?? "",
-    donor_phone: donation.donor_phone,
+    donor_phone: donation.donor_phone ?? "",
     donor_address: donation.donor_address ?? "",
     donor_pan: donation.donor_pan ?? "",
     donor_type: donation.donor_type,
+    is_anonymous: donation.is_anonymous ?? false,
     amount: String(donation.amount),
     currency: donation.currency,
     purpose: donation.purpose,
@@ -108,12 +111,7 @@ export default function Page() {
         if (!response.ok) return;
         const attrs = (await response.json())?.data?.[0]?.attributes;
         if (!attrs) return;
-        setPaymentSettings({
-          ...fallbackDonationPaymentSettings,
-          ...attrs,
-          paymentOptions: Array.isArray(attrs.paymentOptions) ? attrs.paymentOptions : fallbackDonationPaymentSettings.paymentOptions,
-          instructions: Array.isArray(attrs.instructions) ? attrs.instructions : fallbackDonationPaymentSettings.instructions,
-        });
+        setPaymentSettings(mapDonationPaymentSettingsAttrs(attrs as Record<string, unknown>));
       } catch (requestError) {
         if (!controller.signal.aborted) console.warn("Unable to load CMS donation payment settings", requestError);
       }
@@ -169,11 +167,30 @@ export default function Page() {
       setError("Guest users have read-only access.");
       return;
     }
+    if (
+      formValues.payment_status === "paid" &&
+      paymentMethodRequiresUtr(formValues.payment_method) &&
+      !formValues.transaction_reference.trim()
+    ) {
+      setError("Enter a UTR / transaction reference before marking this donation as paid.");
+      return;
+    }
+
     setSubmitting(true);
     setError(null);
     try {
       if (editingDonation) {
-        await updateDonation(editingDonation.id, formValues);
+        const markingPaid =
+          formValues.payment_status === "paid" && editingDonation.payment_status !== "paid";
+        if (markingPaid) {
+          await updateDonation(editingDonation.id, {
+            ...formValues,
+            payment_status: editingDonation.payment_status,
+          });
+          await markDonationPaid(editingDonation.id, formValues.transaction_reference);
+        } else {
+          await updateDonation(editingDonation.id, formValues);
+        }
       } else {
         await createDonation(formValues);
       }
@@ -277,7 +294,17 @@ export default function Page() {
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-[9rem_1fr] sm:items-center">
-            <img src={paymentSettings.qrImageUrl} alt="Raushni donation UPI QR code" className="h-36 w-36 rounded-lg border border-gray-200 bg-gray-50 object-contain p-2" />
+            {paymentSettings.qrImageUrl ? (
+              <img
+                src={paymentSettings.qrImageUrl}
+                alt="Raushni donation UPI QR code"
+                className="h-36 w-36 rounded-lg border border-gray-200 bg-gray-50 object-contain p-2"
+              />
+            ) : (
+              <div className="flex h-36 w-36 items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50 p-3 text-center text-xs leading-5 text-gray-600">
+                Upload QR in CMS (qrImage)
+              </div>
+            )}
             <div className="grid gap-2">
               <div className="flex flex-wrap gap-2">
                 {paymentSettings.paymentOptions.filter((option) => option.enabled !== false).map((option) => (
@@ -357,6 +384,8 @@ export default function Page() {
               values={formValues}
               submitting={submitting}
               submitLabel={editingDonation ? "Update donation" : "Save donation"}
+              receiptIssued={Boolean(editingDonation?.receipt_issued)}
+              receiptIssuedAt={editingDonation?.receipt_issued_at ?? null}
               onChange={updateFormField}
               onCancel={closeForm}
               onSubmit={submitForm}

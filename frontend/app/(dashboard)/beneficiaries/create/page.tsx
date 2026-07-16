@@ -1,5 +1,5 @@
-import ComingSoonPage from "../../_components/ComingSoonPage";
+import { redirect } from "next/navigation";
 
-export default function Page() {
-  return <ComingSoonPage title="Create Beneficiary" />;
+export default function CreateBeneficiaryPage() {
+  redirect("/beneficiaries");
 }

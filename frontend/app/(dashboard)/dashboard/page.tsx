@@ -1,3 +1,5 @@
+﻿"use client";
+
 import Link from "next/link";
 import {
   ArrowRight,
@@ -9,7 +11,14 @@ import {
   Server,
   ShieldCheck,
 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { DASHBOARD_MODULES } from "@/lib/auth/modules";
+import { getApiBaseUrl } from "@/services/api/baseUrl";
+
+type DashboardStatus = {
+  organization_name?: string;
+  tenant_slug?: string;
+};
 
 const serviceLinks = [
   {
@@ -43,7 +52,7 @@ const serviceLinks = [
 ];
 
 const contentLinks = [
-  { name: "Landing Content", href: "/cms", detail: "Managed in Strapi single type: landing-page" },
+  { name: "Landing Content", href: "/cms", detail: "Managed in Strapi collection: landing-pages (tenantSlug)" },
   { name: "Public Website", href: "/", detail: "Uses Strapi content with local fallback data" },
   { name: "Preview Workflow", href: "/preview", detail: "CMS preview surface for draft content" },
   {
@@ -55,6 +64,45 @@ const contentLinks = [
 
 export default function Page() {
   const moduleCount = DASHBOARD_MODULES.reduce((count, group) => count + group.items.length, 0);
+  const [orgName, setOrgName] = useState("Organization");
+  const [tenantSlug, setTenantSlug] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const response = await fetch(`${getApiBaseUrl()}/api/v1/dashboard/status`, {
+          cache: "no-store",
+          headers: { "Content-Type": "application/json" },
+        });
+        if (!response.ok) {
+          return;
+        }
+        const body = (await response.json()) as DashboardStatus;
+        if (cancelled) {
+          return;
+        }
+        if (body.organization_name?.trim()) {
+          setOrgName(body.organization_name.trim());
+        }
+        if (body.tenant_slug?.trim()) {
+          setTenantSlug(body.tenant_slug.trim());
+        }
+      } catch {
+        // Keep fallback label when status is unavailable.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const eyebrow = useMemo(() => {
+    if (tenantSlug) {
+      return `${orgName} · ${tenantSlug}`;
+    }
+    return orgName;
+  }, [orgName, tenantSlug]);
 
   return (
     <section className="min-h-[calc(100vh-7rem)] bg-[#f7f7f7] px-4 py-10 sm:px-6 lg:px-8">
@@ -65,13 +113,13 @@ export default function Page() {
               <ShieldCheck size={28} aria-hidden="true" />
             </div>
             <p className="mt-6 text-sm font-bold uppercase tracking-[0.18em] text-amber-700">
-              Raushni Management
+              {eyebrow}
             </p>
             <h1 className="mt-3 text-4xl font-black leading-tight text-stone-950 sm:text-5xl">
               Dashboard command center
             </h1>
             <p className="mt-5 max-w-3xl text-base leading-8 text-stone-700">
-              Manage Raushni&apos;s frontend, backend, Strapi CMS, database workflows, operational modules, and public
+              Manage {orgName}&apos;s frontend, backend, Strapi CMS, database workflows, operational modules, and public
               content from one professional workspace. Each card links to a configured route or service entry point.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">

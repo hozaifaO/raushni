@@ -80,11 +80,15 @@ export default function DonationReceiptGenerator({ template }: { template: CmsDo
     setForm({
       receiptNumber: issuedNumber,
       issuedAt: today,
-      donorName: donation.donor_name,
-      donorPhone: donation.donor_phone,
-      donorEmail: donation.donor_email ?? "Email not provided",
-      donorAddress: donation.donor_address ?? "Address not provided",
-      donorPan: donation.donor_pan ?? "Not provided",
+      donorName: donation.is_anonymous ? "Anonymous" : donation.donor_name,
+      donorPhone: donation.is_anonymous ? "Not provided" : donation.donor_phone,
+      donorEmail: donation.is_anonymous
+        ? "Not provided"
+        : (donation.donor_email ?? "Email not provided"),
+      donorAddress: donation.is_anonymous
+        ? "Not provided"
+        : (donation.donor_address ?? "Address not provided"),
+      donorPan: donation.is_anonymous ? "Not provided" : (donation.donor_pan ?? "Not provided"),
       amount: formatAmount(donation),
       purpose: donation.purpose.replace(/_/g, " "),
       paymentMethod: donation.payment_method.replace(/_/g, " "),

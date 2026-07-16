@@ -10,7 +10,6 @@ resources:
   - ../../backend-deployment.yaml
   - ../../frontend-deployment.yaml
   - ../../strapi-deployment.yaml
-  - ../../document-generator-deployment.yaml
   - ../../ingress.yaml
   - ../../network-policy.yaml
 

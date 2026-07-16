@@ -28,17 +28,16 @@ const nextConfig = {
 
   async rewrites() {
     const apiUrl = process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || 'http://backend:8000';
-    const cmsUrl = process.env.CMS_INTERNAL_URL || process.env.NEXT_PUBLIC_CMS_URL || 'http://strapi:1337';
 
+    // /api/auth/* → NextAuth
+    // /api/v1/* → BFF Route Handler
+    // /cms/api/* → CMS BFF Route Handler (app/cms/api/[...path]) — do not rewrite to Strapi
+    // other /api/* → FastAPI (legacy paths if any)
     return {
       afterFiles: [
         {
-          source: '/api/:path((?!auth(?:/|$)).*)',
+          source: '/api/:path((?!auth(?:/|$)|v1(?:/|$)).*)',
           destination: `${apiUrl}/api/:path*`,
-        },
-        {
-          source: '/cms/api/:path*',
-          destination: `${cmsUrl}/api/:path*`,
         },
       ],
     };

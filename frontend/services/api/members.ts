@@ -1,5 +1,6 @@
 import type { Member, MemberFormValues, MemberListResponse, MemberStatus } from "@/types/models/member";
-import { authHeaders } from "@/lib/auth/permissions";
+import { memberListResponseSchema, memberSchema } from "@/lib/validation/member";
+import { parseEmpty, parseJson } from "@/lib/validation/parseJson";
 import { getApiBaseUrl } from "./baseUrl";
 
 const API_BASE_URL = getApiBaseUrl();
@@ -24,20 +25,6 @@ function cleanPayload(values: MemberFormValues) {
   };
 }
 
-async function parseResponse<T>(response: Response): Promise<T> {
-  if (!response.ok) {
-    const body = await response.json().catch(() => null);
-    const detail = typeof body?.detail === "string" ? body.detail : "Member request failed";
-    throw new Error(detail);
-  }
-
-  if (response.status === 204) {
-    return undefined as T;
-  }
-
-  return response.json() as Promise<T>;
-}
-
 export async function listMembers(options: ListMembersOptions = {}): Promise<MemberListResponse> {
   const params = new URLSearchParams();
   if (options.search) {
@@ -50,33 +37,35 @@ export async function listMembers(options: ListMembersOptions = {}): Promise<Mem
   const query = params.toString();
   const response = await fetch(`${MEMBERS_ENDPOINT}${query ? `?${query}` : ""}`, {
     cache: "no-store",
-    headers: authHeaders(),
+    headers: { "Content-Type": "application/json" },
   });
-  return parseResponse<MemberListResponse>(response);
+  return parseJson(memberListResponseSchema, response, {
+    fallbackMessage: "Member request failed",
+  });
 }
 
 export async function createMember(values: MemberFormValues): Promise<Member> {
   const response = await fetch(MEMBERS_ENDPOINT, {
     method: "POST",
-    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(cleanPayload(values)),
   });
-  return parseResponse<Member>(response);
+  return parseJson(memberSchema, response, { fallbackMessage: "Member request failed" });
 }
 
 export async function updateMember(id: string, values: MemberFormValues): Promise<Member> {
   const response = await fetch(`${MEMBERS_ENDPOINT}/${id}`, {
     method: "PATCH",
-    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(cleanPayload(values)),
   });
-  return parseResponse<Member>(response);
+  return parseJson(memberSchema, response, { fallbackMessage: "Member request failed" });
 }
 
 export async function deleteMember(id: string): Promise<void> {
   const response = await fetch(`${MEMBERS_ENDPOINT}/${id}`, {
     method: "DELETE",
-    headers: authHeaders(),
+    headers: { "Content-Type": "application/json" },
   });
-  await parseResponse<void>(response);
+  await parseEmpty(response, { fallbackMessage: "Member request failed" });
 }

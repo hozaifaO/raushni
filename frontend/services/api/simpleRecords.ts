@@ -1,6 +1,12 @@
-import { authHeaders } from "@/lib/auth/permissions";
 import { getApiBaseUrl } from "./baseUrl";
-import type { SimpleRecord, SimpleRecordFormValues, SimpleRecordListResponse, SimpleRecordStatus } from "@/types/models/simpleRecord";
+import type {
+  SimpleRecord,
+  SimpleRecordFormValues,
+  SimpleRecordListResponse,
+  SimpleRecordStatus,
+} from "@/types/models/simpleRecord";
+import { simpleRecordListResponseSchema, simpleRecordSchema } from "@/lib/validation/simpleRecord";
+import { parseEmpty, parseJson } from "@/lib/validation/parseJson";
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -28,50 +34,56 @@ function cleanPayload(values: SimpleRecordFormValues) {
   };
 }
 
-async function parseResponse<T>(response: Response, fallback: string): Promise<T> {
-  if (!response.ok) {
-    const body = await response.json().catch(() => null);
-    const detail = typeof body?.detail === "string" ? body.detail : fallback;
-    throw new Error(detail);
-  }
-  if (response.status === 204) return undefined as T;
-  return response.json() as Promise<T>;
-}
-
-export async function listSimpleRecords(modulePath: string, options: ListOptions = {}): Promise<SimpleRecordListResponse> {
+export async function listSimpleRecords(
+  modulePath: string,
+  options: ListOptions = {},
+): Promise<SimpleRecordListResponse> {
   const params = new URLSearchParams();
   if (options.search) params.set("search", options.search);
   if (options.status && options.status !== "all") params.set("status_filter", options.status);
   const query = params.toString();
   const response = await fetch(`${endpoint(modulePath)}${query ? `?${query}` : ""}`, {
     cache: "no-store",
-    headers: authHeaders(),
+    headers: { "Content-Type": "application/json" },
   });
-  return parseResponse<SimpleRecordListResponse>(response, "Unable to load records.");
+  return parseJson(simpleRecordListResponseSchema, response, {
+    fallbackMessage: "Unable to load records.",
+  });
 }
 
-export async function createSimpleRecord(modulePath: string, values: SimpleRecordFormValues): Promise<SimpleRecord> {
+export async function createSimpleRecord(
+  modulePath: string,
+  values: SimpleRecordFormValues,
+): Promise<SimpleRecord> {
   const response = await fetch(endpoint(modulePath), {
     method: "POST",
-    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(cleanPayload(values)),
   });
-  return parseResponse<SimpleRecord>(response, "Unable to create record.");
+  return parseJson(simpleRecordSchema, response, {
+    fallbackMessage: "Unable to create record.",
+  });
 }
 
-export async function updateSimpleRecord(modulePath: string, id: string, values: SimpleRecordFormValues): Promise<SimpleRecord> {
+export async function updateSimpleRecord(
+  modulePath: string,
+  id: string,
+  values: SimpleRecordFormValues,
+): Promise<SimpleRecord> {
   const response = await fetch(`${endpoint(modulePath)}/${id}`, {
     method: "PATCH",
-    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(cleanPayload(values)),
   });
-  return parseResponse<SimpleRecord>(response, "Unable to update record.");
+  return parseJson(simpleRecordSchema, response, {
+    fallbackMessage: "Unable to update record.",
+  });
 }
 
 export async function deleteSimpleRecord(modulePath: string, id: string): Promise<void> {
   const response = await fetch(`${endpoint(modulePath)}/${id}`, {
     method: "DELETE",
-    headers: authHeaders(),
+    headers: { "Content-Type": "application/json" },
   });
-  await parseResponse<void>(response, "Unable to delete record.");
+  await parseEmpty(response, { fallbackMessage: "Unable to delete record." });
 }

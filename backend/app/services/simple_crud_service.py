@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from uuid import UUID, uuid4
+from uuid import UUID
 
+from app.repositories.simple_record_repository import SimpleRecordRepository
 from app.schemas.simple_record import (
     SimpleRecord,
     SimpleRecordCreate,
@@ -17,68 +17,45 @@ class SimpleRecordNotFoundError(LookupError):
 
 
 class SimpleCrudService:
-    def __init__(self, module: str) -> None:
-        self.module = module
-        self._records: dict[UUID, SimpleRecord] = {}
+    def __init__(self, repository: SimpleRecordRepository) -> None:
+        self._repository = repository
+        self.module = repository.module
 
-    def list_records(
+    async def list_records(
         self,
         *,
         search: str | None = None,
         status_filter: SimpleRecordStatus | None = None,
     ) -> SimpleRecordListResponse:
-        items = list(self._records.values())
-        if search:
-            query = search.strip().lower()
-            items = [
-                record
-                for record in items
-                if query in record.title.lower()
-                or query in record.category.lower()
-                or query in record.summary.lower()
-                or (record.contact_name is not None and query in record.contact_name.lower())
-            ]
-        if status_filter is not None:
-            items = [record for record in items if record.status == status_filter]
-        items.sort(key=lambda record: (record.record_date, record.title.lower()), reverse=True)
-        all_records = list(self._records.values())
+        items, total, active, published, archived = await self._repository.list(
+            search=search,
+            status_filter=status_filter,
+        )
         return SimpleRecordListResponse(
-            items=items,
-            total=len(all_records),
-            active=sum(1 for record in all_records if record.status == SimpleRecordStatus.ACTIVE),
-            published=sum(1 for record in all_records if record.status == SimpleRecordStatus.PUBLISHED),
-            archived=sum(1 for record in all_records if record.status == SimpleRecordStatus.ARCHIVED),
+            items=[SimpleRecord.model_validate(item) for item in items],
+            total=total,
+            active=active,
+            published=published,
+            archived=archived,
         )
 
-    def create_record(self, payload: SimpleRecordCreate) -> SimpleRecord:
-        now = datetime.now(timezone.utc)
-        record = SimpleRecord(
-            id=uuid4(),
-            module=self.module,
-            created_at=now,
-            updated_at=now,
-            **payload.model_dump(),
-        )
-        self._records[record.id] = record
-        return record
+    async def create_record(self, payload: SimpleRecordCreate) -> SimpleRecord:
+        record = await self._repository.create(payload)
+        return SimpleRecord.model_validate(record)
 
-    def get_record(self, record_id: UUID) -> SimpleRecord:
-        try:
-            return self._records[record_id]
-        except KeyError as exc:
-            raise SimpleRecordNotFoundError(f"{self.module} record {record_id} was not found") from exc
+    async def get_record(self, record_id: UUID) -> SimpleRecord:
+        record = await self._repository.get(record_id)
+        if record is None:
+            raise SimpleRecordNotFoundError(f"{self.module} record {record_id} was not found")
+        return SimpleRecord.model_validate(record)
 
-    def update_record(self, record_id: UUID, payload: SimpleRecordUpdate) -> SimpleRecord:
-        record = self.get_record(record_id)
-        updated = record.model_copy(
-            update={
-                **payload.model_dump(exclude_unset=True),
-                "updated_at": datetime.now(timezone.utc),
-            },
-        )
-        self._records[record_id] = updated
-        return updated
+    async def update_record(self, record_id: UUID, payload: SimpleRecordUpdate) -> SimpleRecord:
+        record = await self._repository.update(record_id, payload)
+        if record is None:
+            raise SimpleRecordNotFoundError(f"{self.module} record {record_id} was not found")
+        return SimpleRecord.model_validate(record)
 
-    def delete_record(self, record_id: UUID) -> None:
-        self.get_record(record_id)
-        del self._records[record_id]
+    async def delete_record(self, record_id: UUID) -> None:
+        deleted = await self._repository.delete(record_id)
+        if not deleted:
+            raise SimpleRecordNotFoundError(f"{self.module} record {record_id} was not found")

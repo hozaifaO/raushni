@@ -247,7 +247,7 @@ Create Route 53 records:
 - `www.raushni.com` alias to ALB.
 - `api.raushni.com` alias to ALB.
 - `cms.raushni.com` alias to ALB.
-- Optional `*.raushni.com` alias to ALB for SaaS tenant subdomains.
+- `*.raushni.com` alias to ALB for SaaS tenant subdomains (ingress host rule is enabled; ACM must include this SAN).
 
 ## 10. Validate
 

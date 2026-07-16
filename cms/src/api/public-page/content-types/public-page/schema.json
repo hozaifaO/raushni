@@ -11,6 +11,10 @@
     "draftAndPublish": true
   },
   "attributes": {
+    "tenantSlug": {
+      "type": "string",
+      "required": true
+    },
     "slug": { "type": "uid", "targetField": "title", "required": true },
     "title": { "type": "string", "required": true },
     "heroEyebrow": { "type": "string" },

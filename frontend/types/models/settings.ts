@@ -48,6 +48,9 @@ export type AccountProfile = {
   role: RoleAccess;
   session_started_at: string;
   auth_mode: string;
+  organization_id?: string | null;
+  tenant_slug?: string | null;
+  organization_name?: string | null;
 };
 
 export type SettingsDashboard = {
@@ -55,6 +58,9 @@ export type SettingsDashboard = {
   roles: RoleAccess[];
   platform: PlatformSettings;
   updated_at: string;
+  organization_id?: string | null;
+  tenant_slug?: string | null;
+  organization_name?: string | null;
 };
 
 export type UserAccountUpdate = {

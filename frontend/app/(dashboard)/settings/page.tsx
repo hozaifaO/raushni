@@ -199,7 +199,9 @@ export default function Page() {
             <p className="text-sm font-semibold uppercase text-orange-600">Administration</p>
             <h1 className="mt-2 text-3xl font-bold text-gray-950">Settings</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-600">
-              Configure users, roles, permissions, and platform settings for the dashboard.
+              Configure users, roles, permissions, and platform settings
+              {settingsData.organization_name ? ` for ${settingsData.organization_name}` : " for this organization"}
+              {settingsData.tenant_slug ? ` (${settingsData.tenant_slug})` : ""}.
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
@@ -483,7 +485,7 @@ export default function Page() {
               </div>
               <div>
                 <h2 className="text-lg font-bold text-gray-950">Users</h2>
-                <p className="text-sm text-gray-600">Manage local dashboard users and account access.</p>
+                <p className="text-sm text-gray-600">Manage organization memberships for staff who can sign in with NextAuth.</p>
               </div>
             </div>
             <div className="overflow-x-auto">

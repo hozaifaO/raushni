@@ -35,10 +35,12 @@ module.exports = ({ env }) => {
     config: {
       origin: allowedOrigins,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
-      headers: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
+      headers: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-CMS-API-Key'],
       keepHeaderOnError: true,
     },
   },
+  // Gate Content API with CMS_API_TOKEN (see src/middlewares/cms-api-key.js).
+  'global::cms-api-key',
   'strapi::poweredBy',
   'strapi::query',
   'strapi::body',

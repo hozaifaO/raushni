@@ -52,6 +52,8 @@ services:
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
       CMS_INTERNAL_URL: ${CMS_INTERNAL_URL:-http://strapi:1337}
       REQUIRE_AUTH: ${REQUIRE_AUTH:-false}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-dev-internal-api-key-change-me-32chars}
+      CMS_API_TOKEN: ${CMS_API_TOKEN:-dev-cms-api-token-change-me-32charsxx}
       APP_PUBLIC_URL: ${APP_PUBLIC_URL:-http://localhost:3000}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
@@ -67,6 +69,8 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4317}
       OTEL_EXPORTER_OTLP_PROTOCOL: ${OTEL_EXPORTER_OTLP_PROTOCOL:-grpc}
       OTEL_RESOURCE_ATTRIBUTES: deployment.environment=${DD_ENV:-production},service.namespace=raushni
+      ALEMBIC_AUTO_UPGRADE: ${ALEMBIC_AUTO_UPGRADE:-true}
+      REDIS_CACHE_TTL_SECONDS: ${REDIS_CACHE_TTL_SECONDS:-60}
     depends_on:
       postgres:
         condition: service_healthy
@@ -85,6 +89,8 @@ services:
     ports:
       - "1337:1337"
     volumes:
+      - ./cms:/opt/app
+      - /opt/app/node_modules
       - strapi_uploads:/opt/app/public/uploads
     environment:
       HOST: 0.0.0.0
@@ -105,6 +111,8 @@ services:
       DATABASE_USERNAME: ${CMS_DATABASE_USERNAME:-postgres}
       DATABASE_PASSWORD: ${CMS_DATABASE_PASSWORD:-postgres}
       DATABASE_SSL: ${CMS_DATABASE_SSL:-false}
+      CMS_API_TOKEN: ${CMS_API_TOKEN:-dev-cms-api-token-change-me-32charsxx}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
       DD_ENV: ${DD_ENV:-production}
       DD_SERVICE: raushni-cms
       DD_VERSION: ${DD_VERSION:-1.0.0}
@@ -152,6 +160,8 @@ services:
       NEXTAUTH_ADMIN_PASSWORD: ${NEXTAUTH_ADMIN_PASSWORD:-ChangeMe@12345}
       NEXTAUTH_STAFF_EMAIL: ${NEXTAUTH_STAFF_EMAIL:-staff@raushni.com}
       NEXTAUTH_STAFF_PASSWORD: ${NEXTAUTH_STAFF_PASSWORD:-ChangeMe@12345}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-dev-internal-api-key-change-me-32chars}
+      CMS_API_TOKEN: ${CMS_API_TOKEN:-dev-cms-api-token-change-me-32charsxx}
       API_INTERNAL_URL: ${API_INTERNAL_URL:-http://backend:8000}
       CMS_INTERNAL_URL: ${CMS_INTERNAL_URL:-http://strapi:1337}
       NODE_ENV: ${NODE_ENV:-development}
@@ -184,29 +194,6 @@ services:
       - frontend
       - backend
       - strapi
-      - document-generator
-    networks:
-      - raushni_network
-
-  # Document generation microservice
-  document-generator:
-    build:
-      context: ./services/document_generator
-      dockerfile: Dockerfile
-    container_name: raushni-document-generator
-    ports:
-      - "8001:8000"
-    environment:
-      ENVIRONMENT: ${ENVIRONMENT:-production}
-      DD_ENV: ${DD_ENV:-production}
-      DD_SERVICE: raushni-document-generator
-      DD_VERSION: ${DD_VERSION:-1.0.0}
-      OTEL_SERVICE_NAME: raushni-document-generator
-      OTEL_SERVICE_VERSION: ${DD_VERSION:-1.0.0}
-      OTEL_SDK_DISABLED: ${OTEL_SDK_DISABLED:-true}
-      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4317}
-      OTEL_EXPORTER_OTLP_PROTOCOL: ${OTEL_EXPORTER_OTLP_PROTOCOL:-grpc}
-      OTEL_RESOURCE_ATTRIBUTES: deployment.environment=${DD_ENV:-production},service.namespace=raushni
     networks:
       - raushni_network
 

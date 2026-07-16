@@ -1,0 +1,17 @@
+{
+  "include": ["app"],
+  "exclude": ["**/node_modules", "**/__pycache__", "alembic/versions"],
+  "pythonVersion": "3.11",
+  "typeCheckingMode": "basic",
+  "reportMissingImports": true,
+  "reportMissingTypeStubs": false,
+  "strict": [
+    "app/models",
+    "app/repositories",
+    "app/schemas",
+    "app/core/config.py",
+    "app/core/db.py",
+    "app/core/sanitize.py",
+    "app/core/lifespan.py"
+  ]
+}

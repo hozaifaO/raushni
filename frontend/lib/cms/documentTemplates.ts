@@ -26,10 +26,7 @@ export type CmsDocumentTemplate = {
   settings: Record<string, unknown>;
 };
 
-const CMS_BASE_URL =
-  process.env.CMS_INTERNAL_URL ??
-  process.env.NEXT_PUBLIC_CMS_URL ??
-  "http://localhost:1337";
+const CMS_PUBLIC_URL = process.env.NEXT_PUBLIC_CMS_URL ?? process.env.CMS_INTERNAL_URL ?? "http://localhost:1337";
 
 export const fallbackDocumentTemplates: Record<string, CmsDocumentTemplate> = {
   "member-id-card": {
@@ -172,17 +169,16 @@ function resolveMediaUrl(media: unknown, fallback: string) {
   const url = candidate?.data?.attributes?.url ?? candidate?.url;
   if (!url) return fallback;
   if (url.startsWith("http") || url.startsWith("/assets")) return url;
-  return `${process.env.NEXT_PUBLIC_CMS_URL ?? CMS_BASE_URL}${url}`;
+  return `${CMS_PUBLIC_URL}${url}`;
 }
 
-async function fetchCmsJson(path: string) {
-  try {
-    const response = await fetch(`${CMS_BASE_URL}/api${path}`, { cache: "no-store" });
-    if (!response.ok) return null;
-    return response.json();
-  } catch {
-    return null;
-  }
+async function fetchCmsJson(path: string): Promise<{
+  data?: Array<{ attributes?: Record<string, unknown> }> | { attributes?: Record<string, unknown> };
+} | null> {
+  const { cmsFetchJson } = await import("@/lib/cms/client");
+  return cmsFetchJson(path) as Promise<{
+    data?: Array<{ attributes?: Record<string, unknown> }> | { attributes?: Record<string, unknown> };
+  } | null>;
 }
 
 function normalizeTemplate(attrs: Record<string, unknown>, fallback: CmsDocumentTemplate): CmsDocumentTemplate {
@@ -211,17 +207,18 @@ function normalizeTemplate(attrs: Record<string, unknown>, fallback: CmsDocument
 export async function getDocumentTemplate(key: string): Promise<CmsDocumentTemplate> {
   const fallback = fallbackDocumentTemplates[key] ?? fallbackDocumentTemplates["donation-receipt"];
   const payload = await fetchCmsJson(`/document-templates?filters[key][$eq]=${encodeURIComponent(key)}&populate=*`);
-  const attrs = payload?.data?.[0]?.attributes;
+  const rows = Array.isArray(payload?.data) ? payload.data : [];
+  const attrs = rows[0]?.attributes;
   return attrs ? normalizeTemplate(attrs, fallback) : fallback;
 }
 
 export async function listDocumentTemplates(): Promise<CmsDocumentTemplate[]> {
   const payload = await fetchCmsJson("/document-templates?populate=*&pagination[limit]=100&sort=name:asc");
-  const records = payload?.data;
-  if (!Array.isArray(records) || records.length === 0) {
+  const records = Array.isArray(payload?.data) ? payload.data : [];
+  if (records.length === 0) {
     return Object.values(fallbackDocumentTemplates);
   }
-  return records.map((record: { attributes?: Record<string, unknown> }) => {
+  return records.map((record) => {
     const attrs = record.attributes ?? {};
     const key = String(attrs.key ?? "");
     const fallback = fallbackDocumentTemplates[key] ?? fallbackDocumentTemplates["donation-receipt"];

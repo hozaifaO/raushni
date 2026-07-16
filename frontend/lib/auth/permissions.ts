@@ -95,11 +95,8 @@ export function setStoredUser(user: AppUser): AppUser {
 }
 
 export function signInAsAdmin(): AppUser {
-  const user = setStoredUser(DEFAULT_ADMIN_USER);
-  if (typeof window !== "undefined") {
-    window.localStorage.setItem("token", "local-admin-session");
-  }
-  return user;
+  // UI-only mirror for local demos. API auth goes through NextAuth session + BFF.
+  return setStoredUser(DEFAULT_ADMIN_USER);
 }
 
 export function signOutToGuest(): AppUser {
@@ -122,17 +119,7 @@ export function isReadOnly(role: UserRole | string | undefined): boolean {
   return READ_ONLY_ROLES.has(normalizeRole(role));
 }
 
+/** @deprecated Client role headers are no longer used; the Next.js BFF asserts identity. */
 export function authHeaders(): HeadersInit {
-  const user = getStoredUser();
-  const headers: Record<string, string> = {
-    "X-User-Role": user.role,
-    "X-User-Email": user.email,
-  };
-  if (typeof window !== "undefined") {
-    const accessToken = window.localStorage.getItem("accessToken");
-    if (accessToken) {
-      headers.Authorization = `Bearer ${accessToken}`;
-    }
-  }
-  return headers;
+  return {};
 }

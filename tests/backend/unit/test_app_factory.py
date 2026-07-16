@@ -22,6 +22,7 @@ def test_create_app_registers_public_routes() -> None:
     routes = {route.path for route in test_app.routes}
 
     assert "/health" in routes
+    assert "/health/ready" in routes
     assert "/api" in routes
     assert "/docs" in routes
     assert "/openapi.json" in routes

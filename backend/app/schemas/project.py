@@ -2,9 +2,12 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from enum import StrEnum
+from typing import Annotated
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
+
+from app.core.sanitize import OptionalFreeTextSanitizedStr, OptionalSanitizedStr, SanitizedStr
 
 
 class ProjectStatus(StrEnum):
@@ -23,12 +26,15 @@ class ProjectPriority(StrEnum):
     URGENT = "urgent"
 
 
+BoundedItem = Annotated[str, Field(max_length=400)]
+
+
 class ProjectBase(BaseModel):
-    title: str = Field(..., min_length=3, max_length=180)
-    slug: str = Field(..., min_length=3, max_length=140)
-    summary: str = Field(..., min_length=10, max_length=1200)
-    location: str = Field(..., min_length=2, max_length=180)
-    focus_area: str = Field(default="Education and WATSAN", max_length=120)
+    title: SanitizedStr = Field(..., min_length=3, max_length=180)
+    slug: SanitizedStr = Field(..., min_length=3, max_length=140)
+    summary: SanitizedStr = Field(..., min_length=10, max_length=1200)
+    location: SanitizedStr = Field(..., min_length=2, max_length=180)
+    focus_area: SanitizedStr = Field(default="Education and WATSAN", max_length=120)
     status: ProjectStatus = ProjectStatus.PROPOSED
     priority: ProjectPriority = ProjectPriority.HIGH
     start_date: date
@@ -38,14 +44,14 @@ class ProjectBase(BaseModel):
     beneficiaries: int = Field(default=0, ge=0)
     schools_targeted: int = Field(default=0, ge=0)
     progress: int = Field(default=0, ge=0, le=100)
-    manager: str = Field(default="Project Manager", max_length=120)
-    donor: str | None = Field(default=None, max_length=160)
-    proposal_url: str | None = Field(default=None, max_length=300)
-    cms_slug: str | None = Field(default=None, max_length=160)
-    objectives: list[str] = Field(default_factory=list)
-    milestones: list[str] = Field(default_factory=list)
-    risks: list[str] = Field(default_factory=list)
-    notes: str | None = Field(default=None, max_length=1200)
+    manager: SanitizedStr = Field(default="Project Manager", max_length=120)
+    donor: OptionalSanitizedStr = Field(default=None, max_length=160)
+    proposal_url: OptionalSanitizedStr = Field(default=None, max_length=300)
+    cms_slug: OptionalSanitizedStr = Field(default=None, max_length=160)
+    objectives: list[BoundedItem] = Field(default_factory=list, max_length=20)
+    milestones: list[BoundedItem] = Field(default_factory=list, max_length=20)
+    risks: list[BoundedItem] = Field(default_factory=list, max_length=20)
+    notes: OptionalFreeTextSanitizedStr = Field(default=None, max_length=1200)
 
 
 class ProjectCreate(ProjectBase):
@@ -53,11 +59,11 @@ class ProjectCreate(ProjectBase):
 
 
 class ProjectUpdate(BaseModel):
-    title: str | None = Field(default=None, min_length=3, max_length=180)
-    slug: str | None = Field(default=None, min_length=3, max_length=140)
-    summary: str | None = Field(default=None, min_length=10, max_length=1200)
-    location: str | None = Field(default=None, min_length=2, max_length=180)
-    focus_area: str | None = Field(default=None, max_length=120)
+    title: SanitizedStr | None = Field(default=None, min_length=3, max_length=180)
+    slug: SanitizedStr | None = Field(default=None, min_length=3, max_length=140)
+    summary: SanitizedStr | None = Field(default=None, min_length=10, max_length=1200)
+    location: SanitizedStr | None = Field(default=None, min_length=2, max_length=180)
+    focus_area: SanitizedStr | None = Field(default=None, max_length=120)
     status: ProjectStatus | None = None
     priority: ProjectPriority | None = None
     start_date: date | None = None
@@ -67,14 +73,14 @@ class ProjectUpdate(BaseModel):
     beneficiaries: int | None = Field(default=None, ge=0)
     schools_targeted: int | None = Field(default=None, ge=0)
     progress: int | None = Field(default=None, ge=0, le=100)
-    manager: str | None = Field(default=None, max_length=120)
-    donor: str | None = Field(default=None, max_length=160)
-    proposal_url: str | None = Field(default=None, max_length=300)
-    cms_slug: str | None = Field(default=None, max_length=160)
-    objectives: list[str] | None = None
-    milestones: list[str] | None = None
-    risks: list[str] | None = None
-    notes: str | None = Field(default=None, max_length=1200)
+    manager: SanitizedStr | None = Field(default=None, max_length=120)
+    donor: OptionalSanitizedStr = Field(default=None, max_length=160)
+    proposal_url: OptionalSanitizedStr = Field(default=None, max_length=300)
+    cms_slug: OptionalSanitizedStr = Field(default=None, max_length=160)
+    objectives: list[BoundedItem] | None = Field(default=None, max_length=20)
+    milestones: list[BoundedItem] | None = Field(default=None, max_length=20)
+    risks: list[BoundedItem] | None = Field(default=None, max_length=20)
+    notes: OptionalFreeTextSanitizedStr = Field(default=None, max_length=1200)
 
 
 class Project(ProjectBase):

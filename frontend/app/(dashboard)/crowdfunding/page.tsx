@@ -348,7 +348,7 @@ export default function Page() {
             <div className="mt-5 grid gap-4 md:grid-cols-2">
               <Field label="Donor name" value={donationForm.donor_name} onChange={(value) => updateDonationField("donor_name", value)} />
               <Field label="Amount" value={donationForm.amount} onChange={(value) => updateDonationField("amount", value)} type="number" />
-              <SelectField label="Payment method" value={donationForm.payment_method} onChange={(value) => updateDonationField("payment_method", value)} options={["upi", "gpay", "cash", "cheque", "debit_card", "credit_card", "netbanking", "stripe", "other"]} />
+              <SelectField label="Payment method" value={donationForm.payment_method} onChange={(value) => updateDonationField("payment_method", value)} options={["upi", "qr_code", "gpay", "cash", "cheque"]} />
               <Field label="Receipt no" value={donationForm.receipt_no} onChange={(value) => updateDonationField("receipt_no", value)} />
               <TextArea label="Note" value={donationForm.note} onChange={(value) => updateDonationField("note", value)} wide />
             </div>

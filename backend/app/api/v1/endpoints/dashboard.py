@@ -3,17 +3,30 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+
+from app.api.dependencies.auth import get_current_organization
+from app.api.dependencies.services import get_settings_service
+from app.models.organization import OrganizationModel
+from app.services.settings_service import SettingsService
 
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
 
 @router.get("/status")
-def get_dashboard_status() -> dict[str, Any]:
-    """Return operational wiring for the Raushni management dashboard."""
+async def get_dashboard_status(
+    organization: OrganizationModel = Depends(get_current_organization),
+    settings_service: SettingsService = Depends(get_settings_service),
+) -> dict[str, Any]:
+    """Return operational wiring for the current organization's management dashboard."""
+    settings = await settings_service.get_settings()
+    org_name = settings.platform.organization_name or organization.name
     return {
-        "project": "raushni",
+        "project": organization.slug,
+        "organization_id": str(organization.id),
+        "tenant_slug": organization.slug,
+        "organization_name": org_name,
         "status": "configured",
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "services": [
@@ -38,8 +51,8 @@ def get_dashboard_status() -> dict[str, Any]:
             {
                 "name": "Database",
                 "status": "configured",
-                "path": "postgresql://database:5432/raushni",
-                "description": "PostgreSQL persistence for platform data and CMS content storage.",
+                "path": "postgresql://postgres:5432/raushni_backend",
+                "description": "PostgreSQL persistence for members, donations, and operational data (Alembic-managed).",
             },
         ],
         "content": [
@@ -55,7 +68,7 @@ def get_dashboard_status() -> dict[str, Any]:
             },
             {
                 "name": "Landing Page",
-                "source": "Strapi single type: landing-page",
+                "source": "Strapi tenant-keyed content",
                 "api": "/cms/api/landing-page?populate=*",
             },
             {

@@ -11,6 +11,10 @@
     "draftAndPublish": true
   },
   "attributes": {
+    "tenantSlug": {
+      "type": "string",
+      "required": true
+    },
     "key": { "type": "uid", "targetField": "name", "required": true },
     "name": { "type": "string", "required": true },
     "category": {

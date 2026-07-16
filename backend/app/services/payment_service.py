@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import json
 import os
-from typing import Any
+from typing import Any, cast
 
 import stripe
 
 from app.schemas.donation import Donation, DonationCheckoutSession
+from app.schemas.webhook import StripeWebhookEvent
 
 
 class PaymentGatewayUnavailableError(RuntimeError):
@@ -21,6 +23,8 @@ class StripePaymentService:
         self.secret_key = os.getenv("STRIPE_SECRET_KEY", "").strip()
         self.publishable_key = os.getenv("STRIPE_PUBLISHABLE_KEY", "").strip() or None
         self.webhook_secret = os.getenv("STRIPE_WEBHOOK_SECRET", "").strip()
+        if "replace" in self.webhook_secret.lower():
+            self.webhook_secret = ""
         self.app_public_url = (
             os.getenv("APP_PUBLIC_URL")
             or os.getenv("FRONTEND_PUBLIC_URL")
@@ -55,11 +59,13 @@ class StripePaymentService:
                         "quantity": 1,
                     }
                 ],
-                customer_email=donation.donor_email,
+                # Stripe stubs require str; omit when missing via empty-skip below.
+                customer_email=donation.donor_email if donation.donor_email else "",
                 metadata={
                     "donation_id": str(donation.id),
                     "receipt_number": donation.receipt_number,
                     "donor_name": donation.donor_name,
+                    "organization_id": str(donation.organization_id),
                 },
                 success_url=f"{self.app_public_url}/donate?payment=success&receipt={donation.receipt_number}",
                 cancel_url=f"{self.app_public_url}/donate?payment=cancelled&receipt={donation.receipt_number}",
@@ -80,13 +86,27 @@ class StripePaymentService:
             publishable_key=self.publishable_key,
         )
 
-    def parse_webhook_event(self, payload: bytes, signature: str | None) -> dict[str, Any]:
+    def parse_webhook_event(self, payload: bytes, signature: str | None) -> StripeWebhookEvent:
+        raw: dict[str, Any]
+        # Prefer raw JSON for local/tests. Signature verification only when a real secret is set.
         if self.webhook_secret:
             try:
-                return stripe.Webhook.construct_event(payload, signature or "", self.webhook_secret)
+                constructed = stripe.Webhook.construct_event(payload, signature or "", self.webhook_secret)
             except Exception as exc:
                 raise PaymentGatewayError(f"Invalid Stripe webhook signature: {exc}") from exc
+            if hasattr(constructed, "to_dict"):
+                raw = cast(dict[str, Any], constructed.to_dict())
+            else:
+                raw = cast(dict[str, Any], dict(constructed))
+        else:
+            try:
+                parsed = json.loads(payload.decode("utf-8"))
+            except Exception as exc:
+                raise PaymentGatewayError(f"Invalid Stripe webhook payload: {exc}") from exc
+            if not isinstance(parsed, dict):
+                raise PaymentGatewayError("Invalid Stripe webhook payload: expected object")
+            raw = cast(dict[str, Any], parsed)
         try:
-            return stripe.Event.construct_from(stripe.util.json.loads(payload.decode("utf-8")), stripe.api_key)
+            return StripeWebhookEvent.from_stripe_payload(raw)
         except Exception as exc:
-            raise PaymentGatewayError(f"Invalid Stripe webhook payload: {exc}") from exc
+            raise PaymentGatewayError(f"Invalid Stripe webhook shape: {exc}") from exc

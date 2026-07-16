@@ -12,6 +12,10 @@
     "populateCreatorFields": true
   },
   "attributes": {
+    "tenantSlug": {
+      "type": "string",
+      "required": true
+    },
     "slug": {
       "type": "uid",
       "targetField": "title",
@@ -28,9 +32,13 @@
     "upiId": {
       "type": "string"
     },
+    "qrImage": {
+      "type": "media",
+      "allowedTypes": ["images"],
+      "multiple": false
+    },
     "qrImageUrl": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "accountName": {
       "type": "string",

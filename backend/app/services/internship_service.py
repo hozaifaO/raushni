@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
 from hashlib import sha256
 from html import escape
 from io import BytesIO
@@ -13,6 +13,8 @@ try:
 except ModuleNotFoundError:
     qrcode = None
 
+from app.models.internship import InternshipCertificateModel
+from app.repositories.internship_repository import InternshipRepository
 from app.schemas.internship import (
     CertificateStatus,
     InternshipAnnouncement,
@@ -25,7 +27,6 @@ from app.schemas.internship import (
     InternshipCertificate,
     InternshipCertificateIssueRequest,
     InternshipListResponse,
-    InternshipStatus,
 )
 from app.services.cms_template_service import get_document_template, render_template
 
@@ -39,198 +40,153 @@ class InternshipCertificateUnavailableError(ValueError):
 
 
 class InternshipService:
-    def __init__(self) -> None:
-        self._announcements: dict[UUID, InternshipAnnouncement] = {}
-        self._applications: dict[UUID, InternshipApplication] = {}
-        self._certificates: dict[UUID, InternshipCertificate] = {}
-        self._registration_counter = 100
-        self._certificate_counter = 500
-        self._seed_defaults()
+    def __init__(self, repository: InternshipRepository) -> None:
+        self._repository = repository
 
-    def list_dashboard(
+    async def list_dashboard(
         self,
         *,
         search: str | None = None,
         application_status: InternshipApplicationStatus | None = None,
     ) -> InternshipListResponse:
-        applications = list(self._applications.values())
-        if search:
-            query = search.strip().lower()
-            applications = [
-                item
-                for item in applications
-                if query in item.full_name.lower()
-                or query in item.email.lower()
-                or query in item.phone.lower()
-                or query in item.registration_number.lower()
-                or query in item.track.lower()
-            ]
-
-        if application_status is not None:
-            applications = [item for item in applications if item.status == application_status]
-
-        applications.sort(key=lambda item: item.created_at, reverse=True)
-        all_applications = list(self._applications.values())
-
+        applications = await self._repository.list_applications(
+            search=search,
+            application_status=application_status,
+        )
+        counts = await self._repository.application_status_counts()
+        announcements = await self._repository.list_announcements()
+        certificates = await self._repository.list_certificates()
         return InternshipListResponse(
-            announcements=sorted(self._announcements.values(), key=lambda item: item.event_date, reverse=True),
-            applications=applications,
-            certificates=sorted(self._certificates.values(), key=lambda item: item.issued_at, reverse=True),
-            total_announcements=len(self._announcements),
-            total_applications=len(all_applications),
-            registered=sum(1 for item in all_applications if item.status == InternshipApplicationStatus.REGISTERED),
-            active=sum(1 for item in all_applications if item.status == InternshipApplicationStatus.ACTIVE),
-            completed=sum(1 for item in all_applications if item.status == InternshipApplicationStatus.COMPLETED),
-            certificates_issued=len(self._certificates),
+            announcements=[InternshipAnnouncement.model_validate(item) for item in announcements],
+            applications=[InternshipApplication.model_validate(item) for item in applications],
+            certificates=[InternshipCertificate.model_validate(item) for item in certificates],
+            total_announcements=await self._repository.count_announcements(),
+            total_applications=await self._repository.count_applications(),
+            registered=counts.get(InternshipApplicationStatus.REGISTERED.value, 0),
+            active=counts.get(InternshipApplicationStatus.ACTIVE.value, 0),
+            completed=counts.get(InternshipApplicationStatus.COMPLETED.value, 0),
+            certificates_issued=await self._repository.count_certificates(),
         )
 
-    def list_public_announcements(self) -> list[InternshipAnnouncement]:
-        return [
-            announcement
-            for announcement in sorted(self._announcements.values(), key=lambda item: item.event_date, reverse=True)
-            if announcement.status == InternshipStatus.PUBLISHED
-        ]
+    async def list_public_announcements(self) -> list[InternshipAnnouncement]:
+        rows = await self._repository.list_announcements(published_only=True)
+        return [InternshipAnnouncement.model_validate(item) for item in rows]
 
-    def create_announcement(self, payload: InternshipAnnouncementCreate) -> InternshipAnnouncement:
-        now = datetime.now(timezone.utc)
-        announcement = InternshipAnnouncement(id=uuid4(), created_at=now, updated_at=now, **payload.model_dump())
-        self._announcements[announcement.id] = announcement
-        return announcement
+    async def create_announcement(self, payload: InternshipAnnouncementCreate) -> InternshipAnnouncement:
+        row = await self._repository.create_announcement(payload)
+        return InternshipAnnouncement.model_validate(row)
 
-    def update_announcement(
+    async def update_announcement(
         self,
         announcement_id: UUID,
         payload: InternshipAnnouncementUpdate,
     ) -> InternshipAnnouncement:
-        announcement = self.get_announcement(announcement_id)
-        updated = announcement.model_copy(
-            update={**payload.model_dump(exclude_unset=True), "updated_at": datetime.now(timezone.utc)},
-        )
-        self._announcements[announcement_id] = updated
-        return updated
+        row = await self._repository.update_announcement(announcement_id, payload)
+        if row is None:
+            raise InternshipNotFoundError(f"Internship announcement {announcement_id} was not found")
+        return InternshipAnnouncement.model_validate(row)
 
-    def get_announcement(self, announcement_id: UUID) -> InternshipAnnouncement:
-        try:
-            return self._announcements[announcement_id]
-        except KeyError as exc:
-            raise InternshipNotFoundError(f"Internship announcement {announcement_id} was not found") from exc
+    async def get_announcement(self, announcement_id: UUID) -> InternshipAnnouncement:
+        row = await self._repository.get_announcement(announcement_id)
+        if row is None:
+            raise InternshipNotFoundError(f"Internship announcement {announcement_id} was not found")
+        return InternshipAnnouncement.model_validate(row)
 
-    def register_application(self, payload: InternshipApplicationCreate) -> InternshipApplication:
-        self.get_announcement(payload.announcement_id)
-        now = datetime.now(timezone.utc)
-        application = InternshipApplication(
-            id=uuid4(),
-            registration_number=self._next_registration_number(),
-            certificate_id=None,
-            created_at=now,
-            updated_at=now,
-            **payload.model_dump(),
-        )
-        self._applications[application.id] = application
-        return application
+    async def register_application(self, payload: InternshipApplicationCreate) -> InternshipApplication:
+        if await self._repository.get_announcement(payload.announcement_id) is None:
+            raise InternshipNotFoundError(f"Internship announcement {payload.announcement_id} was not found")
+        registration_number = await self._repository.allocate_counter("registration", start_value=100)
+        row = await self._repository.create_application(payload, registration_number)
+        return InternshipApplication.model_validate(row)
 
-    def update_application(
+    async def update_application(
         self,
         application_id: UUID,
         payload: InternshipApplicationUpdate,
     ) -> InternshipApplication:
-        application = self.get_application(application_id)
-        updated = application.model_copy(
-            update={**payload.model_dump(exclude_unset=True), "updated_at": datetime.now(timezone.utc)},
-        )
-        self._applications[application_id] = updated
-        return updated
+        row = await self._repository.update_application(application_id, payload)
+        if row is None:
+            raise InternshipNotFoundError(f"Internship application {application_id} was not found")
+        return InternshipApplication.model_validate(row)
 
-    def get_application(self, application_id: UUID) -> InternshipApplication:
-        try:
-            return self._applications[application_id]
-        except KeyError as exc:
-            raise InternshipNotFoundError(f"Internship application {application_id} was not found") from exc
+    async def get_application(self, application_id: UUID) -> InternshipApplication:
+        row = await self._repository.get_application(application_id)
+        if row is None:
+            raise InternshipNotFoundError(f"Internship application {application_id} was not found")
+        return InternshipApplication.model_validate(row)
 
-    def issue_certificate(
+    async def issue_certificate(
         self,
         application_id: UUID,
         payload: InternshipCertificateIssueRequest | None = None,
     ) -> InternshipCertificate:
-        application = self.get_application(application_id)
-        announcement = self.get_announcement(application.announcement_id)
+        application = await self._repository.get_application(application_id)
+        if application is None:
+            raise InternshipNotFoundError(f"Internship application {application_id} was not found")
+        announcement = await self._repository.get_announcement(application.announcement_id)
+        if announcement is None:
+            raise InternshipNotFoundError(f"Internship announcement {application.announcement_id} was not found")
 
-        existing = self._certificate_for_application(application_id)
+        existing = await self._repository.get_certificate_for_application(application_id)
         if existing is not None:
-            return existing
+            return InternshipCertificate.model_validate(existing)
 
         if application.status not in {
-            InternshipApplicationStatus.ACTIVE,
-            InternshipApplicationStatus.COMPLETED,
-            InternshipApplicationStatus.SHORTLISTED,
+            InternshipApplicationStatus.ACTIVE.value,
+            InternshipApplicationStatus.COMPLETED.value,
+            InternshipApplicationStatus.SHORTLISTED.value,
         }:
             raise InternshipCertificateUnavailableError(
                 "Certificate can be issued only for shortlisted, active, or completed interns",
             )
 
         certificate_id = uuid4()
-        verification_code = self._next_certificate_number()
+        verification_code = await self._repository.allocate_counter("certificate", start_value=500)
         verification_url = f"https://www.raushni.com/certificates/verify/{quote(verification_code)}"
         qr_code_svg = self._make_qr_svg(verification_url)
         now = datetime.now(timezone.utc)
-        completed = application.model_copy(
-            update={
-                "status": InternshipApplicationStatus.COMPLETED,
-                "completion_notes": payload.completion_notes if payload else application.completion_notes,
-                "certificate_id": certificate_id,
-                "updated_at": now,
-            },
-        )
-        self._applications[application_id] = completed
 
-        certificate = InternshipCertificate(
+        application.status = InternshipApplicationStatus.COMPLETED.value
+        if payload is not None and payload.completion_notes is not None:
+            application.completion_notes = payload.completion_notes
+        application.certificate_id = certificate_id
+        await self._repository.save_application(application)
+
+        certificate = InternshipCertificateModel(
             id=certificate_id,
             application_id=application_id,
             certificate_number=verification_code,
             verification_code=verification_code,
             verification_url=verification_url,
-            participant_name=completed.full_name,
+            participant_name=application.full_name,
             program_title=announcement.title,
-            track=completed.track,
+            track=application.track,
             issued_at=now,
-            status=CertificateStatus.ISSUED,
+            status=CertificateStatus.ISSUED.value,
             qr_code_svg=qr_code_svg,
             html_template=self._certificate_html(
-                participant_name=completed.full_name,
+                participant_name=application.full_name,
                 program_title=announcement.title,
-                track=completed.track,
+                track=application.track,
                 certificate_number=verification_code,
                 verification_url=verification_url,
                 issued_at=now,
                 qr_code_svg=qr_code_svg,
             ),
         )
-        self._certificates[certificate.id] = certificate
-        return certificate
+        created = await self._repository.create_certificate(certificate)
+        return InternshipCertificate.model_validate(created)
 
-    def verify_certificate(self, verification_code: str) -> InternshipCertificate:
-        for certificate in self._certificates.values():
-            if certificate.verification_code == verification_code and certificate.status == CertificateStatus.ISSUED:
-                return certificate
-        raise InternshipNotFoundError(f"Certificate {verification_code} was not found")
+    async def verify_certificate(self, verification_code: str) -> InternshipCertificate:
+        certificate = await self._repository.get_certificate_by_code(verification_code)
+        if certificate is None:
+            raise InternshipNotFoundError(f"Certificate {verification_code} was not found")
+        return InternshipCertificate.model_validate(certificate)
 
-    def delete_application(self, application_id: UUID) -> None:
-        self.get_application(application_id)
-        del self._applications[application_id]
-
-    def _certificate_for_application(self, application_id: UUID) -> InternshipCertificate | None:
-        for certificate in self._certificates.values():
-            if certificate.application_id == application_id:
-                return certificate
-        return None
-
-    def _next_registration_number(self) -> str:
-        self._registration_counter += 1
-        return f"RSH-INT-{datetime.now(timezone.utc).year}-{self._registration_counter}"
-
-    def _next_certificate_number(self) -> str:
-        self._certificate_counter += 1
-        return f"RSH-CERT-{datetime.now(timezone.utc).year}-{self._certificate_counter}"
+    async def delete_application(self, application_id: UUID) -> None:
+        deleted = await self._repository.delete_application(application_id)
+        if not deleted:
+            raise InternshipNotFoundError(f"Internship application {application_id} was not found")
 
     def _make_qr_svg(self, value: str) -> str:
         if qrcode is None:
@@ -334,55 +290,3 @@ class InternshipService:
   </section>
 </body>
 </html>"""
-
-    def _seed_defaults(self) -> None:
-        announcement = self.create_announcement(
-            InternshipAnnouncementCreate(
-                title="Internship 2026: AI Enabled Community Technology Program",
-                slug="internship-2026-ai-community-technology",
-                summary="A professional internship for students to gain practical exposure, final-year project support, AI-enabled delivery experience, and career guidance.",
-                description="Raushni Educational & Social Welfare Trust invites students and early-career learners to work on real community technology workflows across web development, content operations, data, AI enablement, documentation, and outreach.",
-                start_date=date(2026, 6, 15),
-                end_date=date(2026, 8, 15),
-                registration_deadline=date(2026, 6, 14),
-                event_date=date(2026, 6, 15),
-                event_time="01:00 PM",
-                location="Web/Virtual, India",
-                apply_url="/internship-registration",
-                benefits=[
-                    "Real industry exposure",
-                    "Final year project work",
-                    "Hands-on experience and AI enabled delivery",
-                    "Career guidance",
-                    "Completion certificate with QR verification",
-                ],
-                tracks=[
-                    "Web Development",
-                    "AI Enabled Operations",
-                    "Content and Outreach",
-                    "Data and Reporting",
-                ],
-                eligibility=[
-                    "Students, freshers, and early-career learners",
-                    "Basic computer and internet access",
-                    "Commitment to weekly progress and professional communication",
-                ],
-            ),
-        )
-
-        self.register_application(
-            InternshipApplicationCreate(
-                announcement_id=announcement.id,
-                full_name="Sample Intern",
-                email="intern@example.org",
-                phone="+91 7827860062",
-                city="Virtual",
-                college="Raushni Learning Network",
-                course="Computer Applications",
-                track="Web Development",
-                github_url="https://github.com/owais4u/raushni",
-                portfolio_url=None,
-                motivation="I want to contribute to social impact technology while building practical delivery experience.",
-                status=InternshipApplicationStatus.ACTIVE,
-            ),
-        )

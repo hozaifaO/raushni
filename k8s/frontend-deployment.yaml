@@ -68,6 +68,16 @@ spec:
                 secretKeyRef:
                   name: raushni-secrets
                   key: NEXTAUTH_STAFF_PASSWORD
+            - name: INTERNAL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: raushni-secrets
+                  key: INTERNAL_API_KEY
+            - name: CMS_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: raushni-secrets
+                  key: CMS_API_TOKEN
             - name: DD_SERVICE
               value: raushni-frontend
             - name: OTEL_SERVICE_NAME

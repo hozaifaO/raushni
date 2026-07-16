@@ -2,9 +2,12 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from enum import StrEnum
+from typing import Annotated
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
+
+from app.core.sanitize import OptionalFreeTextSanitizedStr, OptionalSanitizedStr, SanitizedStr
 
 
 class CampaignStatus(StrEnum):
@@ -25,10 +28,13 @@ class CampaignCategory(StrEnum):
     OTHER = "other"
 
 
+BoundedItem = Annotated[str, Field(max_length=400)]
+
+
 class CampaignBase(BaseModel):
-    title: str = Field(..., min_length=3, max_length=180)
-    slug: str = Field(..., min_length=3, max_length=140)
-    summary: str = Field(..., min_length=10, max_length=900)
+    title: SanitizedStr = Field(..., min_length=3, max_length=180)
+    slug: SanitizedStr = Field(..., min_length=3, max_length=140)
+    summary: SanitizedStr = Field(..., min_length=10, max_length=900)
     category: CampaignCategory = CampaignCategory.EDUCATION
     status: CampaignStatus = CampaignStatus.DRAFT
     target_amount: float = Field(..., ge=1)
@@ -36,15 +42,15 @@ class CampaignBase(BaseModel):
     currency: str = Field(default="INR", min_length=3, max_length=3)
     start_date: date
     end_date: date
-    location: str = Field(default="India", min_length=2, max_length=180)
+    location: SanitizedStr = Field(default="India", min_length=2, max_length=180)
     beneficiary_count: int = Field(default=0, ge=0)
-    cover_image_url: str | None = Field(default=None, max_length=400)
-    public_url: str | None = Field(default=None, max_length=400)
-    cms_slug: str | None = Field(default=None, max_length=160)
-    owner: str = Field(default="Fundraising Team", max_length=120)
-    highlights: list[str] = Field(default_factory=list)
-    impact_metrics: list[str] = Field(default_factory=list)
-    notes: str | None = Field(default=None, max_length=1200)
+    cover_image_url: OptionalSanitizedStr = Field(default=None, max_length=400)
+    public_url: OptionalSanitizedStr = Field(default=None, max_length=400)
+    cms_slug: OptionalSanitizedStr = Field(default=None, max_length=160)
+    owner: SanitizedStr = Field(default="Fundraising Team", max_length=120)
+    highlights: list[BoundedItem] = Field(default_factory=list, max_length=20)
+    impact_metrics: list[BoundedItem] = Field(default_factory=list, max_length=20)
+    notes: OptionalFreeTextSanitizedStr = Field(default=None, max_length=1200)
 
 
 class CampaignCreate(CampaignBase):
@@ -52,9 +58,9 @@ class CampaignCreate(CampaignBase):
 
 
 class CampaignUpdate(BaseModel):
-    title: str | None = Field(default=None, min_length=3, max_length=180)
-    slug: str | None = Field(default=None, min_length=3, max_length=140)
-    summary: str | None = Field(default=None, min_length=10, max_length=900)
+    title: SanitizedStr | None = Field(default=None, min_length=3, max_length=180)
+    slug: SanitizedStr | None = Field(default=None, min_length=3, max_length=140)
+    summary: SanitizedStr | None = Field(default=None, min_length=10, max_length=900)
     category: CampaignCategory | None = None
     status: CampaignStatus | None = None
     target_amount: float | None = Field(default=None, ge=1)
@@ -62,26 +68,28 @@ class CampaignUpdate(BaseModel):
     currency: str | None = Field(default=None, min_length=3, max_length=3)
     start_date: date | None = None
     end_date: date | None = None
-    location: str | None = Field(default=None, min_length=2, max_length=180)
+    location: SanitizedStr | None = Field(default=None, min_length=2, max_length=180)
     beneficiary_count: int | None = Field(default=None, ge=0)
-    cover_image_url: str | None = Field(default=None, max_length=400)
-    public_url: str | None = Field(default=None, max_length=400)
-    cms_slug: str | None = Field(default=None, max_length=160)
-    owner: str | None = Field(default=None, max_length=120)
-    highlights: list[str] | None = None
-    impact_metrics: list[str] | None = None
-    notes: str | None = Field(default=None, max_length=1200)
+    cover_image_url: OptionalSanitizedStr = Field(default=None, max_length=400)
+    public_url: OptionalSanitizedStr = Field(default=None, max_length=400)
+    cms_slug: OptionalSanitizedStr = Field(default=None, max_length=160)
+    owner: SanitizedStr | None = Field(default=None, max_length=120)
+    highlights: list[BoundedItem] | None = Field(default=None, max_length=20)
+    impact_metrics: list[BoundedItem] | None = Field(default=None, max_length=20)
+    notes: OptionalFreeTextSanitizedStr = Field(default=None, max_length=1200)
 
 
 class CampaignDonationCreate(BaseModel):
-    donor_name: str = Field(..., min_length=2, max_length=140)
+    donor_name: SanitizedStr = Field(..., min_length=2, max_length=140)
     amount: float = Field(..., gt=0)
-    payment_method: str = Field(default="upi", min_length=2, max_length=80)
-    receipt_no: str | None = Field(default=None, max_length=80)
-    note: str | None = Field(default=None, max_length=500)
+    payment_method: SanitizedStr = Field(default="upi", min_length=2, max_length=80)
+    receipt_no: OptionalSanitizedStr = Field(default=None, max_length=80)
+    note: OptionalFreeTextSanitizedStr = Field(default=None, max_length=500)
 
 
 class CampaignDonation(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     campaign_id: UUID
     donor_name: str

@@ -1,10 +1,155 @@
-version: '3.8'
+# Production-oriented Compose stack.
+# Requires secrets via environment / env file — no soft defaults for keys.
+#
+# Example:
+#   docker compose --env-file .env.example -f docker-compose.prod.yml config
+#   docker compose --env-file .env -f docker-compose.prod.yml up -d --build
 
 services:
   postgres:
     build: ./database
     container_name: raushni-postgres
-    restart: always
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_P
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - raushni_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: raushni-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - raushni_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: raushni-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${BACKEND_DATABASE_URL:?BACKEND_DATABASE_URL is required}
+      REDIS_URL: ${REDIS_URL:?REDIS_URL is required}
+      CMS_INTERNAL_URL: ${CMS_INTERNAL_URL:-http://strapi:1337}
+      CMS_API_TOKEN: ${CMS_API_TOKEN:?CMS_API_TOKEN is required}
+      REQUIRE_AUTH: ${REQUIRE_AUTH:-true}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:?INTERNAL_API_KEY is required}
+      APP_PUBLIC_URL: ${APP_PUBLIC_URL:?APP_PUBLIC_URL is required}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      ALEMBIC_AUTO_UPGRADE: ${ALEMBIC_AUTO_UPGRADE:-false}
+      REDIS_CACHE_TTL_SECONDS: ${REDIS_CACHE_TTL_SECONDS:-60}
+      OTEL_SDK_DISABLED: ${OTEL_SDK_DISABLED:-true}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - raushni_network
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=3)\""]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  strapi:
+    build:
+      context: ./cms
+      dockerfile: Dockerfile
+    container_name: raushni-strapi
+    restart: unless-stopped
+    environment:
+      HOST: 0.0.0.0
+      PORT: 1337
+      NODE_ENV: production
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      PUBLIC_URL: ${CMS_PUBLIC_URL:?CMS_PUBLIC_URL is required}
+      ADMIN_URL: ${STRAPI_ADMIN_URL:?STRAPI_ADMIN_URL is required}
+      APP_KEYS: ${STRAPI_APP_KEYS:?STRAPI_APP_KEYS is required}
+      API_TOKEN_SALT: ${STRAPI_API_TOKEN_SALT:?STRAPI_API_TOKEN_SALT is required}
+      ADMIN_JWT_SECRET: ${STRAPI_ADMIN_JWT_SECRET:?STRAPI_ADMIN_JWT_SECRET is required}
+      JWT_SECRET: ${STRAPI_JWT_SECRET:?STRAPI_JWT_SECRET is required}
+      TRANSFER_TOKEN_SALT: ${STRAPI_TRANSFER_TOKEN_SALT:?STRAPI_TRANSFER_TOKEN_SALT is required}
+      CMS_API_TOKEN: ${CMS_API_TOKEN:?CMS_API_TOKEN is required}
+      CORS_ORIGINS: ${CMS_CORS_ORIGINS:-}
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: ${CMS_DATABASE_NAME:-raushni_cms}
+      DATABASE_USERNAME: ${CMS_DATABASE_USERNAME:?CMS_DATABASE_USERNAME is required}
+      DATABASE_PASSWORD: ${CMS_DATABASE_PASSWORD:?CMS_DATABASE_PASSWORD is required}
+      DATABASE_SSL: ${CMS_DATABASE_SSL:-false}
+      OTEL_SDK_DISABLED: ${OTEL_SDK_DISABLED:-true}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - raushni_network
+    volumes:
+      - strapi_uploads:/opt/app/public/uploads
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:1337/_health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: raushni-frontend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-}
+      NEXT_PUBLIC_CMS_URL: ${NEXT_PUBLIC_CMS_URL:?NEXT_PUBLIC_CMS_URL is required}
+      NEXT_PUBLIC_REQUIRE_AUTH: ${NEXT_PUBLIC_REQUIRE_AUTH:-true}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:?NEXTAUTH_URL is required}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:?NEXTAUTH_SECRET is required}
+      NEXTAUTH_ADMIN_EMAIL: ${NEXTAUTH_ADMIN_EMAIL:?NEXTAUTH_ADMIN_EMAIL is required}
+      NEXTAUTH_ADMIN_PASSWORD: ${NEXTAUTH_ADMIN_PASSWORD:?NEXTAUTH_ADMIN_PASSWORD is required}
+      NEXTAUTH_STAFF_EMAIL: ${NEXTAUTH_STAFF_EMAIL:?NEXTAUTH_STAFF_EMAIL is required}
+      NEXTAUTH_STAFF_PASSWORD: ${NEXTAUTH_STAFF_PASSWORD:?NEXTAUTH_STAFF_PASSWORD is required}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:?INTERNAL_API_KEY is required}
+      CMS_API_TOKEN: ${CMS_API_TOKEN:?CMS_API_TOKEN is required}
+      API_INTERNAL_URL: ${API_INTERNAL_URL:-http://backend:8000}
+      CMS_INTERNAL_URL: ${CMS_INTERNAL_URL:-http://strapi:1337}
+      OTEL_SDK_DISABLED: ${OTEL_SDK_DISABLED:-true}
+    depends_on:
+      backend:
+        condition: service_healthy
+      strapi:
+        condition: service_healthy
+    networks:
+      - raushni_network
+
+networks:
+  raushni_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  strapi_uploads:

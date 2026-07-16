@@ -1,5 +1,5 @@
-import ComingSoonPage from "../_components/ComingSoonPage";
+import { redirect } from "next/navigation";
 
-export default function Page() {
-  return <ComingSoonPage title="Reports" />;
+export default function ReportsPage() {
+  redirect("/dashboard");
 }

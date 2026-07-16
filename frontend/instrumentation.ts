@@ -3,6 +3,9 @@ export async function register() {
     return;
   }
 
+  const { assertFrontendRuntimeSecrets } = await import("@/lib/auth/runtime-secrets");
+  assertFrontendRuntimeSecrets();
+
   if (process.env.OTEL_SDK_DISABLED === "true" || process.env.OTEL_SDK_DISABLED === "1") {
     return;
   }

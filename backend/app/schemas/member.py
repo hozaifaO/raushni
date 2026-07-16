@@ -6,6 +6,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.core.sanitize import OptionalFreeTextSanitizedStr, OptionalSanitizedStr, SanitizedStr
+
 
 class MemberStatus(StrEnum):
     ACTIVE = "active"
@@ -14,15 +16,15 @@ class MemberStatus(StrEnum):
 
 
 class MemberBase(BaseModel):
-    full_name: str = Field(..., min_length=2, max_length=120)
+    full_name: SanitizedStr = Field(..., min_length=2, max_length=120)
     email: str | None = Field(default=None, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
-    phone: str = Field(..., min_length=7, max_length=20)
-    role: str = Field(default="Volunteer", min_length=2, max_length=80)
+    phone: SanitizedStr = Field(..., min_length=7, max_length=20)
+    role: SanitizedStr = Field(default="Volunteer", min_length=2, max_length=80)
     status: MemberStatus = MemberStatus.ACTIVE
     joined_on: date = Field(default_factory=date.today)
-    address: str | None = Field(default=None, max_length=240)
-    emergency_contact: str | None = Field(default=None, max_length=120)
-    notes: str | None = Field(default=None, max_length=500)
+    address: OptionalSanitizedStr = Field(default=None, max_length=240)
+    emergency_contact: OptionalSanitizedStr = Field(default=None, max_length=120)
+    notes: OptionalFreeTextSanitizedStr = Field(default=None, max_length=500)
 
 
 class MemberCreate(MemberBase):
@@ -30,15 +32,15 @@ class MemberCreate(MemberBase):
 
 
 class MemberUpdate(BaseModel):
-    full_name: str | None = Field(default=None, min_length=2, max_length=120)
+    full_name: SanitizedStr | None = Field(default=None, min_length=2, max_length=120)
     email: str | None = Field(default=None, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
-    phone: str | None = Field(default=None, min_length=7, max_length=20)
-    role: str | None = Field(default=None, min_length=2, max_length=80)
+    phone: SanitizedStr | None = Field(default=None, min_length=7, max_length=20)
+    role: SanitizedStr | None = Field(default=None, min_length=2, max_length=80)
     status: MemberStatus | None = None
     joined_on: date | None = None
-    address: str | None = Field(default=None, max_length=240)
-    emergency_contact: str | None = Field(default=None, max_length=120)
-    notes: str | None = Field(default=None, max_length=500)
+    address: OptionalSanitizedStr = Field(default=None, max_length=240)
+    emergency_contact: OptionalSanitizedStr = Field(default=None, max_length=120)
+    notes: OptionalFreeTextSanitizedStr = Field(default=None, max_length=500)
 
 
 class Member(MemberBase):

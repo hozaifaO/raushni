@@ -68,13 +68,23 @@ spec:
                 secretKeyRef:
                   name: raushni-secrets
                   key: STRIPE_WEBHOOK_SECRET
+            - name: INTERNAL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: raushni-secrets
+                  key: INTERNAL_API_KEY
+            - name: CMS_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: raushni-secrets
+                  key: CMS_API_TOKEN
             - name: DD_SERVICE
               value: raushni-backend
             - name: OTEL_SERVICE_NAME
               value: raushni-backend
           readinessProbe:
             httpGet:
-              path: /health
+              path: /health/ready
               port: http
             periodSeconds: 10
             timeoutSeconds: 3

@@ -120,6 +120,17 @@ spec:
                 secretKeyRef:
                   name: raushni-secrets
                   key: STRAPI_TRANSFER_TOKEN_SALT
+            - name: CMS_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: raushni-secrets
+                  key: CMS_API_TOKEN
+            - name: ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  name: raushni-config
+                  key: ENVIRONMENT
+                  optional: true
             - name: DD_SERVICE
               value: raushni-cms
             - name: OTEL_SERVICE_NAME

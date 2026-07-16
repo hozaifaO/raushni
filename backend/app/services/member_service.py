@@ -1,8 +1,10 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from uuid import UUID, uuid4
+from uuid import UUID
 
+from app.core.config import get_settings
+from app.core.redis import cache_delete, cache_get_json, cache_set_json
+from app.repositories.member_repository import MemberRepository
 from app.schemas.member import Member, MemberCreate, MemberListResponse, MemberStatus, MemberUpdate
 
 
@@ -10,72 +12,63 @@ class MemberNotFoundError(LookupError):
     pass
 
 
-class MemberService:
-    def __init__(self) -> None:
-        self._members: dict[UUID, Member] = {}
+def _member_cache_key(organization_id: UUID, member_id: UUID) -> str:
+    return f"org:{organization_id}:member:{member_id}"
 
-    def list_members(
+
+class MemberService:
+    def __init__(self, repository: MemberRepository) -> None:
+        self._repository = repository
+        self._ttl = get_settings().redis_cache_ttl_seconds
+
+    @property
+    def _organization_id(self) -> UUID:
+        return self._repository._organization_id
+
+    async def list_members(
         self,
         *,
         search: str | None = None,
         status: MemberStatus | None = None,
     ) -> MemberListResponse:
-        items = list(self._members.values())
-
-        if search:
-            query = search.strip().lower()
-            items = [
-                member
-                for member in items
-                if query in member.full_name.lower()
-                or query in member.phone.lower()
-                or (member.email is not None and query in member.email.lower())
-                or query in member.role.lower()
-            ]
-
-        if status is not None:
-            items = [member for member in items if member.status == status]
-
-        items.sort(key=lambda member: (member.joined_on, member.full_name.lower()), reverse=True)
-        all_members = list(self._members.values())
-
+        items, total, active, inactive, pending = await self._repository.list(
+            search=search,
+            status=status,
+        )
         return MemberListResponse(
-            items=items,
-            total=len(all_members),
-            active=sum(1 for member in all_members if member.status == MemberStatus.ACTIVE),
-            inactive=sum(1 for member in all_members if member.status == MemberStatus.INACTIVE),
-            pending=sum(1 for member in all_members if member.status == MemberStatus.PENDING),
+            items=[Member.model_validate(item) for item in items],
+            total=total,
+            active=active,
+            inactive=inactive,
+            pending=pending,
         )
 
-    def create_member(self, payload: MemberCreate) -> Member:
-        now = datetime.now(timezone.utc)
-        member = Member(
-            id=uuid4(),
-            created_at=now,
-            updated_at=now,
-            **payload.model_dump(),
-        )
-        self._members[member.id] = member
-        return member
+    async def create_member(self, payload: MemberCreate) -> Member:
+        member = await self._repository.create(payload)
+        return Member.model_validate(member)
 
-    def get_member(self, member_id: UUID) -> Member:
-        try:
-            return self._members[member_id]
-        except KeyError as exc:
-            raise MemberNotFoundError(f"Member {member_id} was not found") from exc
+    async def get_member(self, member_id: UUID) -> Member:
+        cache_key = _member_cache_key(self._organization_id, member_id)
+        cached = await cache_get_json(cache_key)
+        if cached is not None:
+            return Member.model_validate(cached)
 
-    def update_member(self, member_id: UUID, payload: MemberUpdate) -> Member:
-        member = self.get_member(member_id)
-        updates = payload.model_dump(exclude_unset=True)
-        updated = member.model_copy(
-            update={
-                **updates,
-                "updated_at": datetime.now(timezone.utc),
-            },
-        )
-        self._members[member_id] = updated
-        return updated
+        member = await self._repository.get(member_id)
+        if member is None:
+            raise MemberNotFoundError(f"Member {member_id} was not found")
+        schema = Member.model_validate(member)
+        await cache_set_json(cache_key, schema.model_dump(mode="json"), self._ttl)
+        return schema
 
-    def delete_member(self, member_id: UUID) -> None:
-        self.get_member(member_id)
-        del self._members[member_id]
+    async def update_member(self, member_id: UUID, payload: MemberUpdate) -> Member:
+        member = await self._repository.update(member_id, payload)
+        if member is None:
+            raise MemberNotFoundError(f"Member {member_id} was not found")
+        await cache_delete(_member_cache_key(self._organization_id, member_id))
+        return Member.model_validate(member)
+
+    async def delete_member(self, member_id: UUID) -> None:
+        deleted = await self._repository.delete(member_id)
+        if not deleted:
+            raise MemberNotFoundError(f"Member {member_id} was not found")
+        await cache_delete(_member_cache_key(self._organization_id, member_id))

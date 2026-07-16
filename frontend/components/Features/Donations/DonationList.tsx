@@ -87,8 +87,13 @@ export default function DonationList({
             {donations.map((donation) => (
               <tr key={donation.id} className="hover:bg-orange-50/50">
                 <td className="whitespace-nowrap px-4 py-4">
-                  <div className="font-semibold text-gray-950">{donation.donor_name}</div>
-                  <div className="text-sm text-gray-500">{donation.donor_phone}</div>
+                  <div className="font-semibold text-gray-950">
+                    {donation.donor_name}
+                    {donation.is_anonymous ? (
+                      <span className="ml-2 text-xs font-medium text-gray-500">(anonymous)</span>
+                    ) : null}
+                  </div>
+                  <div className="text-sm text-gray-500">{donation.donor_phone || "Phone not set"}</div>
                   <div className="text-sm text-gray-500">{donation.donor_email || "Email not set"}</div>
                 </td>
                 <td className="whitespace-nowrap px-4 py-4">
@@ -113,7 +118,11 @@ export default function DonationList({
                 <td className="whitespace-nowrap px-4 py-4">
                   <div className="text-sm font-medium text-gray-900">{donation.receipt_number}</div>
                   <div className="text-sm text-gray-500">
-                    {donation.receipt_issued ? "Issued" : "Ready when paid"}
+                    {donation.receipt_issued
+                      ? donation.receipt_issued_at
+                        ? `Issued ${formatDate(donation.receipt_issued_at)}`
+                        : "Issued"
+                      : "Ready when paid"}
                   </div>
                 </td>
                 <td className="whitespace-nowrap px-4 py-4">

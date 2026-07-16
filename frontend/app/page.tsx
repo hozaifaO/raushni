@@ -261,7 +261,7 @@ export default function HomePage() {
 
     async function loadLandingContent() {
       try {
-        const response = await fetch("/cms/api/landing-page?populate=*", {
+        const response = await fetch("/cms/api/landing-pages?populate=*", {
           signal: controller.signal,
         });
 
@@ -270,7 +270,9 @@ export default function HomePage() {
         }
 
         const payload = await response.json();
-        const attributes = payload?.data?.attributes;
+        const attributes = Array.isArray(payload?.data)
+          ? payload.data[0]?.attributes
+          : payload?.data?.attributes;
 
         if (attributes) {
           setLandingContent(normalizeLandingContent(attributes));

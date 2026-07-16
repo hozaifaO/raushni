@@ -26,6 +26,15 @@ def test_health_endpoint_returns_operational_payload(client: TestClient) -> None
     assert parse_iso_timestamp(payload["timestamp"]).tzinfo is not None
 
 
+def test_ready_endpoint_reports_database(client: TestClient) -> None:
+    response = client.get("/health/ready")
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["database"] == "ok"
+    assert payload["status"] in {"ready", "degraded"}
+    assert "redis" in payload
+
+
 def test_api_root_returns_discoverable_contract(client: TestClient) -> None:
     response = client.get("/api")
 
@@ -35,6 +44,7 @@ def test_api_root_returns_discoverable_contract(client: TestClient) -> None:
     assert payload["version"] == APP_VERSION
     assert payload["status"] == "running"
     assert "GET /health" in payload["endpoints"]
+    assert "GET /health/ready" in payload["endpoints"]
     assert "GET /api" in payload["endpoints"]
     assert "GET /api/v1/dashboard/status" in payload["endpoints"]
 

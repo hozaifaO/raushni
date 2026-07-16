@@ -44,7 +44,6 @@ def configure_telemetry(app: FastAPI) -> None:
         from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
         from opentelemetry.instrumentation.logging import LoggingInstrumentor
         from opentelemetry.instrumentation.redis import RedisInstrumentor
-        from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
         from opentelemetry.sdk.metrics import MeterProvider
         from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
         from opentelemetry.sdk.resources import Resource
@@ -69,7 +68,29 @@ def configure_telemetry(app: FastAPI) -> None:
     )
     HTTPXClientInstrumentor().instrument()
     LoggingInstrumentor().instrument(set_logging_format=True)
+    # SQLAlchemy/Redis engines are attached after init_db/init_redis via instrument_data_clients.
     RedisInstrumentor().instrument()
-    SQLAlchemyInstrumentor().instrument(enable_commenter=True)
 
     logger.info("OpenTelemetry configured for %s", _resource_attributes()["service.name"])
+
+
+def instrument_data_clients(engine: object | None = None) -> None:
+    """Attach SQLAlchemy instrumentation to the live async engine after init_db."""
+    if not telemetry_enabled():
+        return
+    try:
+        from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
+        from sqlalchemy.ext.asyncio import AsyncEngine
+    except ImportError as exc:
+        logger.warning("OpenTelemetry SQLAlchemy instrumentor unavailable: %s", exc)
+        return
+
+    if engine is None:
+        return
+
+    try:
+        sync_engine = engine.sync_engine if isinstance(engine, AsyncEngine) else engine
+        SQLAlchemyInstrumentor().instrument(engine=sync_engine, enable_commenter=True)
+        logger.info("SQLAlchemy OpenTelemetry instrumentation attached to live engine")
+    except Exception as exc:  # noqa: BLE001 — telemetry must never break boot
+        logger.warning("Failed to instrument SQLAlchemy engine: %s", exc)

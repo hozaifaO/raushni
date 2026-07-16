@@ -20,6 +20,10 @@ FROM base AS dependencies
 RUN npm install --legacy-peer-deps
 
 FROM dependencies AS build
+# Admin SPA bakes STRAPI_ADMIN_BACKEND_URL at build time. Empty = same-origin
+# (works for http://localhost:1337 and https://localhost/admin via nginx).
+ARG STRAPI_ADMIN_BACKEND_URL=
+ENV STRAPI_ADMIN_BACKEND_URL=$STRAPI_ADMIN_BACKEND_URL
 COPY . .
 RUN npm run build
 

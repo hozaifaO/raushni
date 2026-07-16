@@ -1,121 +1,145 @@
 from __future__ import annotations
 
+import hmac
 import os
-import json
-import time
-from typing import Any
-from urllib.request import urlopen
+import uuid
 
-from fastapi import Header, HTTPException, status
-from jose import JWTError, jwt
+from fastapi import Depends, Header, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.constants.roles import UserRole, can_write, normalize_role
+from app.core.config import get_settings
+from app.core.db import get_db
+from app.models.organization import OrganizationModel
+from app.repositories.organization_repository import OrganizationRepository
 
 
 READ_ONLY_MESSAGE = "Guest users have read-only access."
-_JWKS_CACHE: dict[str, Any] = {"expires_at": 0, "keys": []}
 
 
 def _auth_required() -> bool:
-    return os.getenv("REQUIRE_AUTH", "false").lower() == "true"
+    return get_settings().require_auth or os.getenv("REQUIRE_AUTH", "false").lower() == "true"
 
 
-def _oidc_issuer() -> str | None:
-    return os.getenv("OIDC_ISSUER")
+def _configured_api_key() -> str:
+    return (get_settings().internal_api_key or os.getenv("INTERNAL_API_KEY", "")).strip()
 
 
-def _oidc_audience() -> str | None:
-    return os.getenv("OIDC_AUDIENCE")
-
-
-def _verify_audience() -> bool:
-    return os.getenv("OIDC_VERIFY_AUDIENCE", "false").lower() == "true"
-
-
-def _load_jwks() -> list[dict[str, Any]]:
-    issuer = _oidc_issuer()
-    if not issuer:
-        return []
-    now = time.time()
-    if _JWKS_CACHE["expires_at"] > now:
-        return _JWKS_CACHE["keys"]
-    with urlopen(f"{issuer.rstrip('/')}/protocol/openid-connect/certs", timeout=5) as response:
-        payload = json.loads(response.read().decode("utf-8"))
-    _JWKS_CACHE["keys"] = payload.get("keys", [])
-    _JWKS_CACHE["expires_at"] = now + 300
-    return _JWKS_CACHE["keys"]
-
-
-def _decode_bearer_token(authorization: str | None) -> dict[str, Any] | None:
+def _extract_api_key(
+    x_api_key: str | None,
+    authorization: str | None,
+) -> str | None:
+    if x_api_key and x_api_key.strip():
+        return x_api_key.strip()
     if not authorization:
         return None
     scheme, _, token = authorization.partition(" ")
-    if scheme.lower() != "bearer" or not token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authorization header.")
+    if scheme.lower() == "bearer" and token.strip():
+        return token.strip()
+    return None
 
-    issuer = _oidc_issuer()
-    audience = _oidc_audience() if _verify_audience() else None
-    if not issuer:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="OIDC issuer is not configured.")
 
-    try:
-        header = jwt.get_unverified_header(token)
-        key = next((item for item in _load_jwks() if item.get("kid") == header.get("kid")), None)
-        if key is None:
-            raise JWTError("Signing key not found")
-        return jwt.decode(
-            token,
-            key,
-            algorithms=[header.get("alg", "RS256")],
-            audience=audience,
-            issuer=issuer.rstrip("/"),
-            options={"verify_aud": _verify_audience()},
+def _api_key_valid(provided: str | None) -> bool:
+    expected = _configured_api_key()
+    if not expected or not provided:
+        return False
+    return hmac.compare_digest(provided, expected)
+
+
+def require_service_key(
+    x_api_key: str | None = Header(default=None, alias="X-API-Key"),
+    authorization: str | None = Header(default=None),
+) -> None:
+    """When REQUIRE_AUTH is true, demand a valid INTERNAL_API_KEY."""
+    if not _auth_required():
+        return
+    provided = _extract_api_key(x_api_key, authorization)
+    if not _api_key_valid(provided):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Valid service API key is required.",
         )
-    except JWTError as exc:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired access token.") from exc
 
 
-def _role_from_claims(claims: dict[str, Any] | None) -> UserRole | None:
-    if not claims:
-        return None
-    roles: list[str] = []
-    realm_roles = claims.get("realm_access", {}).get("roles", [])
-    if isinstance(realm_roles, list):
-        roles.extend(str(role) for role in realm_roles)
-    resource_access = claims.get("resource_access", {})
-    if isinstance(resource_access, dict):
-        for client in resource_access.values():
-            client_roles = client.get("roles", []) if isinstance(client, dict) else []
-            if isinstance(client_roles, list):
-                roles.extend(str(role) for role in client_roles)
-    for role in roles:
-        normalized = normalize_role(role)
-        if normalized == UserRole.ADMIN:
-            return normalized
-    for role in roles:
-        normalized = normalize_role(role)
-        if normalized == UserRole.STAFF:
-            return normalized
-    return UserRole.GUEST
+async def get_current_organization(
+    _service_key: None = Depends(require_service_key),
+    session: AsyncSession = Depends(get_db),
+    x_tenant_slug: str | None = Header(default=None, alias="X-Tenant-Slug"),
+    x_organization_id: str | None = Header(default=None, alias="X-Organization-Id"),
+) -> OrganizationModel:
+    """
+    Resolve the current organization after service-key auth.
+
+    X-Tenant-Slug is always authoritative (falls back to DEFAULT_TENANT_SLUG).
+    X-Organization-Id is optional consistency check only — never switches tenants.
+    """
+    repo = OrganizationRepository(session)
+    settings = get_settings()
+    slug = (x_tenant_slug or "").strip().lower() or settings.default_tenant_slug
+
+    org = await repo.get_by_slug(slug)
+    if org is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Organization '{slug}' was not found.",
+        )
+
+    if x_organization_id and x_organization_id.strip():
+        try:
+            claimed = uuid.UUID(x_organization_id.strip())
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="X-Organization-Id must be a valid UUID.",
+            ) from exc
+        if claimed != org.id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="X-Organization-Id does not match X-Tenant-Slug.",
+            )
+
+    return org
 
 
 def get_current_role(
     authorization: str | None = Header(default=None),
-    x_user_role: str | None = Header(default=None),
+    x_api_key: str | None = Header(default=None, alias="X-API-Key"),
+    x_user_role: str | None = Header(default=None, alias="X-User-Role"),
 ) -> UserRole:
-    token_role = _role_from_claims(_decode_bearer_token(authorization))
-    if token_role is not None:
-        return token_role
-    if _auth_required():
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication is required.")
+    """
+    Resolve caller role.
+
+    - REQUIRE_AUTH=true: INTERNAL_API_KEY required; role comes from X-User-Role
+      asserted by the Next.js BFF after getServerSession.
+    - REQUIRE_AUTH=false: allow local DX; prefer valid API key when present.
+    """
+    provided = _extract_api_key(x_api_key, authorization)
+    key_ok = _api_key_valid(provided)
+
+    if _auth_required() and not key_ok:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Valid service API key is required.",
+        )
+
+    # With a valid service key, trust BFF-asserted role headers.
+    if key_ok:
+        return normalize_role(x_user_role)
+
+    # Local-only fallback when REQUIRE_AUTH is false and no key was sent.
     return normalize_role(x_user_role)
 
 
 def require_write_access(
     authorization: str | None = Header(default=None),
+    x_api_key: str | None = Header(default=None, alias="X-API-Key"),
     x_user_role: str | None = Header(default=None, alias="X-User-Role"),
 ) -> UserRole:
-    role = get_current_role(authorization=authorization, x_user_role=x_user_role)
+    role = get_current_role(
+        authorization=authorization,
+        x_api_key=x_api_key,
+        x_user_role=x_user_role,
+    )
     if not can_write(role):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -126,9 +150,14 @@ def require_write_access(
 
 def require_admin_access(
     authorization: str | None = Header(default=None),
+    x_api_key: str | None = Header(default=None, alias="X-API-Key"),
     x_user_role: str | None = Header(default=None, alias="X-User-Role"),
 ) -> UserRole:
-    role = get_current_role(authorization=authorization, x_user_role=x_user_role)
+    role = get_current_role(
+        authorization=authorization,
+        x_api_key=x_api_key,
+        x_user_role=x_user_role,
+    )
     if role != UserRole.ADMIN:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

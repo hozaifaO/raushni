@@ -2,7 +2,7 @@
 
 import { CheckCircle2, Github, Send, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
-import { fallbackPages, type CmsPublicPage } from "@/lib/cms/publicContent";
+import { fallbackPages, type CmsPublicPage } from "@/lib/cms/publicContentShared";
 import {
   listPublicInternships,
   registerInternshipApplication,
@@ -130,7 +130,7 @@ export default function Page() {
   };
 
   return (
-    <section className="bg-[#f7f7f7]">
+    <section className="bg-white">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-8">
         <div className="overflow-hidden rounded-lg border border-stone-200 bg-white shadow-sm">
           {loading ? (

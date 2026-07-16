@@ -22,12 +22,14 @@ export type DonationPurpose =
 
 export type Donation = {
   id: string;
+  organization_id: string;
   donor_name: string;
   donor_email: string | null;
   donor_phone: string;
   donor_address: string | null;
   donor_pan: string | null;
   donor_type: string;
+  is_anonymous: boolean;
   amount: number;
   currency: string;
   purpose: DonationPurpose;
@@ -42,8 +44,22 @@ export type Donation = {
   checkout_url: string | null;
   receipt_number: string;
   receipt_issued: boolean;
+  receipt_issued_at: string | null;
+  receipt_snapshot: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
+};
+
+export type DonationStatusEvent = {
+  id: string;
+  donation_id: string;
+  from_status: string | null;
+  to_status: string;
+  transaction_reference: string | null;
+  actor_role: string | null;
+  actor_email: string | null;
+  note: string | null;
+  created_at: string;
 };
 
 export type DonationFormValues = {
@@ -53,6 +69,7 @@ export type DonationFormValues = {
   donor_address: string;
   donor_pan: string;
   donor_type: string;
+  is_anonymous: boolean;
   amount: string;
   currency: string;
   purpose: DonationPurpose;

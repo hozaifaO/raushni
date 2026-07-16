@@ -1,12 +1,16 @@
 #!/usr/bin/env node
 
 const apiUrl = (process.env.API_BASE_URL || process.env.API_PUBLIC_URL || "https://api.raushni-dev.com").replace(/\/$/, "");
+const apiKey = process.env.INTERNAL_API_KEY || process.env.CRUD_SMOKE_API_KEY || "";
 const headers = {
   "Content-Type": "application/json",
   "X-User-Role": process.env.CRUD_SMOKE_ROLE || "ADMIN",
   "X-User-Email": process.env.CRUD_SMOKE_EMAIL || "admin@raushni.com",
   "User-Agent": "raushni-dashboard-crud-smoke/1.0",
 };
+if (apiKey) {
+  headers["X-API-Key"] = apiKey;
+}
 
 function stamp() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;

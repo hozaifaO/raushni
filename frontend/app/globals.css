@@ -32,10 +32,11 @@ a {
 }
 
 .public-site main,
-.public-site section.bg-\[\#fafafa\],
-.public-site .bg-\[\#fafafa\],
 .public-site .bg-gray-50,
-.public-site .bg-stone-50 {
+.public-site .bg-stone-50,
+.public-site .bg-\[\#f7f7f7\],
+.public-site .bg-\[\#fafafa\],
+.public-site section.bg-\[\#fafafa\] {
   background-color: #ffffff;
 }
 
@@ -183,4 +184,92 @@ html[data-public-theme="dark"] .public-site select {
 html[data-public-theme="dark"] .public-site input::placeholder,
 html[data-public-theme="dark"] .public-site textarea::placeholder {
   color: #94a3b8;
+}
+
+/* CMS page hero — light by default; charcoal in dark theme */
+html[data-public-theme="dark"] .public-site .public-hero {
+  background-color: #120f0b;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+}
+
+html[data-public-theme="dark"] .public-site .public-hero-eyebrow {
+  color: #fdba74;
+}
+
+html[data-public-theme="dark"] .public-site .public-hero-title {
+  color: #ffffff;
+}
+
+html[data-public-theme="dark"] .public-site .public-hero-text {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+html[data-public-theme="dark"] .public-site .public-hero img {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Footer — white in light mode; charcoal in dark theme */
+html[data-public-theme="dark"] .public-site .public-footer {
+  background-color: #120f0b;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+}
+
+html[data-public-theme="dark"] .public-site .public-footer-heading {
+  color: #fcd34d;
+}
+
+html[data-public-theme="dark"] .public-site .public-footer-link {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+html[data-public-theme="dark"] .public-site .public-footer-link:hover,
+html[data-public-theme="dark"] .public-site .public-footer-link:focus {
+  color: #fde68a;
+}
+
+html[data-public-theme="dark"] .public-site .public-footer-muted {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+html[data-public-theme="dark"] .public-site .public-footer-title {
+  color: #ffffff;
+}
+
+html[data-public-theme="dark"] .public-site .public-footer-note {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+html[data-public-theme="dark"] .public-site .public-footer-accent {
+  color: #fcd34d;
+}
+
+html[data-public-theme="dark"] .public-site .public-footer-icon {
+  border-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.75);
+}
+
+html[data-public-theme="dark"] .public-site .public-footer-icon:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fcd34d;
+}
+
+html[data-public-theme="dark"] .public-site .public-footer-input {
+  border-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+html[data-public-theme="dark"] .public-site .public-footer-input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+html[data-public-theme="dark"] .public-site .public-footer-divider {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+html[data-public-theme="dark"] .public-site .public-footer img {
+  --tw-ring-color: rgba(255, 255, 255, 0.15);
 }

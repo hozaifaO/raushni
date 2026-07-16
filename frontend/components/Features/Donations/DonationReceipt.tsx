@@ -104,8 +104,8 @@ export default function DonationReceipt({ receipt, onClose }: DonationReceiptPro
         <div className="flex flex-col gap-4 border-b border-gray-300 pb-5 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex gap-4">
             <img
-              src={stampLogoPath}
-              alt="Raushni Educational and Social Welfare Trust stamp logo"
+              src={template.stampUrl || stampLogoPath}
+              alt={`${receipt.organization} stamp logo`}
               className="h-24 w-24 shrink-0 rounded-full border border-gray-200 bg-gray-50 object-contain p-1 print:h-28 print:w-28"
             />
             <div>
@@ -127,11 +127,21 @@ export default function DonationReceipt({ receipt, onClose }: DonationReceiptPro
         <div className="grid gap-4 py-6 sm:grid-cols-2">
           <div className="rounded-lg border border-gray-200 p-4">
             <p className="text-xs font-semibold uppercase text-gray-500">Received from</p>
-            <p className="mt-2 text-lg font-bold">{donation.donor_name}</p>
-            <p className="mt-1 text-sm text-gray-600">{donation.donor_phone}</p>
-            <p className="text-sm text-gray-600">{donation.donor_email || "Email not provided"}</p>
-            <p className="mt-2 text-sm text-gray-600">{donation.donor_address || "Address not provided"}</p>
-            <p className="mt-2 text-sm text-gray-600">PAN: {donation.donor_pan || "Not provided"}</p>
+            <p className="mt-2 text-lg font-bold">
+              {donation.is_anonymous ? "Anonymous" : donation.donor_name}
+            </p>
+            {!donation.is_anonymous && (
+              <p className="mt-1 text-sm text-gray-600">{donation.donor_phone}</p>
+            )}
+            {!donation.is_anonymous && (
+              <p className="text-sm text-gray-600">{donation.donor_email || "Email not provided"}</p>
+            )}
+            {!donation.is_anonymous && (
+              <p className="mt-2 text-sm text-gray-600">{donation.donor_address || "Address not provided"}</p>
+            )}
+            <p className="mt-2 text-sm text-gray-600">
+              PAN: {donation.is_anonymous ? "Not provided" : donation.donor_pan || "Not provided"}
+            </p>
           </div>
 
           <div className="rounded-lg border border-gray-200 p-4">

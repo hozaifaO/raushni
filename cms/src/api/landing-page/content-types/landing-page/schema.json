@@ -1,16 +1,21 @@
 {
-  "kind": "singleType",
+  "kind": "collectionType",
   "collectionName": "landing_pages",
   "info": {
     "singularName": "landing-page",
     "pluralName": "landing-pages",
     "displayName": "Landing Page",
-    "description": "Public Raushni landing page content"
+    "description": "Per-tenant public landing page content"
   },
   "options": {
     "draftAndPublish": true
   },
   "attributes": {
+    "tenantSlug": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
     "title": { "type": "string", "required": true, "default": "Raushni Educational & Social Welfare Trust" },
     "heroEyebrow": { "type": "string", "default": "Community-led education, healthcare, and dignity" },
     "heroSubtitle": { "type": "text" },

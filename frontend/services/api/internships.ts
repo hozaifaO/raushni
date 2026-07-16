@@ -1,4 +1,3 @@
-import { authHeaders } from "@/lib/auth/permissions";
 import { getApiBaseUrl } from "./baseUrl";
 import type {
   InternshipAnnouncement,
@@ -98,7 +97,7 @@ export async function listInternships(options: ListInternshipsOptions = {}): Pro
   const query = params.toString();
   const response = await fetch(`${INTERNSHIPS_ENDPOINT}${query ? `?${query}` : ""}`, {
     cache: "no-store",
-    headers: authHeaders(),
+    headers: { "Content-Type": "application/json" },
   });
   return parseResponse<InternshipListResponse>(response);
 }
@@ -153,7 +152,7 @@ export async function createInternshipAnnouncement(
 ): Promise<InternshipAnnouncement> {
   const response = await fetch(`${INTERNSHIPS_ENDPOINT}/announcements`, {
     method: "POST",
-    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(cleanAnnouncementPayload(values)),
   });
   return parseResponse<InternshipAnnouncement>(response);
@@ -165,7 +164,7 @@ export async function updateInternshipApplication(
 ): Promise<InternshipApplication> {
   const response = await fetch(`${INTERNSHIPS_ENDPOINT}/applications/${id}`, {
     method: "PATCH",
-    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(values),
   });
   return parseResponse<InternshipApplication>(response);
@@ -187,7 +186,7 @@ export async function createInternshipApplication(
 ): Promise<InternshipApplication> {
   const response = await fetch(`${INTERNSHIPS_ENDPOINT}/applications`, {
     method: "POST",
-    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(cleanApplicationPayload(values)),
   });
   return parseResponse<InternshipApplication>(response);
@@ -199,7 +198,7 @@ export async function issueInternshipCertificate(
 ): Promise<InternshipCertificate> {
   const response = await fetch(`${INTERNSHIPS_ENDPOINT}/applications/${applicationId}/certificate`, {
     method: "POST",
-    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ completion_notes: completionNotes.trim() || null }),
   });
   return parseResponse<InternshipCertificate>(response);

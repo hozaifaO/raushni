@@ -4,18 +4,13 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import create_app
+from tests.conftest import ADMIN_HEADERS, GUEST_HEADERS, STAFF_HEADERS
 
 
-pytestmark = pytest.mark.api
-
-ADMIN_HEADERS = {"X-User-Role": "ADMIN", "X-User-Email": "admin@raushni.com"}
-STAFF_HEADERS = {"X-User-Role": "STAFF", "X-User-Email": "staff@raushni.com"}
-GUEST_HEADERS = {"X-User-Role": "GUEST", "X-User-Email": "guest@raushni.com"}
+pytestmark = [pytest.mark.api, pytest.mark.db]
 
 
-def test_profile_returns_current_session_access() -> None:
-    client = TestClient(create_app())
-
+def test_profile_returns_current_session_access(client: TestClient) -> None:
     response = client.get("/api/v1/account/profile", headers=ADMIN_HEADERS)
 
     assert response.status_code == 200
@@ -24,15 +19,17 @@ def test_profile_returns_current_session_access() -> None:
     assert profile["user"]["role"] == "ADMIN"
     assert profile["role"]["is_admin"] is True
     assert "settings:write" in profile["permissions"]
+    assert profile["tenant_slug"] == "raushni"
+    assert profile["organization_name"]
 
 
-def test_settings_read_and_admin_platform_update() -> None:
-    client = TestClient(create_app())
-
+def test_settings_platform_persists_across_app_restart(client: TestClient) -> None:
     read_response = client.get("/api/v1/settings", headers=STAFF_HEADERS)
     assert read_response.status_code == 200
     settings = read_response.json()
-    assert len(settings["users"]) >= 3
+    assert settings["tenant_slug"] == "raushni"
+    assert len(settings["users"]) >= 1
+    assert any(user["email"].endswith("@raushni.local") or user["email"].endswith("@raushni.com") for user in settings["users"])
     assert settings["platform"]["receipt_prefix"] == "RSH-DON"
 
     update_response = client.patch(
@@ -45,10 +42,15 @@ def test_settings_read_and_admin_platform_update() -> None:
     assert updated["support_email"] == "support@raushni.org"
     assert updated["maintenance_mode"] is True
 
+    with TestClient(create_app()) as other:
+        persisted = other.get("/api/v1/settings", headers=ADMIN_HEADERS)
+        assert persisted.status_code == 200
+        platform = persisted.json()["platform"]
+        assert platform["support_email"] == "support@raushni.org"
+        assert platform["maintenance_mode"] is True
 
-def test_non_admin_cannot_update_settings() -> None:
-    client = TestClient(create_app())
 
+def test_non_admin_cannot_update_settings(client: TestClient) -> None:
     response = client.patch(
         "/api/v1/settings/platform",
         headers=GUEST_HEADERS,
@@ -59,9 +61,7 @@ def test_non_admin_cannot_update_settings() -> None:
     assert response.json()["detail"] == "Administrator access is required."
 
 
-def test_admin_can_update_user_role_and_status() -> None:
-    client = TestClient(create_app())
-
+def test_admin_can_update_user_role_and_status(client: TestClient) -> None:
     settings = client.get("/api/v1/settings", headers=ADMIN_HEADERS).json()
     staff_user = next(user for user in settings["users"] if user["role"] == "STAFF")
 
@@ -76,3 +76,25 @@ def test_admin_can_update_user_role_and_status() -> None:
     assert updated["role"] == "GUEST"
     assert updated["status"] == "suspended"
     assert updated["access_level"] == "read"
+
+    refreshed = client.get("/api/v1/settings", headers=ADMIN_HEADERS).json()
+    member = next(user for user in refreshed["users"] if user["id"] == staff_user["id"])
+    assert member["role"] == "GUEST"
+    assert member["status"] == "suspended"
+
+    # Restore seeded membership role so later tests keep a STAFF member.
+    restore = client.patch(
+        f"/api/v1/settings/users/{staff_user['id']}",
+        headers=ADMIN_HEADERS,
+        json={"role": "STAFF", "status": "active"},
+    )
+    assert restore.status_code == 200
+
+
+def test_dashboard_status_includes_organization(client: TestClient) -> None:
+    response = client.get("/api/v1/dashboard/status", headers=ADMIN_HEADERS)
+    assert response.status_code == 200
+    body = response.json()
+    assert body["tenant_slug"] == "raushni"
+    assert body["organization_name"]
+    assert body["organization_id"]

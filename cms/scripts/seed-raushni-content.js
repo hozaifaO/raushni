@@ -2,6 +2,8 @@
 
 const strapiFactory = require("@strapi/strapi");
 
+const TENANT_SLUG = "raushni";
+
 const uids = {
   landing: "api::landing-page.landing-page",
   siteSetting: "api::site-setting.site-setting",
@@ -16,6 +18,7 @@ const uids = {
 const now = () => new Date();
 
 const siteSettingContent = {
+  tenantSlug: TENANT_SLUG,
   siteName: "Raushni Educational & Social Welfare Trust",
   brandShortName: "Raushni",
   brandTagline: "Educational & Social Welfare Trust",
@@ -71,6 +74,7 @@ const focusAreas = [
 
 const publicPages = [
   {
+    tenantSlug: TENANT_SLUG,
     slug: "about",
     title: "About",
     heroEyebrow: "About Raushni",
@@ -248,6 +252,7 @@ const publicPages = [
 ];
 
 const landingPageContent = {
+  tenantSlug: TENANT_SLUG,
   title: siteSettingContent.siteName,
   heroEyebrow: "Community-led education, healthcare, and dignity",
   heroSubtitle:
@@ -312,11 +317,14 @@ const internshipContent = {
 };
 
 const donationPaymentSettingContent = {
+  tenantSlug: TENANT_SLUG,
   slug: "donation-payment-methods",
   title: "Donation Payment Methods",
   intro: "Choose a payment method and share the transaction reference for finance verification and receipt generation.",
   upiId: "raushni.eswt@upi",
-  qrImageUrl: "/cms/donations/raushni-upi-qr.jpeg",
+  // Upload the NGO UPI QR via the `qrImage` media field in Strapi Admin (Media Library → Donation Payment Setting).
+  // Leave qrImageUrl empty unless you intentionally override with a public URL.
+  qrImageUrl: "",
   accountName: siteSettingContent.siteName,
   paymentOptions: [
     { value: "upi", label: "UPI", description: "Pay with any UPI app.", enabled: true, requiresReference: true },
@@ -324,18 +332,12 @@ const donationPaymentSettingContent = {
     { value: "gpay", label: "GPay", description: "Pay via Google Pay UPI.", enabled: true, requiresReference: true },
     { value: "cash", label: "Cash", description: "Record cash received by authorized staff.", enabled: true, requiresReference: false },
     { value: "cheque", label: "Cheque", description: "Record cheque number and bank details.", enabled: true, requiresReference: true },
-    { value: "debit_card", label: "Debit Card", description: "Debit card payment via approved payment terminal or gateway.", enabled: true, requiresReference: true },
-    { value: "credit_card", label: "Credit Card", description: "Credit card payment via approved payment terminal or gateway.", enabled: true, requiresReference: true },
-    { value: "international_card", label: "International Card", description: "International donor card payment through Stripe Checkout.", enabled: true, requiresReference: false, gateway: "stripe" },
-    { value: "stripe", label: "Stripe", description: "Secure Stripe Checkout for international cards.", enabled: true, requiresReference: false, gateway: "stripe" },
-    { value: "netbanking", label: "Netbanking", description: "Bank netbanking transfer reference.", enabled: true, requiresReference: true },
-    { value: "online_banking", label: "Online banking", description: "Online banking or NEFT/IMPS transfer reference.", enabled: true, requiresReference: true },
-    { value: "other", label: "Other", description: "Any approved custom payment mode.", enabled: true, requiresReference: false },
   ],
   instructions: [
+    "Upload the donation UPI QR image on Donation Payment Setting → qrImage in Strapi before going live.",
     "Scan the QR code for UPI, GPay, or QR Code payments.",
-    "Enter the transaction reference so the finance team can verify payment.",
-    "For international card payments, continue to Stripe Checkout after submitting the donation form.",
+    "Enter the UTR / transaction reference so the finance team can verify payment.",
+    "Cash donations do not require a UTR; cheque requires the cheque number.",
     "Receipts are issued after payment status is marked paid.",
   ],
   supportContact: siteSettingContent.contactEmail,
@@ -700,8 +702,8 @@ const projectContents = [
   },
 ];
 
-async function upsertSingle(app, uid, data) {
-  const existing = await app.db.query(uid).findOne();
+async function upsertByTenantSlug(app, uid, data) {
+  const existing = await app.db.query(uid).findOne({ where: { tenantSlug: data.tenantSlug } });
   if (existing) {
     await app.db.query(uid).update({ where: { id: existing.id }, data });
   } else {
@@ -710,7 +712,10 @@ async function upsertSingle(app, uid, data) {
 }
 
 async function upsertBySlug(app, uid, data) {
-  const existing = await app.db.query(uid).findOne({ where: { slug: data.slug } });
+  const where = data.tenantSlug
+    ? { slug: data.slug, tenantSlug: data.tenantSlug }
+    : { slug: data.slug };
+  const existing = await app.db.query(uid).findOne({ where });
   if (existing) {
     await app.db.query(uid).update({ where: { id: existing.id }, data });
   } else {
@@ -719,7 +724,10 @@ async function upsertBySlug(app, uid, data) {
 }
 
 async function upsertByKey(app, uid, data) {
-  const existing = await app.db.query(uid).findOne({ where: { key: data.key } });
+  const where = data.tenantSlug
+    ? { key: data.key, tenantSlug: data.tenantSlug }
+    : { key: data.key };
+  const existing = await app.db.query(uid).findOne({ where });
   if (existing) {
     await app.db.query(uid).update({ where: { id: existing.id }, data });
   } else {
@@ -786,10 +794,10 @@ async function enablePublicRead(app) {
 async function main() {
   const app = await strapiFactory().load();
   try {
-    await upsertSingle(app, uids.siteSetting, siteSettingContent);
-    await upsertSingle(app, uids.landing, landingPageContent);
+    await upsertByTenantSlug(app, uids.siteSetting, siteSettingContent);
+    await upsertByTenantSlug(app, uids.landing, landingPageContent);
     for (const page of publicPages) {
-      await upsertBySlug(app, uids.publicPage, page);
+      await upsertBySlug(app, uids.publicPage, { ...page, tenantSlug: page.tenantSlug || TENANT_SLUG });
     }
     await upsertBySlug(app, uids.internshipAnnouncement, internshipContent);
     await upsertBySlug(app, uids.donationPaymentSetting, donationPaymentSettingContent);
@@ -800,10 +808,13 @@ async function main() {
       await upsertBySlug(app, uids.projectContent, project);
     }
     for (const template of documentTemplates) {
-      await upsertByKey(app, uids.documentTemplate, template);
+      await upsertByKey(app, uids.documentTemplate, {
+        ...template,
+        tenantSlug: template.tenantSlug || TENANT_SLUG,
+      });
     }
     await enablePublicRead(app);
-    console.log("Seeded Raushni CMS-managed site content.");
+    console.log(`Seeded Raushni CMS-managed site content for tenantSlug=${TENANT_SLUG}.`);
   } finally {
     await app.destroy();
   }

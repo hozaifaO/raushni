@@ -1,4 +1,3 @@
-import { authHeaders } from "@/lib/auth/permissions";
 import { getApiBaseUrl } from "./baseUrl";
 import type {
   Designation,
@@ -6,6 +5,8 @@ import type {
   DesignationListResponse,
   DesignationStatus,
 } from "@/types/models/designation";
+import { designationListResponseSchema, designationSchema } from "@/lib/validation/designation";
+import { parseEmpty, parseJson } from "@/lib/validation/parseJson";
 
 const API_BASE_URL = getApiBaseUrl();
 const DESIGNATIONS_ENDPOINT = `${API_BASE_URL}/api/v1/designations`;
@@ -48,16 +49,6 @@ function cleanPayload(values: DesignationFormValues) {
   };
 }
 
-async function parseResponse<T>(response: Response): Promise<T> {
-  if (!response.ok) {
-    const body = await response.json().catch(() => null);
-    const detail = typeof body?.detail === "string" ? body.detail : "Designation request failed";
-    throw new Error(detail);
-  }
-  if (response.status === 204) return undefined as T;
-  return response.json() as Promise<T>;
-}
-
 export async function listDesignations(options: ListDesignationsOptions = {}): Promise<DesignationListResponse> {
   const params = new URLSearchParams();
   if (options.search) params.set("search", options.search);
@@ -66,33 +57,39 @@ export async function listDesignations(options: ListDesignationsOptions = {}): P
   const query = params.toString();
   const response = await fetch(`${DESIGNATIONS_ENDPOINT}${query ? `?${query}` : ""}`, {
     cache: "no-store",
-    headers: authHeaders(),
+    headers: { "Content-Type": "application/json" },
   });
-  return parseResponse<DesignationListResponse>(response);
+  return parseJson(designationListResponseSchema, response, {
+    fallbackMessage: "Designation request failed",
+  });
 }
 
 export async function createDesignation(values: DesignationFormValues): Promise<Designation> {
   const response = await fetch(DESIGNATIONS_ENDPOINT, {
     method: "POST",
-    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(cleanPayload(values)),
   });
-  return parseResponse<Designation>(response);
+  return parseJson(designationSchema, response, {
+    fallbackMessage: "Designation request failed",
+  });
 }
 
 export async function updateDesignation(id: string, values: DesignationFormValues): Promise<Designation> {
   const response = await fetch(`${DESIGNATIONS_ENDPOINT}/${id}`, {
     method: "PATCH",
-    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(cleanPayload(values)),
   });
-  return parseResponse<Designation>(response);
+  return parseJson(designationSchema, response, {
+    fallbackMessage: "Designation request failed",
+  });
 }
 
 export async function deleteDesignation(id: string): Promise<void> {
   const response = await fetch(`${DESIGNATIONS_ENDPOINT}/${id}`, {
     method: "DELETE",
-    headers: authHeaders(),
+    headers: { "Content-Type": "application/json" },
   });
-  await parseResponse<void>(response);
+  await parseEmpty(response, { fallbackMessage: "Designation request failed" });
 }

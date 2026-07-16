@@ -1,4 +1,3 @@
-import { authHeaders } from "@/lib/auth/permissions";
 import { getApiBaseUrl } from "./baseUrl";
 import type { Project, ProjectFormValues, ProjectListResponse, ProjectStatus } from "@/types/models/project";
 
@@ -66,7 +65,7 @@ export async function listProjects(options: ListProjectsOptions = {}): Promise<P
   const query = params.toString();
   const response = await fetch(`${PROJECTS_ENDPOINT}${query ? `?${query}` : ""}`, {
     cache: "no-store",
-    headers: authHeaders(),
+    headers: { "Content-Type": "application/json" },
   });
   return parseResponse<ProjectListResponse>(response);
 }
@@ -74,7 +73,7 @@ export async function listProjects(options: ListProjectsOptions = {}): Promise<P
 export async function createProject(values: ProjectFormValues): Promise<Project> {
   const response = await fetch(PROJECTS_ENDPOINT, {
     method: "POST",
-    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(cleanPayload(values)),
   });
   return parseResponse<Project>(response);
@@ -83,7 +82,7 @@ export async function createProject(values: ProjectFormValues): Promise<Project>
 export async function updateProject(id: string, values: ProjectFormValues): Promise<Project> {
   const response = await fetch(`${PROJECTS_ENDPOINT}/${id}`, {
     method: "PATCH",
-    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(cleanPayload(values)),
   });
   return parseResponse<Project>(response);
@@ -92,7 +91,7 @@ export async function updateProject(id: string, values: ProjectFormValues): Prom
 export async function deleteProject(id: string): Promise<void> {
   const response = await fetch(`${PROJECTS_ENDPOINT}/${id}`, {
     method: "DELETE",
-    headers: authHeaders(),
+    headers: { "Content-Type": "application/json" },
   });
   await parseResponse<void>(response);
 }
