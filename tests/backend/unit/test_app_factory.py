@@ -19,7 +19,8 @@ def test_create_app_returns_configured_fastapi_instance() -> None:
 
 def test_create_app_registers_public_routes() -> None:
     test_app = create_app()
-    routes = {route.path for route in test_app.routes}
+    # Newer Starlette/FastAPI may leave `_IncludedRouter` entries without `.path`.
+    routes = {route.path for route in test_app.routes if hasattr(route, "path")}
 
     assert "/health" in routes
     assert "/health/ready" in routes
