@@ -71,16 +71,13 @@ export function getStoredUser(): AppUser {
 
   const storedUser = window.localStorage.getItem("user");
   if (!storedUser) {
-    window.localStorage.setItem("user", JSON.stringify(DEFAULT_GUEST_USER));
     return DEFAULT_GUEST_USER;
   }
 
   try {
-    const user = normalizeUser(JSON.parse(storedUser));
-    window.localStorage.setItem("user", JSON.stringify(user));
-    return user;
+    return normalizeUser(JSON.parse(storedUser));
   } catch {
-    window.localStorage.setItem("user", JSON.stringify(DEFAULT_GUEST_USER));
+    window.localStorage.removeItem("user");
     return DEFAULT_GUEST_USER;
   }
 }
@@ -103,8 +100,9 @@ export function signOutToGuest(): AppUser {
   if (typeof window !== "undefined") {
     window.localStorage.removeItem("token");
     window.localStorage.removeItem("accessToken");
+    window.localStorage.removeItem("user");
   }
-  return setStoredUser(DEFAULT_GUEST_USER);
+  return DEFAULT_GUEST_USER;
 }
 
 export function canWrite(role: UserRole | string | undefined): boolean {

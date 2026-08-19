@@ -77,7 +77,7 @@ export default function AppShell({
       >
         {readOnly && (
           <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-sm font-medium text-amber-800">
-            Guest mode is read-only. You can view every module, but create, edit, delete, and admin actions are disabled.
+            Read-only access. Create, edit, delete, and admin actions are disabled for this account.
           </div>
         )}
         {children}

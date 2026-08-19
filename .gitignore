@@ -36,6 +36,13 @@ htmlcov/
 !.env.example
 !.env.dev.example
 
+# Local-only secrets (never commit)
+cms-admin-credentials.txt
+site-dashboard-credentials.txt
+*_tmp_*.json
+*_tmp_*.py
+*_tmp_*.txt
+
 # Logs
 logs/
 *.log

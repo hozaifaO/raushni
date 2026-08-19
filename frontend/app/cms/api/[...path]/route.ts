@@ -1,5 +1,9 @@
+import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
+import { authOptions } from "@/lib/auth/auth-options";
+import { isPublicCmsGetPath } from "@/lib/auth/bff-allowlist";
+import { canAdmin, canWrite, normalizeRole } from "@/lib/auth/permissions";
 import {
   DEFAULT_TENANT_SLUG,
   TENANT_COOKIE,
@@ -8,6 +12,7 @@ import {
   normalizeTenantSlug,
   withTenantFilter,
 } from "@/lib/tenant";
+import { enforceBffRateLimit } from "@/lib/security/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -49,12 +54,64 @@ function resolveTenantSlug(request: NextRequest): string {
   return DEFAULT_TENANT_SLUG;
 }
 
+function clientIp(request: NextRequest): string {
+  const forwarded = request.headers.get("x-forwarded-for");
+  if (forwarded) {
+    return forwarded.split(",")[0]?.trim() || "unknown";
+  }
+  return request.headers.get("x-real-ip") || "unknown";
+}
+
 async function proxyRequest(request: NextRequest, pathSegments: string[]): Promise<NextResponse> {
   const token = cmsApiToken();
   if (!token) {
     return NextResponse.json(
       { error: { status: 500, message: "CMS_API_TOKEN is not configured on the frontend CMS BFF." } },
       { status: 500 },
+    );
+  }
+
+  const method = request.method.toUpperCase();
+  if (method === "OPTIONS") {
+    return new NextResponse(null, { status: 204 });
+  }
+
+  const session = await getServerSession(authOptions);
+  const role = normalizeRole(session?.user?.role);
+  const hasSession = Boolean(session?.user?.email);
+  const isGet = method === "GET" || method === "HEAD";
+  const publicGet = isGet && isPublicCmsGetPath(pathSegments);
+
+  if (!publicGet && !hasSession) {
+    return NextResponse.json(
+      { error: { status: 401, message: "Authentication required." } },
+      { status: 401 },
+    );
+  }
+
+  if (!isGet && !(canWrite(role) || canAdmin(role))) {
+    return NextResponse.json(
+      { error: { status: 403, message: "Write access required." } },
+      { status: 403 },
+    );
+  }
+
+  if (!publicGet && !canWrite(role) && !canAdmin(role)) {
+    return NextResponse.json(
+      { error: { status: 403, message: "Staff access required." } },
+      { status: 403 },
+    );
+  }
+
+  const rate = await enforceBffRateLimit({
+    key: `cms:${publicGet && !hasSession ? "public" : "auth"}:${clientIp(request)}`,
+    limit: publicGet && !hasSession ? 30 : 60,
+    windowSeconds: 60,
+  });
+  if (!rate.ok) {
+    return NextResponse.json(
+      { error: { status: 429, message: "Too many requests. Try again later." } },
+      { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } },
     );
   }
 
@@ -77,7 +134,6 @@ async function proxyRequest(request: NextRequest, pathSegments: string[]): Promi
     headers.set("content-type", contentType);
   }
 
-  const method = request.method.toUpperCase();
   const hasBody = method !== "GET" && method !== "HEAD";
   const body = hasBody ? await request.arrayBuffer() : undefined;
 

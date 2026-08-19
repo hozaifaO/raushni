@@ -10,6 +10,7 @@ import {
 } from "@/lib/tenant";
 
 const PROTECTED_PREFIXES = [
+  "/admin",
   "/dashboard",
   "/members",
   "/beneficiaries",
@@ -22,6 +23,8 @@ const PROTECTED_PREFIXES = [
   "/reports",
   "/settings",
   "/cms",
+  "/profile",
+  "/projects",
 ];
 
 function isProtectedPath(pathname: string): boolean {
