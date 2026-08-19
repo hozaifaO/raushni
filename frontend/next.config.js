@@ -61,7 +61,7 @@ const nextConfig = {
   },
 
   experimental: {
-    optimizePackageImports: ['lucide-react', 'react-icons', 'date-fns'],
+    optimizePackageImports: ['lucide-react'],
   },
 
   // next-pwa v2 injects a webpack hook; keep only the supported key.

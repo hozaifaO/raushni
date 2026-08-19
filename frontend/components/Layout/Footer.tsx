@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type ComponentType } from "react";
-import { FaFacebook, FaInstagram, FaTwitter, FaLinkedin, FaYoutube } from "react-icons/fa";
+import { useEffect, useState, type ReactNode } from "react";
 import { Mail, Phone, MapPin, Send, ArrowRight } from "lucide-react";
 import type { PublicLink } from "@/lib/cms/publicContentShared";
 
@@ -126,12 +125,60 @@ function linkLabel(link: FooterLink): string {
   return link.label ?? link.name ?? link.href;
 }
 
-const socialLinks: Array<{ name: string; href: string; icon: ComponentType<{ size?: number }> }> = [
-  { name: "Facebook", icon: FaFacebook, href: "https://www.facebook.com/profile.php?id=61563690991747" },
-  { name: "Twitter", icon: FaTwitter, href: "https://X.com/" },
-  { name: "Instagram", icon: FaInstagram, href: "https://instagram.com/" },
-  { name: "LinkedIn", icon: FaLinkedin, href: "https://linkedin.com/company/" },
-  { name: "YouTube", icon: FaYoutube, href: "https://youtube.com/" },
+function SocialGlyph({ children }: { children: ReactNode }) {
+  return (
+    <svg viewBox="0 0 24 24" width={18} height={18} fill="currentColor" aria-hidden>
+      {children}
+    </svg>
+  );
+}
+
+const socialLinks: Array<{ name: string; href: string; icon: ReactNode }> = [
+  {
+    name: "Facebook",
+    href: "https://www.facebook.com/profile.php?id=61563690991747",
+    icon: (
+      <SocialGlyph>
+        <path d="M14 9h3V6h-3c-1.7 0-3 1.3-3 3v2H9v3h2v7h3v-7h2.6L17 11h-3V9c0-.6.4-1 1-1z" />
+      </SocialGlyph>
+    ),
+  },
+  {
+    name: "Twitter",
+    href: "https://X.com/",
+    icon: (
+      <SocialGlyph>
+        <path d="M18.2 4H21l-6.5 7.4L22 20h-5.6l-4.4-5.5L7 20H4.2l7-8L2 4h5.7l4 5.1L18.2 4zm-1 14.5h1.6L7 5.4H5.3L17.2 18.5z" />
+      </SocialGlyph>
+    ),
+  },
+  {
+    name: "Instagram",
+    href: "https://instagram.com/",
+    icon: (
+      <SocialGlyph>
+        <path d="M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4zm5 4.5A4.5 4.5 0 1 0 16.5 12 4.5 4.5 0 0 0 12 7.5zm0 7.2A2.7 2.7 0 1 1 14.7 12 2.7 2.7 0 0 1 12 14.7zm5.2-8.6a1.05 1.05 0 1 0 1.05 1.05A1.05 1.05 0 0 0 17.2 6.1z" />
+      </SocialGlyph>
+    ),
+  },
+  {
+    name: "LinkedIn",
+    href: "https://linkedin.com/company/",
+    icon: (
+      <SocialGlyph>
+        <path d="M6.5 9.5H3.7V20h2.8V9.5zM5.1 4A1.6 1.6 0 1 0 5.1 7.2 1.6 1.6 0 0 0 5.1 4zM20.3 13.2c0-3.1-1.7-4.5-3.9-4.5a3.4 3.4 0 0 0-3 1.6V9.5H10.6V20h2.8v-5.6c0-1.5.3-2.9 2.1-2.9s1.8 1.7 1.8 3V20h2.8v-6.8z" />
+      </SocialGlyph>
+    ),
+  },
+  {
+    name: "YouTube",
+    href: "https://youtube.com/",
+    icon: (
+      <SocialGlyph>
+        <path d="M21.6 7.2a2.7 2.7 0 0 0-1.9-1.9C18 4.8 12 4.8 12 4.8s-6 0-7.7.5A2.7 2.7 0 0 0 2.4 7.2 28 28 0 0 0 2 12a28 28 0 0 0 .4 4.8 2.7 2.7 0 0 0 1.9 1.9c1.7.5 7.7.5 7.7.5s6 0 7.7-.5a2.7 2.7 0 0 0 1.9-1.9A28 28 0 0 0 22 12a28 28 0 0 0-.4-4.8zM10 15.5v-7l6 3.5-6 3.5z" />
+      </SocialGlyph>
+    ),
+  },
 ];
 
 export default function Footer() {
@@ -205,7 +252,7 @@ export default function Footer() {
                   aria-label={social.name}
                   className={footerStyles.iconLink}
                 >
-                  <social.icon size={18} />
+                  {social.icon}
                 </a>
               ))}
             </div>

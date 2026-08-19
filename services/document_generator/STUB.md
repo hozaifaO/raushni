@@ -1,8 +1,16 @@
 # STUB — not production
 
-The document-generator service under this directory is a placeholder (`/health` + a test
-generate route only). It is **not** part of the default Docker Compose or K8s stack as of
-Phase 4.
+Standalone PDF/document microservice placeholder. Production documents today are
+HTML + browser print via the FastAPI app / frontend generators.
 
-Do not deploy this image until a real PDF/document service is implemented and wired with
-service authentication.
+Wire this service only when you need server-side PDF bytes (email attachments,
+archival). Application code should call `app.services.pdf_service.PdfService`
+first; that stub can later HTTP to this service or render in-process (reportlab).
+
+Planned routes (not implemented):
+  POST /generate/member-card
+  POST /generate/donation-receipt
+  POST /generate/appointment-letter
+  POST /generate/certificate
+
+Do not deploy until authenticated and implemented.

@@ -41,7 +41,6 @@ def configure_telemetry(app: FastAPI) -> None:
         )
         from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
         from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-        from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
         from opentelemetry.instrumentation.logging import LoggingInstrumentor
         from opentelemetry.instrumentation.redis import RedisInstrumentor
         from opentelemetry.sdk.metrics import MeterProvider
@@ -66,7 +65,6 @@ def configure_telemetry(app: FastAPI) -> None:
         app,
         excluded_urls=os.getenv("OTEL_PYTHON_FASTAPI_EXCLUDED_URLS", "/health"),
     )
-    HTTPXClientInstrumentor().instrument()
     LoggingInstrumentor().instrument(set_logging_format=True)
     # SQLAlchemy/Redis engines are attached after init_db/init_redis via instrument_data_clients.
     RedisInstrumentor().instrument()

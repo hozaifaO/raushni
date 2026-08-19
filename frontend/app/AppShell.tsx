@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Header from "@/components/Layout/Header";
 import Sidebar from "@/components/Layout/Sidebar";
-import Footer from "@/components/Layout/Footer";
 import { getStoredUser, isReadOnly, setStoredUser } from "@/lib/auth/permissions";
 
 export default function AppShell({
@@ -18,7 +17,12 @@ export default function AppShell({
   const { data: session } = useSession();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [readOnly, setReadOnly] = useState(true);
-  const isAuthRoute = pathname?.startsWith("/login") || pathname?.startsWith("/register") || pathname?.startsWith("/forgot-password") || pathname?.startsWith("/reset-password") || pathname?.startsWith("/verify-email");
+  const isAuthRoute =
+    pathname?.startsWith("/login") ||
+    pathname?.startsWith("/register") ||
+    pathname?.startsWith("/forgot-password") ||
+    pathname?.startsWith("/reset-password") ||
+    pathname?.startsWith("/verify-email");
   const isPublicRoute =
     pathname === "/" ||
     pathname?.startsWith("/about") ||
@@ -64,28 +68,22 @@ export default function AppShell({
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-surface">
       <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
       <main
-        className={`mt-44 transition-all duration-300 ${
-          isDashboardHome ? "bg-[#f7f7f7]" : ""
-        } ${
-          sidebarOpen ? "lg:mr-72" : "lg:mr-0"
-        }`}
+        className={`mt-16 min-h-[calc(100vh-4rem)] transition-all duration-300 ${
+          isDashboardHome ? "bg-surface" : ""
+        } ${sidebarOpen ? "lg:mr-72" : "lg:mr-0"}`}
       >
         {readOnly && (
-          <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-sm font-medium text-amber-800">
+          <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-sm font-medium text-amber-900">
             Read-only access. Create, edit, delete, and admin actions are disabled for this account.
           </div>
         )}
         {children}
       </main>
-
-      <div className={`transition-all duration-300 ${sidebarOpen ? "lg:mr-72" : "lg:mr-0"}`}>
-        <Footer />
-      </div>
     </div>
   );
 }

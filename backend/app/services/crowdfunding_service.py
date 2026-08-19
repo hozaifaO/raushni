@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from app.core.config import get_settings
-from app.core.redis import cache_delete, cache_get_json, cache_set_json
 from app.models.crowdfunding import CampaignModel
 from app.repositories.crowdfunding_repository import CrowdfundingRepository
 from app.schemas.crowdfunding import (
@@ -21,18 +19,9 @@ class CampaignNotFoundError(LookupError):
     pass
 
 
-def _cache_key(organization_id: UUID, campaign_id: UUID) -> str:
-    return f"org:{organization_id}:campaign:{campaign_id}"
-
-
 class CrowdfundingService:
     def __init__(self, repository: CrowdfundingRepository) -> None:
         self._repository = repository
-        self._ttl = get_settings().redis_cache_ttl_seconds
-
-    @property
-    def _organization_id(self) -> UUID:
-        return self._repository._organization_id
 
     @staticmethod
     def _progress(amount_raised: float, target_amount: float) -> int:
@@ -112,21 +101,15 @@ class CrowdfundingService:
         return self._to_campaign(campaign, 0)
 
     async def get_campaign(self, campaign_id: UUID) -> Campaign:
-        cached = await cache_get_json(_cache_key(self._organization_id, campaign_id))
-        if cached is not None:
-            return Campaign.model_validate(cached)
         campaign = await self._repository.get(campaign_id)
         if campaign is None:
             raise CampaignNotFoundError(f"Campaign {campaign_id} was not found")
-        schema = self._to_campaign(campaign, await self._repository.donation_count(campaign_id))
-        await cache_set_json(_cache_key(self._organization_id, campaign_id), schema.model_dump(mode="json"), self._ttl)
-        return schema
+        return self._to_campaign(campaign, await self._repository.donation_count(campaign_id))
 
     async def update_campaign(self, campaign_id: UUID, payload: CampaignUpdate) -> Campaign:
         campaign = await self._repository.update(campaign_id, payload)
         if campaign is None:
             raise CampaignNotFoundError(f"Campaign {campaign_id} was not found")
-        await cache_delete(_cache_key(self._organization_id, campaign_id))
         return self._to_campaign(campaign, await self._repository.donation_count(campaign_id))
 
     async def set_status(self, campaign_id: UUID, status: CampaignStatus) -> Campaign:
@@ -136,7 +119,6 @@ class CrowdfundingService:
         deleted = await self._repository.delete(campaign_id)
         if not deleted:
             raise CampaignNotFoundError(f"Campaign {campaign_id} was not found")
-        await cache_delete(_cache_key(self._organization_id, campaign_id))
 
     async def list_donations(self, campaign_id: UUID) -> list[CampaignDonation]:
         if await self._repository.get(campaign_id) is None:
@@ -160,5 +142,4 @@ class CrowdfundingService:
         campaign = await self._repository.record_donation(campaign_id, payload)
         if campaign is None:
             raise CampaignNotFoundError(f"Campaign {campaign_id} was not found")
-        await cache_delete(_cache_key(self._organization_id, campaign_id))
         return self._to_campaign(campaign, await self._repository.donation_count(campaign_id))

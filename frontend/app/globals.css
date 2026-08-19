@@ -4,6 +4,11 @@
 
 :root {
   color-scheme: light;
+  --brand: #120f0b;
+  --accent: #fbbf24;
+  --accent-ink: #1c1917;
+  --surface: #f7f7f7;
+  --surface-elevated: #ffffff;
 }
 
 * {
@@ -17,8 +22,7 @@ body {
 }
 
 body {
-  @apply bg-gray-50 text-gray-900 antialiased;
-  font-family: "Poppins", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  @apply bg-surface text-stone-900 antialiased;
 }
 
 a {
@@ -27,7 +31,7 @@ a {
 }
 
 .public-site {
-  background: #ffffff;
+  background: var(--surface-elevated);
   color: #111827;
 }
 
@@ -186,7 +190,6 @@ html[data-public-theme="dark"] .public-site textarea::placeholder {
   color: #94a3b8;
 }
 
-/* CMS page hero — light by default; charcoal in dark theme */
 html[data-public-theme="dark"] .public-site .public-hero {
   background-color: #120f0b;
   border-color: rgba(255, 255, 255, 0.1);
@@ -209,7 +212,6 @@ html[data-public-theme="dark"] .public-site .public-hero img {
   border-color: rgba(255, 255, 255, 0.12);
 }
 
-/* Footer — white in light mode; charcoal in dark theme */
 html[data-public-theme="dark"] .public-site .public-footer {
   background-color: #120f0b;
   border-color: rgba(255, 255, 255, 0.1);

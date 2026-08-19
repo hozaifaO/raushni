@@ -10,6 +10,9 @@ from app.core.config import Settings, get_settings
 
 logger = logging.getLogger(__name__)
 
+# Redis is required for SlowAPI rate limits + health. cache_* helpers below are
+# available for deliberate future caching — do not sprinkle get-by-id caches by default.
+
 _redis: Redis | None = None
 
 

@@ -47,7 +47,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-44 right-0 h-[calc(100vh-11rem)] w-72 bg-white border-l border-gray-200 z-40 overflow-y-auto shadow-xl transition-transform duration-300 ${
+        className={`fixed top-16 right-0 h-[calc(100vh-4rem)] w-72 bg-white border-l border-stone-200 z-40 overflow-y-auto shadow-xl transition-transform duration-300 ${
           sidebarOpen ? 'translate-x-0' : 'translate-x-full'
         } lg:shadow-none`}
       >
@@ -72,10 +72,10 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                   <img
                     src={user.profileImage}
                     alt={user.name || "Profile"}
-                    className="w-10 h-10 rounded-full object-cover border-2 border-orange-500"
+                    className="w-10 h-10 rounded-full object-cover border-2 border-accent"
                   />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center text-white shadow-md">
+                  <div className="w-10 h-10 rounded-full bg-brand flex items-center justify-center text-accent shadow-md">
                     {user?.name ? user.name.charAt(0).toUpperCase() : (
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -101,7 +101,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
 
           {/* User Info Section (Optional) */}
           {!loading && user && (
-            <div className="mb-6 p-3 bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl">
+            <div className="mb-6 p-3 bg-amber-50 rounded-xl border border-amber-100">
               <div className="flex items-center gap-3">
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-gray-800">{user.name || 'Guest User'}</p>
@@ -136,20 +136,20 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                         onClick={() => setSidebarOpen(false)}
                         className={`flex items-start gap-3 rounded-lg px-3 py-2 transition-all duration-200 group ${
                           active
-                            ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md'
-                            : 'text-gray-700 hover:bg-orange-50 hover:text-orange-600'
+                            ? 'bg-brand text-white shadow-md'
+                            : 'text-stone-700 hover:bg-amber-50 hover:text-brand'
                         }`}
                       >
-                        <Icon size={18} className={`mt-0.5 shrink-0 ${active ? 'text-white' : 'text-gray-400 group-hover:text-orange-500'}`} />
+                        <Icon size={18} className={`mt-0.5 shrink-0 ${active ? 'text-accent' : 'text-stone-400 group-hover:text-amber-600'}`} />
                         <span className="min-w-0 flex-1 whitespace-normal break-words text-sm font-medium leading-tight">{item.name}</span>
                         {item.access === 'admin' && (
                           <span className={`ml-auto shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
-                            active ? 'bg-white/20 text-white' : 'bg-orange-50 text-orange-700'
+                            active ? 'bg-white/15 text-accent' : 'bg-amber-50 text-amber-800'
                           }`}>
                             Admin
                           </span>
                         )}
-                        {active && <span className="ml-auto mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-white" />}
+                        {active && <span className="ml-auto mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />}
                       </Link>
                     );
                   })}

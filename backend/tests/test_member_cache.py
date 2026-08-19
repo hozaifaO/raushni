@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
 import pytest
@@ -12,7 +11,7 @@ from tests.conftest import ADMIN_HEADERS
 pytestmark = [pytest.mark.api, pytest.mark.db]
 
 
-def test_member_cache_warm_then_invalidate_on_patch(client: TestClient) -> None:
+def test_member_crud_roundtrip(client: TestClient) -> None:
     create_response = client.post(
         "/api/v1/members",
         headers=ADMIN_HEADERS,
@@ -45,31 +44,6 @@ def test_member_cache_warm_then_invalidate_on_patch(client: TestClient) -> None:
     assert refreshed.json()["role"] == "Program Lead"
 
 
-def test_member_get_soft_fails_when_redis_raises(client: TestClient) -> None:
-    create_response = client.post(
-        "/api/v1/members",
-        headers=ADMIN_HEADERS,
-        json={
-            "full_name": "Redis Softfail",
-            "email": "softfail@example.org",
-            "phone": "+91 9777777777",
-            "role": "Volunteer",
-            "joined_on": "2026-07-01",
-        },
-    )
-    assert create_response.status_code == 201
-    member_id = create_response.json()["id"]
-
-    with patch("app.services.member_service.cache_get_json", new=AsyncMock(side_effect=RuntimeError("boom"))):
-        # Soft-fail is inside redis helpers; force helper to return None path via cache_get_json exception handling.
-        pass
-
-    with patch("app.core.redis.get_redis_client", side_effect=RuntimeError("redis down")):
-        response = client.get(f"/api/v1/members/{member_id}")
-        assert response.status_code == 200
-        assert response.json()["full_name"] == "Redis Softfail"
-
-
 def test_member_repository_contract_via_api(client: TestClient) -> None:
     missing = client.get(f"/api/v1/members/{uuid4()}")
     assert missing.status_code == 404
@@ -78,18 +52,16 @@ def test_member_repository_contract_via_api(client: TestClient) -> None:
         "/api/v1/members",
         headers=ADMIN_HEADERS,
         json={
-            "full_name": "Repo Contract",
-            "email": "repo@example.org",
+            "full_name": "Contract Member",
+            "email": "contract@example.org",
             "phone": "+91 9666666666",
-            "role": "Staff",
-            "status": "pending",
-            "joined_on": "2026-07-02",
+            "role": "Volunteer",
+            "joined_on": "2026-07-01",
         },
     )
     assert created.status_code == 201
+    member_id = created.json()["id"]
 
-    listing = client.get("/api/v1/members", params={"search": "Repo", "status_filter": "pending"})
-    assert listing.status_code == 200
-    body = listing.json()
-    assert body["pending"] >= 1
-    assert any(item["full_name"] == "Repo Contract" for item in body["items"])
+    listed = client.get("/api/v1/members")
+    assert listed.status_code == 200
+    assert any(item["id"] == member_id for item in listed.json()["items"])

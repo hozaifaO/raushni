@@ -78,6 +78,7 @@ class Settings(BaseSettings):
     require_auth: bool = Field(default=False, alias="REQUIRE_AUTH")
     internal_api_key: str = Field(default="", alias="INTERNAL_API_KEY")
     cms_api_token: str = Field(default="", alias="CMS_API_TOKEN")
+    # Default TTL for intentional cache_* usage (rate limits use SlowAPI separately).
     redis_cache_ttl_seconds: int = Field(default=60, alias="REDIS_CACHE_TTL_SECONDS")
     # Default off so production pods do not migrate on boot; local compose sets true.
     alembic_auto_upgrade: bool = Field(default=False, alias="ALEMBIC_AUTO_UPGRADE")
