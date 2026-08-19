@@ -17,11 +17,13 @@ def client_ip(request: Request) -> str:
 
 def _build_limiter() -> Limiter:
     settings = get_settings()
+    testing = settings.environment.lower() in {"testing", "test"}
     return Limiter(
         key_func=client_ip,
-        default_limits=[settings.rate_limit_default],
-        storage_uri=settings.redis_url,
-        headers_enabled=True,
+        default_limits=[] if testing else [settings.rate_limit_default],
+        storage_uri="memory://" if testing else settings.redis_url,
+        headers_enabled=not testing,
+        enabled=not testing,
     )
 
 

@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 # Defaults for local Docker Desktop Postgres/Redis.
 os.environ.setdefault("OTEL_SDK_DISABLED", "true")
+os.environ.setdefault("ENVIRONMENT", "testing")
 os.environ.setdefault(
     "DATABASE_URL",
     "postgresql+asyncpg://postgres:postgres@localhost:5432/raushni_backend",

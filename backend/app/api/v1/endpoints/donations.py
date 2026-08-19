@@ -78,6 +78,7 @@ async def create_donation(
 @limiter.limit(get_settings().rate_limit_public_write)
 async def register_public_donation(
     request: Request,
+    response: Response,
     payload: PublicDonationCreate,
     service: DonationService = Depends(get_donation_service),
 ) -> Donation:

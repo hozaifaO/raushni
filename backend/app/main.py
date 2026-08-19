@@ -81,7 +81,7 @@ def create_app() -> FastAPI:
 
     @app.get("/api")
     @limiter.limit(settings.rate_limit_default)
-    async def api_root(request: Request) -> dict[str, Any]:
+    async def api_root(request: Request, response: Response) -> dict[str, Any]:
         if production_like:
             return {"name": APP_NAME, "version": APP_VERSION, "status": "running"}
         return {

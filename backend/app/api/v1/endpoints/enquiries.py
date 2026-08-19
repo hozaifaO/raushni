@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, Request, Response, status
 
 from app.api.dependencies.services import get_enquiry_service
 from app.api.v1.endpoints._simple_crud import build_simple_crud_router
@@ -20,6 +20,7 @@ router: APIRouter = build_simple_crud_router(
 @limiter.limit(get_settings().rate_limit_public_write)
 async def register_public_enquiry(
     request: Request,
+    response: Response,
     payload: PublicEnquiryCreate,
     service: SimpleCrudService = Depends(get_enquiry_service),
 ) -> SimpleRecord:

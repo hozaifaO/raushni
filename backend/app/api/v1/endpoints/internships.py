@@ -100,6 +100,7 @@ async def create_application(
 @limiter.limit(get_settings().rate_limit_public_write)
 async def register_public_application(
     request: Request,
+    response: Response,
     payload: InternshipApplicationCreate,
     service: InternshipService = Depends(get_internship_service),
 ) -> InternshipApplication:
