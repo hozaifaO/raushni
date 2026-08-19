@@ -51,12 +51,12 @@ RUN mkdir -p /app/static/uploads /app/logs && \
 # Switch to non-root user
 USER raushni
 
-# Expose port
+# Railway injects PORT; default 8000 for local/docker runs.
 EXPOSE 8000
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:${PORT:-8000}/health || exit 1
 
-# Run the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+# Shell form so ${PORT} expands (Railway sets PORT for public HTTP).
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1

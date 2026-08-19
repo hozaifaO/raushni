@@ -22,10 +22,11 @@ def test_normalize_database_url_asyncpg() -> None:
 
 
 def test_sslmode_require_sets_connect_args() -> None:
-    url = "postgresql+asyncpg://u:p@h/db?sslmode=require"
+    url = "postgresql+asyncpg://u:p@h/db?sslmode=require&channel_binding=require"
     assert database_connect_args(url) == {"ssl": True}
     stripped = strip_ssl_query_for_asyncpg(url)
     assert "sslmode" not in stripped
+    assert "channel_binding" not in stripped
 
 
 def test_sslmode_disable_no_connect_args() -> None:

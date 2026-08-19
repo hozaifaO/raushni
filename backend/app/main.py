@@ -3,12 +3,17 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import FastAPI, Response, status
+from fastapi import FastAPI, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 from app.api.v1.router import api_router
+from app.core.config import get_settings
 from app.core.db import check_db
 from app.core.lifespan import lifespan
+from app.core.rate_limit import limiter
 from app.core.redis import check_redis
 from app.core.telemetry import configure_telemetry
 from app.services.document_service import DocumentService
@@ -20,21 +25,35 @@ APP_VERSION = "1.0.0"
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title=APP_NAME, version=APP_VERSION, lifespan=lifespan)
+    settings = get_settings()
+    production_like = settings.is_production_like
+    app = FastAPI(
+        title=APP_NAME,
+        version=APP_VERSION,
+        lifespan=lifespan,
+        docs_url=None if production_like else "/docs",
+        redoc_url=None if production_like else "/redoc",
+        openapi_url=None if production_like else "/openapi.json",
+    )
     configure_telemetry(app)
     # Staff user mirror only (not auth SoT). Domain services use Depends(get_db).
     app.state.user_account_store = UserAccountStore()
     app.state.document_service = DocumentService()
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+    app.add_middleware(SlowAPIMiddleware)
 
+    origins = settings.cors_origin_list()
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=origins,
         allow_credentials=True,
-        allow_methods=["*"],
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["*"],
     )
 
     @app.get("/health")
+    @limiter.exempt
     async def health() -> dict[str, Any]:
         return {
             "status": "healthy",
@@ -44,6 +63,7 @@ def create_app() -> FastAPI:
         }
 
     @app.get("/health/ready")
+    @limiter.exempt
     async def health_ready(response: Response) -> dict[str, Any]:
         db_ok = await check_db()
         redis_ok = await check_redis()
@@ -59,7 +79,10 @@ def create_app() -> FastAPI:
         }
 
     @app.get("/api")
-    async def api_root() -> dict[str, Any]:
+    @limiter.limit(settings.rate_limit_default)
+    async def api_root(request: Request) -> dict[str, Any]:
+        if production_like:
+            return {"name": APP_NAME, "version": APP_VERSION, "status": "running"}
         return {
             "name": APP_NAME,
             "version": APP_VERSION,
@@ -68,34 +91,10 @@ def create_app() -> FastAPI:
                 "GET /health",
                 "GET /health/ready",
                 "GET /api",
-                "GET /api/v1/dashboard/status",
-                "GET /api/v1/account/profile",
-                "GET /api/v1/settings",
                 "GET /api/v1/landing",
-                "GET /api/v1/activities",
-                "POST /api/v1/activities",
-                "GET /api/v1/beneficiaries",
-                "POST /api/v1/beneficiaries",
-                "GET /api/v1/donations",
-                "POST /api/v1/donations",
-                "POST /api/v1/donations/{id}/checkout",
-                "POST /api/v1/webhooks/stripe",
-                "GET /api/v1/crowdfunding",
-                "POST /api/v1/crowdfunding",
-                "POST /api/v1/crowdfunding/{id}/donations",
-                "GET /api/v1/designations",
-                "POST /api/v1/designations",
-                "GET /api/v1/internships",
+                "POST /api/v1/donations/public",
+                "POST /api/v1/enquiries/public",
                 "POST /api/v1/internships/applications/public",
-                "POST /api/v1/internships/applications/{id}/certificate",
-                "GET /api/v1/events",
-                "POST /api/v1/events",
-                "GET /api/v1/expenses",
-                "POST /api/v1/expenses",
-                "GET /api/v1/news",
-                "POST /api/v1/news",
-                "GET /api/v1/members",
-                "POST /api/v1/members",
             ],
         }
 

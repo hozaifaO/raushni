@@ -20,8 +20,13 @@ target_metadata = Base.metadata
 
 
 def get_url() -> str:
+    """Engine URL with sslmode/channel_binding stripped for asyncpg."""
     settings = get_settings()
-    return settings.async_database_url
+    return settings.async_database_url_for_engine
+
+
+def get_connect_args() -> dict:
+    return get_settings().database_connect_args
 
 
 def run_migrations_offline() -> None:
@@ -51,6 +56,7 @@ async def run_async_migrations() -> None:
         configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
+        connect_args=get_connect_args(),
     )
 
     async with connectable.connect() as connection:

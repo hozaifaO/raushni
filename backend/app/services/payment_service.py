@@ -88,7 +88,6 @@ class StripePaymentService:
 
     def parse_webhook_event(self, payload: bytes, signature: str | None) -> StripeWebhookEvent:
         raw: dict[str, Any]
-        # Prefer raw JSON for local/tests. Signature verification only when a real secret is set.
         if self.webhook_secret:
             try:
                 constructed = stripe.Webhook.construct_event(payload, signature or "", self.webhook_secret)
@@ -99,6 +98,14 @@ class StripePaymentService:
             else:
                 raw = cast(dict[str, Any], dict(constructed))
         else:
+            # Fail closed when auth/production is on — never accept unsigned Stripe payloads.
+            from app.core.config import get_settings
+
+            if get_settings().is_production_like:
+                raise PaymentGatewayError(
+                    "STRIPE_WEBHOOK_SECRET is required when ENVIRONMENT is production/staging "
+                    "or REQUIRE_AUTH=true."
+                )
             try:
                 parsed = json.loads(payload.decode("utf-8"))
             except Exception as exc:

@@ -2,11 +2,13 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, Response, status
 
 from app.api.dependencies.auth import get_current_role, require_write_access
 from app.api.dependencies.services import get_donation_service
 from app.constants.roles import UserRole
+from app.core.config import get_settings
+from app.core.rate_limit import limiter
 from app.schemas.donation import (
     Donation,
     DonationCheckoutSession,
@@ -60,7 +62,9 @@ async def create_donation(
 
 
 @router.post("/public", response_model=Donation, status_code=status.HTTP_201_CREATED)
+@limiter.limit(get_settings().rate_limit_public_write)
 async def register_public_donation(
+    request: Request,
     payload: PublicDonationCreate,
     service: DonationService = Depends(get_donation_service),
 ) -> Donation:

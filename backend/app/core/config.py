@@ -43,11 +43,12 @@ def database_connect_args(url: str) -> dict[str, object]:
 
 
 def strip_ssl_query_for_asyncpg(url: str) -> str:
-    """asyncpg prefers connect_args for SSL; drop conflicting sslmode from the URL."""
+    """asyncpg prefers connect_args for SSL; drop driver-incompatible query params."""
     parsed = urlparse(url)
     query = parse_qs(parsed.query)
-    query.pop("sslmode", None)
-    query.pop("ssl", None)
+    # asyncpg rejects these as connect kwargs if left on the URL.
+    for key in ("sslmode", "ssl", "channel_binding"):
+        query.pop(key, None)
     flat = {k: v[0] for k, v in query.items()}
     return urlunparse(parsed._replace(query=urlencode(flat)))
 
@@ -84,6 +85,18 @@ class Settings(BaseSettings):
     # Stub for future per-org Secrets Manager paths: /raushni/{env}/orgs/{slug}/…
     # See docs/MULTI_TENANT.md. Razorpay is not wired yet.
     org_secrets_prefix: str = Field(default="", alias="ORG_SECRETS_PREFIX")
+    cors_origins: str = Field(
+        default=(
+            "http://localhost:3000,http://localhost:3001,"
+            "https://www.raushni.com,https://raushni.vercel.app"
+        ),
+        alias="CORS_ORIGINS",
+    )
+    rate_limit_default: str = Field(default="120/minute", alias="RATE_LIMIT_DEFAULT")
+    rate_limit_public_write: str = Field(default="10/minute", alias="RATE_LIMIT_PUBLIC_WRITE")
+
+    def cors_origin_list(self) -> list[str]:
+        return [part.strip() for part in self.cors_origins.split(",") if part.strip()]
 
     @field_validator("database_url", mode="before")
     @classmethod

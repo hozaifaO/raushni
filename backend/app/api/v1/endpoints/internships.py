@@ -2,11 +2,13 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from fastapi.responses import HTMLResponse
 
 from app.api.dependencies.auth import require_write_access
 from app.api.dependencies.services import get_internship_service
+from app.core.config import get_settings
+from app.core.rate_limit import limiter
 from app.schemas.internship import (
     InternshipAnnouncement,
     InternshipAnnouncementCreate,
@@ -80,7 +82,9 @@ async def create_application(
 
 
 @router.post("/applications/public", response_model=InternshipApplication, status_code=status.HTTP_201_CREATED)
+@limiter.limit(get_settings().rate_limit_public_write)
 async def register_public_application(
+    request: Request,
     payload: InternshipApplicationCreate,
     service: InternshipService = Depends(get_internship_service),
 ) -> InternshipApplication:
