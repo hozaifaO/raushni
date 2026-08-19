@@ -70,7 +70,15 @@ If port `3000` is already in use, Next.js will print the alternate local URL.
 
 ## Environment Configuration
 
-Create `frontend/.env.local` for local development:
+Full Docker stack: [docs/LOCAL_DEV.md](../docs/LOCAL_DEV.md). Hosted secrets model: [docs/SECURITY.md](../docs/SECURITY.md).
+
+When running the frontend on the host:
+
+```bash
+cp .env.example .env.local
+```
+
+Example local values (see `.env.example` for the full list):
 
 ```bash
 NEXT_PUBLIC_API_URL=http://localhost:8000
@@ -79,13 +87,14 @@ NEXT_PUBLIC_PYTHON_URL=http://localhost:8000
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=replace-with-a-local-secret
+NEXTAUTH_SECRET=local-dev-nextauth-secret-32chars!!
+NEXTAUTH_ADMIN_EMAIL=admin@raushni.com
+NEXTAUTH_ADMIN_PASSWORD=LocalDevAdminPass1!
 
-NEXT_PUBLIC_ENABLE_ANALYTICS=false
-NEXT_PUBLIC_ENABLE_DEBUG_MODE=true
-
-NEXT_PUBLIC_MAX_FILE_SIZE=10485760
-NEXT_PUBLIC_ALLOWED_FILE_TYPES=image/jpeg,image/png,application/pdf
+API_INTERNAL_URL=http://localhost:8000
+CMS_INTERNAL_URL=http://localhost:1337
+INTERNAL_API_KEY=localdev-internal-api-key-xxxxxxxx
+CMS_API_TOKEN=localdev-cms-api-token-xxxxxxxxxxxx
 ```
 
 Environment variables:

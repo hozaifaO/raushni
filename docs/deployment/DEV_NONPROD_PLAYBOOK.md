@@ -30,23 +30,25 @@ Use local development for fast feedback. Use non-prod for production-like valida
 
 ## 1. Local Development
 
+For the default localhost Docker flow (no hosts file), use [LOCAL_DEV.md](../LOCAL_DEV.md).
+
 Prepare local environment:
 
 ```bash
-cd /Users/owaisahmad/Documents/raushni
+cd /path/to/raushni
 cp .env.dev.example .env.dev
 ```
 
-Configure local hostnames once:
-
-```bash
-sudo ./scripts/setup-dev-hosts.sh
-```
-
-Start Docker Compose development stack:
+Start Docker Compose on localhost ports:
 
 ```bash
 make dev-up
+```
+
+Optional — named hosts for nginx TLS / smoke scripts that expect `raushni-dev.com`:
+
+```bash
+sudo ./scripts/setup-dev-hosts.sh
 ```
 
 Stop local stack:

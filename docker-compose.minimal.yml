@@ -40,6 +40,12 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/raushni_backend
       REDIS_URL: redis://redis:6379
       ENVIRONMENT: development
+      REQUIRE_AUTH: "false"
+      INTERNAL_API_KEY: localdev-internal-api-key-xxxxxxxx
+      CMS_API_TOKEN: localdev-cms-api-token-xxxxxxxxxxxx
+      APP_PUBLIC_URL: http://localhost:3000
+      ALEMBIC_AUTO_UPGRADE: "true"
+      OTEL_SDK_DISABLED: "true"
     depends_on:
       postgres:
         condition: service_healthy
@@ -58,9 +64,22 @@ services:
       - ./frontend:/app
       - /app/node_modules
     environment:
+      NODE_ENV: development
       NEXT_PUBLIC_API_URL: http://localhost:8000
+      NEXT_PUBLIC_CMS_URL: http://localhost:1337
+      NEXT_PUBLIC_REQUIRE_AUTH: "false"
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: local-dev-nextauth-secret-32chars!!
+      NEXTAUTH_ADMIN_EMAIL: admin@raushni.com
+      NEXTAUTH_ADMIN_PASSWORD: LocalDevAdminPass1!
+      NEXTAUTH_STAFF_EMAIL: staff@raushni.com
+      NEXTAUTH_STAFF_PASSWORD: LocalDevStaffPass1!
+      API_INTERNAL_URL: http://backend:8000
+      INTERNAL_API_KEY: localdev-internal-api-key-xxxxxxxx
+      OTEL_SDK_DISABLED: "true"
     depends_on:
       - backend
+    command: sh -c "rm -rf .next && npm run dev"
 
 volumes:
   postgres_data:

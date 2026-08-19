@@ -6,32 +6,26 @@ For the target SaaS architecture, including Cloudflare CDN, AWS ALB, Kong/API ga
 
 ## Development Environment
 
-Use the checked-in development template:
+Day-to-day local Docker uses **localhost ports** — see [LOCAL_DEV.md](LOCAL_DEV.md).
 
 ```bash
 cp .env.dev.example .env.dev
 docker compose --env-file .env.dev -f docker-compose.yml -f docker-compose.dev.yml up --build
+# or: make dev-up
 ```
 
-Development domains:
+Optional named hosts for nginx / K8s-local smoke (not required for Compose on localhost):
 
 - `https://raushni-dev.com`
 - `https://api.raushni-dev.com`
 - `https://cms.raushni-dev.com`
 
-For local DNS testing, map these domains to `127.0.0.1` in `/etc/hosts` or use your development DNS provider.
-
-On macOS/Linux local development, run:
-
 ```bash
-sudo ./scripts/setup-dev-hosts.sh
-```
-
-Then start the stack:
-
-```bash
+sudo ./scripts/setup-dev-hosts.sh   # macOS/Linux
 make dev-up
 ```
+
+**Hosted production** today is Vercel + Railway + Neon + Upstash (see [SECURITY.md](SECURITY.md)), not Compose on a public host.
 
 ## Validation
 

@@ -11,10 +11,13 @@ Production-ready Strapi CMS service for Raushni content, media, and publishing w
 
 ## Local Development With Full Stack
 
+Prefer the root local guide: [docs/LOCAL_DEV.md](../docs/LOCAL_DEV.md).
+
 From the repository root:
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+cp .env.dev.example .env.dev
+docker compose --env-file .env.dev -f docker-compose.yml -f docker-compose.dev.yml up --build
 ```
 
 Open Strapi at:
@@ -26,7 +29,7 @@ http://localhost:1337/admin
 Seed professional Raushni content after the CMS container is healthy:
 
 ```bash
-docker compose exec strapi npm run seed:raushni
+docker compose --env-file .env.dev -f docker-compose.yml -f docker-compose.dev.yml exec strapi npm run seed:raushni
 ```
 
 ## Standalone CMS

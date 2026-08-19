@@ -7,7 +7,8 @@ CMS_BASE_URL ?= https://cms.raushni-dev.com
 help:
 	@echo "Raushni development commands"
 	@echo "  make dev-hosts              Show command to configure raushni-dev.com local DNS"
-	@echo "  make dev-up                 Start local dev stack with .env.dev.example defaults"
+	@echo "  make dev-up                 Start local Docker stack (compose.yml + compose.dev.yml + .env.dev.example)"
+	@echo "  make dev-down               Stop local Docker stack"
 	@echo "  make validate               Run static validation"
 	@echo "  make push-aws-secrets       Push runtime secrets to AWS Secrets Manager from env"
 	@echo "  make test                   Run backend and frontend tests"

@@ -52,8 +52,8 @@ services:
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
       CMS_INTERNAL_URL: ${CMS_INTERNAL_URL:-http://strapi:1337}
       REQUIRE_AUTH: ${REQUIRE_AUTH:-false}
-      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-dev-internal-api-key-change-me-32chars}
-      CMS_API_TOKEN: ${CMS_API_TOKEN:-dev-cms-api-token-change-me-32charsxx}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-localdev-internal-api-key-xxxxxxxx}
+      CMS_API_TOKEN: ${CMS_API_TOKEN:-localdev-cms-api-token-xxxxxxxxxxxx}
       APP_PUBLIC_URL: ${APP_PUBLIC_URL:-http://localhost:3000}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
@@ -111,7 +111,7 @@ services:
       DATABASE_USERNAME: ${CMS_DATABASE_USERNAME:-postgres}
       DATABASE_PASSWORD: ${CMS_DATABASE_PASSWORD:-postgres}
       DATABASE_SSL: ${CMS_DATABASE_SSL:-false}
-      CMS_API_TOKEN: ${CMS_API_TOKEN:-dev-cms-api-token-change-me-32charsxx}
+      CMS_API_TOKEN: ${CMS_API_TOKEN:-localdev-cms-api-token-xxxxxxxxxxxx}
       ENVIRONMENT: ${ENVIRONMENT:-development}
       DD_ENV: ${DD_ENV:-production}
       DD_SERVICE: raushni-cms
@@ -155,13 +155,13 @@ services:
       NEXT_PUBLIC_CMS_URL: ${NEXT_PUBLIC_CMS_URL:-http://localhost:1337}
       NEXT_PUBLIC_REQUIRE_AUTH: ${NEXT_PUBLIC_REQUIRE_AUTH:-false}
       NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
-      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-replace-with-local-nextauth-secret}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-local-dev-nextauth-secret-32chars!!}
       NEXTAUTH_ADMIN_EMAIL: ${NEXTAUTH_ADMIN_EMAIL:-admin@raushni.com}
-      NEXTAUTH_ADMIN_PASSWORD: ${NEXTAUTH_ADMIN_PASSWORD:-ChangeMe@12345}
+      NEXTAUTH_ADMIN_PASSWORD: ${NEXTAUTH_ADMIN_PASSWORD:-LocalDevAdminPass1!}
       NEXTAUTH_STAFF_EMAIL: ${NEXTAUTH_STAFF_EMAIL:-staff@raushni.com}
-      NEXTAUTH_STAFF_PASSWORD: ${NEXTAUTH_STAFF_PASSWORD:-ChangeMe@12345}
-      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-dev-internal-api-key-change-me-32chars}
-      CMS_API_TOKEN: ${CMS_API_TOKEN:-dev-cms-api-token-change-me-32charsxx}
+      NEXTAUTH_STAFF_PASSWORD: ${NEXTAUTH_STAFF_PASSWORD:-LocalDevStaffPass1!}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-localdev-internal-api-key-xxxxxxxx}
+      CMS_API_TOKEN: ${CMS_API_TOKEN:-localdev-cms-api-token-xxxxxxxxxxxx}
       API_INTERNAL_URL: ${API_INTERNAL_URL:-http://backend:8000}
       CMS_INTERNAL_URL: ${CMS_INTERNAL_URL:-http://strapi:1337}
       NODE_ENV: ${NODE_ENV:-development}

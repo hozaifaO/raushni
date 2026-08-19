@@ -6,8 +6,8 @@ services:
       DEBUG: "true"
       APP_PUBLIC_URL: ${APP_PUBLIC_URL:-http://localhost:3000}
       REQUIRE_AUTH: ${REQUIRE_AUTH:-false}
-      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-dev-internal-api-key-change-me-32chars}
-      CMS_API_TOKEN: ${CMS_API_TOKEN:-dev-cms-api-token-change-me-32charsxx}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-localdev-internal-api-key-xxxxxxxx}
+      CMS_API_TOKEN: ${CMS_API_TOKEN:-localdev-cms-api-token-xxxxxxxxxxxx}
       OTEL_SDK_DISABLED: ${OTEL_SDK_DISABLED:-true}
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
@@ -20,11 +20,11 @@ services:
       NEXT_PUBLIC_REQUIRE_AUTH: ${NEXT_PUBLIC_REQUIRE_AUTH:-false}
       NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
       NEXTAUTH_ADMIN_EMAIL: ${NEXTAUTH_ADMIN_EMAIL:-admin@raushni.com}
-      NEXTAUTH_ADMIN_PASSWORD: ${NEXTAUTH_ADMIN_PASSWORD:-ChangeMe@12345}
+      NEXTAUTH_ADMIN_PASSWORD: ${NEXTAUTH_ADMIN_PASSWORD:-LocalDevAdminPass1!}
       NEXTAUTH_STAFF_EMAIL: ${NEXTAUTH_STAFF_EMAIL:-staff@raushni.com}
-      NEXTAUTH_STAFF_PASSWORD: ${NEXTAUTH_STAFF_PASSWORD:-ChangeMe@12345}
-      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-dev-internal-api-key-change-me-32chars}
-      CMS_API_TOKEN: ${CMS_API_TOKEN:-dev-cms-api-token-change-me-32charsxx}
+      NEXTAUTH_STAFF_PASSWORD: ${NEXTAUTH_STAFF_PASSWORD:-LocalDevStaffPass1!}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-localdev-internal-api-key-xxxxxxxx}
+      CMS_API_TOKEN: ${CMS_API_TOKEN:-localdev-cms-api-token-xxxxxxxxxxxx}
       API_INTERNAL_URL: http://backend:8000
       CMS_INTERNAL_URL: http://strapi:1337
       OTEL_SDK_DISABLED: ${OTEL_SDK_DISABLED:-true}
@@ -50,5 +50,5 @@ services:
       ADMIN_JWT_SECRET: ${STRAPI_ADMIN_JWT_SECRET:-dev-admin-jwt-secret-change-me}
       JWT_SECRET: ${STRAPI_JWT_SECRET:-dev-jwt-secret-change-me}
       TRANSFER_TOKEN_SALT: ${STRAPI_TRANSFER_TOKEN_SALT:-dev-transfer-token-salt-change-me}
-      CMS_API_TOKEN: ${CMS_API_TOKEN:-dev-cms-api-token-change-me-32charsxx}
+      CMS_API_TOKEN: ${CMS_API_TOKEN:-localdev-cms-api-token-xxxxxxxxxxxx}
       OTEL_SDK_DISABLED: ${OTEL_SDK_DISABLED:-true}

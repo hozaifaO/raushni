@@ -2,7 +2,11 @@
 
 How the live stack is meant to be reached, what is public, and how to rotate keys.
 
+Local Docker setup (separate from hosted prod): [LOCAL_DEV.md](LOCAL_DEV.md).
+
 ## Trust boundaries
+
+**Hosted production**
 
 ```
 Browser
@@ -11,6 +15,8 @@ Browser
        -> Railway Strapi (CMS_API_TOKEN)
   -> Railway FastAPI / Strapi directly (should only be used by BFFs / webhooks)
 ```
+
+**Local Docker** — same BFF pattern, but Next.js / FastAPI / Strapi / Postgres / Redis run in Compose on localhost. Do not reuse production `INTERNAL_API_KEY` / `CMS_API_TOKEN` in `.env.dev`.
 
 Browsers should not hold `INTERNAL_API_KEY` or `CMS_API_TOKEN`. Those stay on the server (Vercel env / Railway env). The Next.js BFFs mint them after their own checks.
 

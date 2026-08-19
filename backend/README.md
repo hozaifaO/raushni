@@ -6,7 +6,9 @@
 [![Redis](https://img.shields.io/badge/Redis-ready-DC382D)](https://redis.io/)
 [![Docker](https://img.shields.io/badge/Docker-ready-2496ED)](https://www.docker.com/)
 
-The Raushni backend is the FastAPI service for the Raushni NGO management platform. It is designed to provide the API layer for public website features, internal dashboard workflows, operational modules, document generation, reporting, and integrations with PostgreSQL, Redis, Celery, email, payments, and PDF tooling.
+The Raushni backend is the FastAPI service for the Raushni NGO management platform. It provides the API layer for public website features, internal dashboard workflows, operational modules, payments, and integrations with PostgreSQL and Redis. Mail/PDF helpers exist as stubs until those providers are wired.
+
+Local Docker vs hosted: [docs/LOCAL_DEV.md](../docs/LOCAL_DEV.md), [docs/SECURITY.md](../docs/SECURITY.md).
 
 At the moment, the active public API surface exposes health and API discovery endpoints. The package structure already contains the intended domain boundaries for future modules such as members, donations, events, projects, beneficiaries, enquiries, documents, reporting, internships, crowdfunding, news, and activities.
 
@@ -34,8 +36,7 @@ FastAPI Backend
       |
       +--> PostgreSQL
       +--> Redis
-      +--> Celery workers
-      +--> Email / payment / document services
+      +--> Email / payment / document services (stubs or optional extras)
 ```
 
 Core backend responsibilities:
@@ -64,13 +65,11 @@ backend/
     repositories/        Persistence access layer
     schemas/             Pydantic schemas
     services/            Business service layer
-    tasks/               Celery and scheduled/background task modules
+    tasks/               Background/scheduled task modules (stubs where unused)
     utils/               Shared utility functions
     main.py              FastAPI application factory and ASGI app
-  prisma/                Node/TypeScript-era Prisma assets retained in the backend folder
-  src/                   TypeScript backend entry files retained for compatibility/history
-  Dockerfile             Production image
-  Dockerfile.dev         Development image
+  Dockerfile             Production image (Railway / self-host)
+  Dockerfile.dev         Development image (Compose)
   entrypoint.sh          Container startup helper for DB/Redis readiness and migrations
   pytest.ini             Backend pytest configuration
   requirements.txt       Runtime Python dependencies
@@ -90,11 +89,14 @@ The recommended local workflow is Docker Compose from the repository root. Runni
 
 ### Run with Docker Compose
 
-From the repository root:
+From the repository root (see [docs/LOCAL_DEV.md](../docs/LOCAL_DEV.md)):
 
 ```bash
-docker-compose up backend postgres redis
+cp .env.dev.example .env.dev
+docker compose --env-file .env.dev -f docker-compose.yml -f docker-compose.dev.yml up --build postgres redis backend
 ```
+
+Or the full stack: `make dev-up`.
 
 The backend will be available at:
 
@@ -114,7 +116,7 @@ API discovery:
 curl http://localhost:8000/api
 ```
 
-Interactive docs:
+Interactive docs (enabled in local `ENVIRONMENT=development`):
 
 ```text
 http://localhost:8000/docs

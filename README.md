@@ -11,7 +11,7 @@ Raushni is a digital operations platform for Raushni Educational & Social Welfar
 
 The repository is organized as a full-stack platform with a Next.js frontend, FastAPI backend, Strapi CMS, PostgreSQL database, Redis cache, PDF/document generation utilities, nginx, Docker Compose, and Kubernetes manifests.
 
-Multi-tenant design: [docs/MULTI_TENANT.md](docs/MULTI_TENANT.md). Deferred / ComingSoon work: [docs/DEFERRED.md](docs/DEFERRED.md).
+Local Docker: [docs/LOCAL_DEV.md](docs/LOCAL_DEV.md). Security (hosted): [docs/SECURITY.md](docs/SECURITY.md). Multi-tenant: [docs/MULTI_TENANT.md](docs/MULTI_TENANT.md). Deferred work: [docs/DEFERRED.md](docs/DEFERRED.md).
 
 ## Product Scope
 
@@ -77,14 +77,14 @@ raushni/
 ## Prerequisites
 
 - Git
-- Docker and Docker Compose
-- Node.js 18 or newer
+- Docker and Docker Compose v2 (recommended for full local stack)
+- Node.js 18 or newer (when running frontend/CMS on the host)
 - npm 9 or newer
-- Python 3.11 or newer
+- Python 3.11 or newer (when running the API on the host)
 
-Docker Compose is the recommended way to run the full platform locally. Individual services can also be run directly when focusing on one area.
+Docker Compose is the recommended way to run the full platform locally. Individual services can also be run directly when focusing on one area. See [docs/LOCAL_DEV.md](docs/LOCAL_DEV.md).
 
-## Quick Start
+## Quick Start (local Docker)
 
 Clone the repository:
 
@@ -93,17 +93,14 @@ git clone https://github.com/owais4u/raushni.git
 cd raushni
 ```
 
-Create local environment files:
+Copy the local Docker env template and start the stack (merge both Compose files):
 
 ```bash
-cp .env.example .env
+cp .env.dev.example .env.dev
+docker compose --env-file .env.dev -f docker-compose.yml -f docker-compose.dev.yml up --build
 ```
 
-Start the full local stack:
-
-```bash
-docker-compose up -d
-```
+Or: `make dev-up` (uses `.env.dev.example` directly).
 
 Default local URLs:
 
@@ -113,14 +110,30 @@ Default local URLs:
 | `http://localhost:8000` | Backend API |
 | `http://localhost:8000/health` | Backend health check |
 | `http://localhost:1337` | CMS |
+| `http://localhost:1337/admin` | Strapi admin |
 | `localhost:5432` | PostgreSQL |
 | `localhost:6379` | Redis |
+
+Default site dashboard login (local only): `admin@raushni.com` / `LocalDevAdminPass1!` — details in [docs/LOCAL_DEV.md](docs/LOCAL_DEV.md).
 
 Stop the stack:
 
 ```bash
-docker-compose down
+make dev-down
+# or
+docker compose --env-file .env.dev -f docker-compose.yml -f docker-compose.dev.yml down
 ```
+
+## Hosted production (current)
+
+| Layer | Hosting |
+| --- | --- |
+| Frontend | Vercel |
+| Backend + CMS | Railway |
+| Postgres | Neon |
+| Redis | Upstash |
+
+Trust boundaries and public surfaces: [docs/SECURITY.md](docs/SECURITY.md). Env templates for hosted/prod-style values: `.env.example`.
 
 ## Running Services Individually
 
@@ -179,17 +192,17 @@ uvicorn main:app --reload --port 8001
 
 ## Configuration
 
-The root `.env` configures the Dockerized stack. Service-specific files are also used:
-
 | File | Purpose |
 | --- | --- |
-| `.env` | Root environment values for local orchestration. |
-| `frontend/.env.local` | Frontend local URLs, NextAuth values, feature flags, and upload settings. |
-| `frontend/.env.development` | Development defaults for the frontend. |
-| `frontend/.env.production` | Production-facing frontend defaults. |
-| `cms/.env` | CMS runtime settings. |
+| `.env.dev.example` / `.env.dev` | Local Docker Compose (recommended). |
+| `.env.example` | Hosted / production-oriented template. |
+| `frontend/.env.local` | Frontend when run on the host. |
+| `frontend/.env.example` | Frontend env variable list. |
+| `cms/.env` | CMS when run on the host. |
 
 Do not commit real secrets. Use example files and deployment secret managers for production credentials.
+
+Full local walkthrough: [docs/LOCAL_DEV.md](docs/LOCAL_DEV.md).
 
 ## Testing and Quality
 
@@ -246,28 +259,20 @@ Review each script before running it against non-local data.
 
 ## Deployment
 
-The repository includes multiple deployment options:
-
 | Path | Purpose |
 | --- | --- |
-| `docker-compose.yml` | Local multi-service development stack. |
-| `docker-compose.dev.yml` | Development Compose variant. |
-| `docker-compose.prod.yml` | Production Compose variant. |
-| `k8s/` | Kubernetes namespace, config map, secrets, backend, and Postgres manifests. |
-| `nginx/` | Reverse proxy and container image configuration. |
+| Local Docker | [docs/LOCAL_DEV.md](docs/LOCAL_DEV.md) — `docker-compose.yml` + `docker-compose.dev.yml` |
+| Hosted prod | Vercel (frontend) + Railway (API/CMS) + Neon + Upstash — see [docs/SECURITY.md](docs/SECURITY.md) |
+| `docker-compose.minimal.yml` | Lighter API-focused Compose (no Strapi/nginx) |
+| `docker-compose.prod.yml` | Production-style Compose variant (self-host) |
+| `k8s/` | Kubernetes manifests / overlays |
+| `nginx/` | Reverse proxy used by full Compose / self-host |
 
-Build the frontend production image:
-
-```bash
-cd frontend
-docker build -t raushni-frontend .
-```
-
-Build the backend image:
+Build images (self-host):
 
 ```bash
-cd backend
-docker build -t raushni-backend .
+cd frontend && docker build -t raushni-frontend .
+cd ../backend && docker build -t raushni-backend .
 ```
 
 ## Architecture Diagrams
@@ -307,14 +312,15 @@ If the frontend cannot reach the API, verify `NEXT_PUBLIC_API_URL` and confirm t
 curl http://localhost:8000/health
 ```
 
-If Docker services fail to start, inspect logs:
+If Docker services fail to start, inspect logs (use both Compose files + your env file):
 
 ```bash
-docker-compose logs -f backend
-docker-compose logs -f frontend
-docker-compose logs -f strapi
-docker-compose logs -f postgres
+docker compose --env-file .env.dev -f docker-compose.yml -f docker-compose.dev.yml logs -f backend
+docker compose --env-file .env.dev -f docker-compose.yml -f docker-compose.dev.yml logs -f frontend
+docker compose --env-file .env.dev -f docker-compose.yml -f docker-compose.dev.yml logs -f strapi
 ```
+
+More local Docker tips: [docs/LOCAL_DEV.md](docs/LOCAL_DEV.md).
 
 If ports are already in use, stop the conflicting process or change the mapped ports in `docker-compose.yml`.
 
