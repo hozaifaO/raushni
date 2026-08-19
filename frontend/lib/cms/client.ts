@@ -1,17 +1,12 @@
 /**
-
  * Server-side CMS Content API client.
-
  * Always attaches CMS_API_TOKEN — never expose that token via NEXT_PUBLIC_*.
-
  * Tenant-scoped collections get filters[tenantSlug][$eq]=… automatically.
-
  */
 
-
+import "server-only";
 
 import { isTenantScopedCmsPath, withTenantFilter } from "@/lib/tenant";
-
 import { getRequestTenantSlug } from "@/lib/tenant/request";
 
 

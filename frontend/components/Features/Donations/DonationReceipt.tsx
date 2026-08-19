@@ -2,7 +2,7 @@
 
 import { Printer, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { fallbackDocumentTemplates, type CmsDocumentTemplate } from "@/lib/cms/documentTemplates";
+import { fallbackDocumentTemplates, type CmsDocumentTemplate } from "@/lib/cms/documentTemplatesShared";
 import { documentQrUrl, documentVerificationValue } from "@/lib/documents/qr";
 import type { DonationReceipt as DonationReceiptModel } from "@/types/models/donation";
 

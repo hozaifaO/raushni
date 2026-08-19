@@ -3,7 +3,7 @@
 import { Printer, QrCode } from "lucide-react";
 import { useState } from "react";
 import { DocumentShell, TextField } from "@/components/Documents/Generators/DonationReceiptGenerator";
-import type { CmsDocumentTemplate } from "@/lib/cms/documentTemplates";
+import type { CmsDocumentTemplate } from "@/lib/cms/documentTemplatesShared";
 import { documentQrUrl } from "@/lib/documents/qr";
 
 export default function QrCodeGenerator({ template }: { template: CmsDocumentTemplate }) {

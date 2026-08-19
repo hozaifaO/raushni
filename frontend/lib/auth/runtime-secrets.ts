@@ -48,7 +48,6 @@ export function assertFrontendRuntimeSecrets(): void {
   requireSecret("NEXTAUTH_SECRET", process.env.NEXTAUTH_SECRET);
   requireNonEmpty("NEXTAUTH_URL", process.env.NEXTAUTH_URL);
   requireSecret("INTERNAL_API_KEY", process.env.INTERNAL_API_KEY);
-  requireSecret("CMS_API_TOKEN", process.env.CMS_API_TOKEN);
   requireNonEmpty("NEXTAUTH_ADMIN_EMAIL", process.env.NEXTAUTH_ADMIN_EMAIL);
   requireNonEmpty("NEXTAUTH_ADMIN_PASSWORD", process.env.NEXTAUTH_ADMIN_PASSWORD);
   requireNonEmpty("NEXTAUTH_STAFF_EMAIL", process.env.NEXTAUTH_STAFF_EMAIL);
@@ -60,6 +59,13 @@ export function assertFrontendRuntimeSecrets(): void {
     process.env.NEXT_PUBLIC_API_URL;
   if (!apiInternal?.trim()) {
     throw new Error("API_INTERNAL_URL (or NEXT_PUBLIC_API_URL) is required for the BFF upstream.");
+  }
+
+  // CMS/Strapi is optional — only enforce the token when a CMS upstream is configured.
+  const cmsInternal =
+    process.env.CMS_INTERNAL_URL || process.env.NEXT_PUBLIC_CMS_URL;
+  if (cmsInternal?.trim()) {
+    requireSecret("CMS_API_TOKEN", process.env.CMS_API_TOKEN);
   }
 
   for (const key of Object.keys(process.env)) {

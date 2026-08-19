@@ -4,7 +4,7 @@ import { ArrowLeft, CreditCard, Printer, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import MemberIDCard from "@/components/Documents/PDFGenerator/MemberIDCard";
-import type { CmsDocumentTemplate } from "@/lib/cms/documentTemplates";
+import type { CmsDocumentTemplate } from "@/lib/cms/documentTemplatesShared";
 import { listMembers } from "@/services/api/members";
 import type { Member } from "@/types/models/member";
 

@@ -4,7 +4,7 @@ import { Award, Printer, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { DocumentShell, TextField } from "@/components/Documents/Generators/DonationReceiptGenerator";
 import AchievementCertificate from "@/components/Documents/PDFGenerator/AchievementCertificate";
-import type { CmsDocumentTemplate } from "@/lib/cms/documentTemplates";
+import type { CmsDocumentTemplate } from "@/lib/cms/documentTemplatesShared";
 
 const today = new Date().toISOString().slice(0, 10);
 

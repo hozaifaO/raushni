@@ -1,5 +1,5 @@
 import { BadgeCheck, CreditCard, FileText, QrCode, Receipt, ScrollText } from "lucide-react";
-import type { CmsDocumentTemplate } from "@/lib/cms/documentTemplates";
+import type { CmsDocumentTemplate } from "@/lib/cms/documentTemplatesShared";
 
 const iconMap = {
   member_id: CreditCard,

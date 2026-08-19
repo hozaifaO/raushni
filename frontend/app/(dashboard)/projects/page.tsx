@@ -4,7 +4,7 @@ import { CalendarDays, FileText, FolderKanban, IndianRupee, MapPin, Plus, Refres
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { canWrite, getStoredUser } from "@/lib/auth/permissions";
-import { fallbackProjectContent, type CmsProjectContent } from "@/lib/cms/projectContent";
+import { fallbackProjectContent, type CmsProjectContent } from "@/lib/cms/projectContentShared";
 import { createProject, deleteProject, listProjects, updateProject } from "@/services/api/projects";
 import type { Project, ProjectFormValues, ProjectListResponse, ProjectStatus } from "@/types/models/project";
 

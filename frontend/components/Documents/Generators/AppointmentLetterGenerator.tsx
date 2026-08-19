@@ -4,7 +4,7 @@ import { ArrowLeft, Printer, RefreshCw, ScrollText } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import AppointmentLetter from "@/components/Documents/PDFGenerator/AppointmentLetter";
-import type { CmsDocumentTemplate } from "@/lib/cms/documentTemplates";
+import type { CmsDocumentTemplate } from "@/lib/cms/documentTemplatesShared";
 
 type FormState = {
   recipientName: string;

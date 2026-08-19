@@ -113,3 +113,6 @@ build/
 # Production builds
 *.tar.gz
 *.zip
+
+.env.deploy.secrets
+

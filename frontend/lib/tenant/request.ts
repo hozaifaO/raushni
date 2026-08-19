@@ -1,3 +1,5 @@
+import "server-only";
+
 import { cookies, headers } from "next/headers";
 
 import { DEFAULT_TENANT_SLUG, TENANT_COOKIE, TENANT_HEADER, normalizeTenantSlug } from "@/lib/tenant";

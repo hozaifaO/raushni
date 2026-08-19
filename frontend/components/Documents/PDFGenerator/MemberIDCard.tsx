@@ -1,4 +1,4 @@
-import { fallbackDocumentTemplates, type CmsDocumentTemplate } from "@/lib/cms/documentTemplates";
+import { fallbackDocumentTemplates, type CmsDocumentTemplate } from "@/lib/cms/documentTemplatesShared";
 import { documentQrUrl, documentVerificationValue } from "@/lib/documents/qr";
 
 type MemberIDCardProps = {

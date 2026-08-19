@@ -6,7 +6,7 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import DonationReceipt from "@/components/Documents/PDFGenerator/DonationReceipt";
 import PrintStyles from "@/components/Documents/Generators/PrintStyles";
-import type { CmsDocumentTemplate } from "@/lib/cms/documentTemplates";
+import type { CmsDocumentTemplate } from "@/lib/cms/documentTemplatesShared";
 import { issueDonationReceipt, listDonations } from "@/services/api/donations";
 import type { Donation } from "@/types/models/donation";
 
