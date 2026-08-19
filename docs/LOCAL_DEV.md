@@ -24,6 +24,95 @@ Security model for the hosted stack: [SECURITY.md](SECURITY.md).
 - Optional: Node 18+, Python 3.11+ for running a single service outside Compose
 - Optional: GNU Make (`make dev-up`) — or use the `docker compose` commands below
 
+## Platform notes (macOS / Windows / Linux)
+
+Day-to-day work targets **localhost ports**. Named hosts (`raushni-dev.com`) are optional.
+
+### Docker
+
+| Platform | Notes |
+| --- | --- |
+| **macOS** | Install [Docker Desktop](https://docs.docker.com/desktop/). Give it enough RAM (8 GB+ recommended; Strapi + Next + Postgres are heavy). On Apple Silicon, images here are multi-arch friendly; if a pull fails, retry after Desktop is fully started. |
+| **Windows** | Use Docker Desktop with the **WSL2** backend (not Hyper-V legacy). Prefer running Compose from **PowerShell, Windows Terminal, or WSL** after Desktop shows “Running”. Error `dockerDesktopLinuxEngine` / pipe not found usually means Desktop is stopped. |
+| **Linux** | Docker Engine + Compose plugin (`docker compose`). Add your user to the `docker` group so you do not need `sudo` for every command. |
+
+Bind mounts:
+
+- Compose already uses anonymous volumes for `node_modules` (frontend/CMS) so host OS modules do not overwrite Linux container modules.
+- On macOS/Windows, first `npm install` inside a container can be slow; subsequent starts are faster.
+- If file watching misses edits on Docker Desktop, restart the service or toggle Desktop → Settings → General file-sharing / VirtioFS (macOS).
+
+### Make vs plain Compose
+
+`make dev-up` / `make dev-down` need GNU Make:
+
+| Platform | How |
+| --- | --- |
+| macOS | `make` from Xcode CLT or Homebrew (`brew install make`) |
+| Linux | Usually preinstalled (`build-essential` / `make`) |
+| Windows | Not default. Use **Git Bash**, **WSL**, or Chocolatey/Scoop `make` — or skip Make and run the `docker compose …` commands in this doc |
+
+### Shell / line endings
+
+- Repo shell scripts (`scripts/*.sh`, container entrypoints) expect **LF** endings. `.gitattributes` forces LF for `*.sh`. If a script fails with `$'\r': command not found`, fix CRLF (`git add --renormalize .` after pull) or run from WSL/Git Bash.
+- Prefer `docker compose` (v2 plugin). Older `docker-compose` (hyphen) often still works but is not what CI/docs assume.
+
+### Ports
+
+| Port | Quirk |
+| --- | --- |
+| `3000`, `8000`, `1337`, `5432`, `6379` | Normal user ports — fine on all platforms if nothing else binds them. |
+| `80` / `443` (nginx in full Compose) | On macOS/Linux, binding may need elevated privileges or conflict with local Apache/nginx. On Windows, another service (IIS, Skype legacy) can own them. If nginx fails to start, you can still use direct service ports above. |
+
+### Copying env files
+
+```bash
+# macOS / Linux / Git Bash / WSL
+cp .env.dev.example .env.dev
+```
+
+```powershell
+# Windows PowerShell
+Copy-Item .env.dev.example .env.dev
+```
+
+### Health checks / curl
+
+```bash
+# macOS / Linux / Git Bash / WSL
+curl http://localhost:8000/health
+```
+
+```powershell
+# Windows PowerShell
+Invoke-WebRequest http://localhost:8000/health | Select-Object -ExpandProperty Content
+# or, if curl.exe is on PATH (Windows 10+):
+curl.exe http://localhost:8000/health
+```
+
+### Python venv (host, not Compose)
+
+```bash
+# macOS / Linux
+python3 -m venv .venv && source .venv/bin/activate
+```
+
+```powershell
+# Windows PowerShell
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+### Optional named hosts
+
+| Platform | Setup |
+| --- | --- |
+| macOS / Linux | `sudo ./scripts/setup-dev-hosts.sh` |
+| Windows (Admin PowerShell) | `.\scripts\setup-dev-hosts.ps1` |
+| Windows (WSL) | Prefer the `.sh` script against WSL’s `/etc/hosts`, or edit `C:\Windows\System32\drivers\etc\hosts` as Administrator |
+
+Hosts file is only needed for nginx TLS / smoke scripts that expect `*.raushni-dev.com`. Localhost Compose does not need it.
+
 ## Recommended: full local stack
 
 From the repo root:
@@ -104,7 +193,7 @@ Keep Compose Postgres + Redis (or your own), then:
 
 ```bash
 cd frontend
-cp .env.example .env.local   # if present; otherwise copy values from .env.dev.example
+cp .env.example .env.local
 npm install
 npm run dev
 ```
@@ -115,9 +204,8 @@ Point `API_INTERNAL_URL` / `CMS_INTERNAL_URL` at `http://localhost:8000` and `ht
 
 ```bash
 cd backend
-python -m venv .venv
-# Windows: .venv\Scripts\activate
-source .venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate   # Windows: .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 # DATABASE_URL=postgresql://postgres:postgres@localhost:5432/raushni_backend
 # REDIS_URL=redis://localhost:6379
@@ -147,7 +235,12 @@ Never commit real production secrets or credential dump files.
 
 ## Named hosts (`raushni-dev.com`)
 
-Optional: map `raushni-dev.com` / `api.` / `cms.` to `127.0.0.1` (see `scripts/setup-dev-hosts.sh`) for nginx TLS and K8s-local smoke tests. That path is documented in [deployment/DEV_NONPROD_PLAYBOOK.md](deployment/DEV_NONPROD_PLAYBOOK.md). Day-to-day Docker work does **not** require it — use `localhost` ports.
+Optional: map `raushni-dev.com` / `api.` / `cms.` to `127.0.0.1` for nginx TLS and K8s-local smoke tests. Day-to-day Docker work does **not** require it — use `localhost` ports.
+
+- macOS/Linux: `sudo ./scripts/setup-dev-hosts.sh`
+- Windows: elevated PowerShell `.\scripts\setup-dev-hosts.ps1`
+
+More context: [deployment/DEV_NONPROD_PLAYBOOK.md](deployment/DEV_NONPROD_PLAYBOOK.md).
 
 ## Troubleshooting
 
@@ -161,4 +254,8 @@ curl http://localhost:8000/health
 - First start builds images and can take several minutes.
 - If Postgres init scripts already ran on an old volume, schema changes may need `down -v` (destructive) or manual migrations.
 - Frontend Compose command clears `.next` on start so stale routes do not stick around.
-- Port conflicts: stop the other process or change host port mappings in Compose.
+- Port conflicts: stop the conflicting process or change the mapped ports in Compose.
+- **Docker daemon down:** start Docker Desktop (macOS/Windows) or `sudo systemctl start docker` (Linux).
+- **Windows + Make missing:** use the long `docker compose …` form instead of `make dev-up`.
+- **nginx cannot bind 80/443:** ignore nginx and open services on `3000`/`8000`/`1337`, or free those ports.
+- **Shell script `\r` errors:** LF line endings required; see Platform notes above.

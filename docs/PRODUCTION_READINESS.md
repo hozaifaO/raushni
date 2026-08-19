@@ -22,7 +22,8 @@ Optional named hosts for nginx / K8s-local smoke (not required for Compose on lo
 
 ```bash
 sudo ./scripts/setup-dev-hosts.sh   # macOS/Linux
-make dev-up
+# Windows (Admin PowerShell): .\scripts\setup-dev-hosts.ps1
+make dev-up                         # or the docker compose form in LOCAL_DEV.md
 ```
 
 **Hosted production** today is Vercel + Railway + Neon + Upstash (see [SECURITY.md](SECURITY.md)), not Compose on a public host.

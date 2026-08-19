@@ -48,8 +48,15 @@ make dev-up
 Optional — named hosts for nginx TLS / smoke scripts that expect `raushni-dev.com`:
 
 ```bash
-sudo ./scripts/setup-dev-hosts.sh
+sudo ./scripts/setup-dev-hosts.sh          # macOS / Linux
 ```
+
+```powershell
+# Windows — run elevated PowerShell
+.\scripts\setup-dev-hosts.ps1
+```
+
+Platform quirks (Docker Desktop, Make, ports, line endings): [LOCAL_DEV.md](../LOCAL_DEV.md#platform-notes-macos--windows--linux).
 
 Stop local stack:
 

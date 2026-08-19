@@ -82,7 +82,9 @@ raushni/
 - npm 9 or newer
 - Python 3.11 or newer (when running the API on the host)
 
-Docker Compose is the recommended way to run the full platform locally. Individual services can also be run directly when focusing on one area. See [docs/LOCAL_DEV.md](docs/LOCAL_DEV.md).
+Docker Compose is the recommended way to run the full platform locally. Individual services can also be run directly when focusing on one area.
+
+See [docs/LOCAL_DEV.md](docs/LOCAL_DEV.md) for the full flow, including **macOS / Windows / Linux** Docker, Make, ports, hosts-file, and shell quirks.
 
 ## Quick Start (local Docker)
 

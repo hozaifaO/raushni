@@ -35,7 +35,9 @@ help:
 
 dev-hosts:
 	@echo "Run this once so raushni-dev.com resolves locally:"
-	@echo "  sudo ./scripts/setup-dev-hosts.sh"
+	@echo "  macOS/Linux: sudo ./scripts/setup-dev-hosts.sh"
+	@echo "  Windows (Admin PowerShell): .\\scripts\\setup-dev-hosts.ps1"
+	@echo "localhost Docker does not require named hosts — see docs/LOCAL_DEV.md"
 
 dev-up:
 	docker compose --env-file .env.dev.example -f docker-compose.yml -f docker-compose.dev.yml up --build

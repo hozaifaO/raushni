@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Configure local named hosts for raushni-dev.com (macOS/Linux).
+# Windows: run scripts/setup-dev-hosts.ps1 as Administrator instead.
+# Not required for day-to-day localhost Docker — see docs/LOCAL_DEV.md.
 set -euo pipefail
 
 HOSTS_FILE="${HOSTS_FILE:-/etc/hosts}"
