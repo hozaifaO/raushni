@@ -57,9 +57,15 @@ class InternshipService:
         announcements = await self._repository.list_announcements()
         certificates = await self._repository.list_certificates()
         return InternshipListResponse(
-            announcements=[InternshipAnnouncement.model_validate(item) for item in announcements],
-            applications=[InternshipApplication.model_validate(item) for item in applications],
-            certificates=[InternshipCertificate.model_validate(item) for item in certificates],
+            announcements=[
+                InternshipAnnouncement.model_validate(item) for item in announcements
+            ],
+            applications=[
+                InternshipApplication.model_validate(item) for item in applications
+            ],
+            certificates=[
+                InternshipCertificate.model_validate(item) for item in certificates
+            ],
             total_announcements=await self._repository.count_announcements(),
             total_applications=await self._repository.count_applications(),
             registered=counts.get(InternshipApplicationStatus.REGISTERED.value, 0),
@@ -72,7 +78,9 @@ class InternshipService:
         rows = await self._repository.list_announcements(published_only=True)
         return [InternshipAnnouncement.model_validate(item) for item in rows]
 
-    async def create_announcement(self, payload: InternshipAnnouncementCreate) -> InternshipAnnouncement:
+    async def create_announcement(
+        self, payload: InternshipAnnouncementCreate
+    ) -> InternshipAnnouncement:
         row = await self._repository.create_announcement(payload)
         return InternshipAnnouncement.model_validate(row)
 
@@ -83,19 +91,29 @@ class InternshipService:
     ) -> InternshipAnnouncement:
         row = await self._repository.update_announcement(announcement_id, payload)
         if row is None:
-            raise InternshipNotFoundError(f"Internship announcement {announcement_id} was not found")
+            raise InternshipNotFoundError(
+                f"Internship announcement {announcement_id} was not found"
+            )
         return InternshipAnnouncement.model_validate(row)
 
     async def get_announcement(self, announcement_id: UUID) -> InternshipAnnouncement:
         row = await self._repository.get_announcement(announcement_id)
         if row is None:
-            raise InternshipNotFoundError(f"Internship announcement {announcement_id} was not found")
+            raise InternshipNotFoundError(
+                f"Internship announcement {announcement_id} was not found"
+            )
         return InternshipAnnouncement.model_validate(row)
 
-    async def register_application(self, payload: InternshipApplicationCreate) -> InternshipApplication:
+    async def register_application(
+        self, payload: InternshipApplicationCreate
+    ) -> InternshipApplication:
         if await self._repository.get_announcement(payload.announcement_id) is None:
-            raise InternshipNotFoundError(f"Internship announcement {payload.announcement_id} was not found")
-        registration_number = await self._repository.allocate_counter("registration", start_value=100)
+            raise InternshipNotFoundError(
+                f"Internship announcement {payload.announcement_id} was not found"
+            )
+        registration_number = await self._repository.allocate_counter(
+            "registration", start_value=100
+        )
         row = await self._repository.create_application(payload, registration_number)
         return InternshipApplication.model_validate(row)
 
@@ -106,13 +124,17 @@ class InternshipService:
     ) -> InternshipApplication:
         row = await self._repository.update_application(application_id, payload)
         if row is None:
-            raise InternshipNotFoundError(f"Internship application {application_id} was not found")
+            raise InternshipNotFoundError(
+                f"Internship application {application_id} was not found"
+            )
         return InternshipApplication.model_validate(row)
 
     async def get_application(self, application_id: UUID) -> InternshipApplication:
         row = await self._repository.get_application(application_id)
         if row is None:
-            raise InternshipNotFoundError(f"Internship application {application_id} was not found")
+            raise InternshipNotFoundError(
+                f"Internship application {application_id} was not found"
+            )
         return InternshipApplication.model_validate(row)
 
     async def issue_certificate(
@@ -122,12 +144,20 @@ class InternshipService:
     ) -> InternshipCertificate:
         application = await self._repository.get_application(application_id)
         if application is None:
-            raise InternshipNotFoundError(f"Internship application {application_id} was not found")
-        announcement = await self._repository.get_announcement(application.announcement_id)
+            raise InternshipNotFoundError(
+                f"Internship application {application_id} was not found"
+            )
+        announcement = await self._repository.get_announcement(
+            application.announcement_id
+        )
         if announcement is None:
-            raise InternshipNotFoundError(f"Internship announcement {application.announcement_id} was not found")
+            raise InternshipNotFoundError(
+                f"Internship announcement {application.announcement_id} was not found"
+            )
 
-        existing = await self._repository.get_certificate_for_application(application_id)
+        existing = await self._repository.get_certificate_for_application(
+            application_id
+        )
         if existing is not None:
             return InternshipCertificate.model_validate(existing)
 
@@ -141,8 +171,12 @@ class InternshipService:
             )
 
         certificate_id = uuid4()
-        verification_code = await self._repository.allocate_counter("certificate", start_value=500)
-        verification_url = f"https://www.raushni.com/certificates/verify/{quote(verification_code)}"
+        verification_code = await self._repository.allocate_counter(
+            "certificate", start_value=500
+        )
+        verification_url = (
+            f"https://www.raushni.com/certificates/verify/{quote(verification_code)}"
+        )
         qr_code_svg = self._make_qr_svg(verification_url)
         now = datetime.now(timezone.utc)
 
@@ -180,13 +214,17 @@ class InternshipService:
     async def verify_certificate(self, verification_code: str) -> InternshipCertificate:
         certificate = await self._repository.get_certificate_by_code(verification_code)
         if certificate is None:
-            raise InternshipNotFoundError(f"Certificate {verification_code} was not found")
+            raise InternshipNotFoundError(
+                f"Certificate {verification_code} was not found"
+            )
         return InternshipCertificate.model_validate(certificate)
 
     async def delete_application(self, application_id: UUID) -> None:
         deleted = await self._repository.delete_application(application_id)
         if not deleted:
-            raise InternshipNotFoundError(f"Internship application {application_id} was not found")
+            raise InternshipNotFoundError(
+                f"Internship application {application_id} was not found"
+            )
 
     def _make_qr_svg(self, value: str) -> str:
         if qrcode is None:
@@ -208,11 +246,17 @@ class InternshipService:
         ]
         for y in range(cells):
             for x in range(cells):
-                finder = (x < 7 and y < 7) or (x >= cells - 7 and y < 7) or (x < 7 and y >= cells - 7)
+                finder = (
+                    (x < 7 and y < 7)
+                    or (x >= cells - 7 and y < 7)
+                    or (x < 7 and y >= cells - 7)
+                )
                 byte = digest[(x + y * cells) % len(digest)]
                 on = finder or ((byte >> (x % 8)) & 1)
                 if on:
-                    rects.append(f'<rect x="{x * cell}" y="{y * cell}" width="{cell}" height="{cell}" fill="#111827"/>')
+                    rects.append(
+                        f'<rect x="{x * cell}" y="{y * cell}" width="{cell}" height="{cell}" fill="#111827"/>'
+                    )
         return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {size} {size}" role="img" aria-label="Certificate verification code">{"".join(rects)}</svg>'
 
     def _certificate_html(
@@ -236,9 +280,16 @@ class InternshipService:
             "issued_on": issued_at.date().isoformat(),
         }
         title = str(template.get("title", "Certificate of Completion"))
-        subtitle = str(template.get("subtitle", "This certificate is proudly awarded to"))
+        subtitle = str(
+            template.get("subtitle", "This certificate is proudly awarded to")
+        )
         body = render_template(str(template.get("body", "")), context)
-        footer = str(template.get("footer", "This certificate can be authenticated using the QR code or verification URL."))
+        footer = str(
+            template.get(
+                "footer",
+                "This certificate can be authenticated using the QR code or verification URL.",
+            )
+        )
         signatory = str(template.get("signatoryLabel", "Authorized Signatory"))
         return f"""<!doctype html>
 <html>

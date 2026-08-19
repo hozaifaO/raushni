@@ -6,11 +6,12 @@ from fastapi.testclient import TestClient
 from app.main import create_app
 from tests.conftest import ADMIN_HEADERS, GUEST_HEADERS
 
-
 pytestmark = [pytest.mark.api, pytest.mark.db]
 
 
-def donation_payload(payment_status: str = "pending", **overrides: object) -> dict[str, object]:
+def donation_payload(
+    payment_status: str = "pending", **overrides: object
+) -> dict[str, object]:
     payload: dict[str, object] = {
         "donor_name": "Aisha Khan",
         "donor_email": "aisha@example.org",
@@ -48,7 +49,9 @@ def test_donation_management_workflow(client: TestClient) -> None:
 
     donation_id = created["id"]
 
-    receipt_too_early = client.post(f"/api/v1/donations/{donation_id}/receipt", headers=ADMIN_HEADERS)
+    receipt_too_early = client.post(
+        f"/api/v1/donations/{donation_id}/receipt", headers=ADMIN_HEADERS
+    )
     assert receipt_too_early.status_code == 409
 
     mark_paid = client.post(
@@ -62,7 +65,9 @@ def test_donation_management_workflow(client: TestClient) -> None:
     assert paid["receipt_issued"] is False
     assert paid["transaction_reference"] == "UPI-REF-1001"
 
-    receipt_response = client.post(f"/api/v1/donations/{donation_id}/receipt", headers=ADMIN_HEADERS)
+    receipt_response = client.post(
+        f"/api/v1/donations/{donation_id}/receipt", headers=ADMIN_HEADERS
+    )
     assert receipt_response.status_code == 200
     receipt = receipt_response.json()
     assert receipt["receipt_number"] == created["receipt_number"]
@@ -78,7 +83,9 @@ def test_donation_management_workflow(client: TestClient) -> None:
     )
     assert frozen.status_code == 409
 
-    list_response = client.get("/api/v1/donations", params={"search": "aisha", "status_filter": "paid"})
+    list_response = client.get(
+        "/api/v1/donations", params={"search": "aisha", "status_filter": "paid"}
+    )
     assert list_response.status_code == 200
     listing = list_response.json()
     assert listing["total"] == 1
@@ -86,7 +93,9 @@ def test_donation_management_workflow(client: TestClient) -> None:
     assert listing["items"][0]["id"] == donation_id
     assert listing["total_amount"] == 5000
 
-    delete_response = client.delete(f"/api/v1/donations/{donation_id}", headers=ADMIN_HEADERS)
+    delete_response = client.delete(
+        f"/api/v1/donations/{donation_id}", headers=ADMIN_HEADERS
+    )
     assert delete_response.status_code == 204
 
     missing_response = client.get(f"/api/v1/donations/{donation_id}")
@@ -160,13 +169,17 @@ def test_issue_receipt_freezes_snapshot(client: TestClient) -> None:
         headers=ADMIN_HEADERS,
         json={"transaction_reference": "UPI-REF-1001"},
     )
-    first = client.post(f"/api/v1/donations/{donation_id}/receipt", headers=ADMIN_HEADERS)
+    first = client.post(
+        f"/api/v1/donations/{donation_id}/receipt", headers=ADMIN_HEADERS
+    )
     assert first.status_code == 200
     first_body = first.json()
     issued_at = first_body["issued_at"]
     snapshot_amount = first_body["donation"]["receipt_snapshot"]["amount"]
 
-    second = client.post(f"/api/v1/donations/{donation_id}/receipt", headers=ADMIN_HEADERS)
+    second = client.post(
+        f"/api/v1/donations/{donation_id}/receipt", headers=ADMIN_HEADERS
+    )
     assert second.status_code == 200
     assert second.json()["issued_at"] == issued_at
     assert second.json()["donation"]["receipt_snapshot"]["amount"] == snapshot_amount
@@ -208,7 +221,9 @@ def test_donation_status_events_on_mark_paid(client: TestClient) -> None:
         json={"transaction_reference": "UPI-REF-1001"},
     )
 
-    events = client.get(f"/api/v1/donations/{donation_id}/events", headers=ADMIN_HEADERS)
+    events = client.get(
+        f"/api/v1/donations/{donation_id}/events", headers=ADMIN_HEADERS
+    )
     assert events.status_code == 200
     body = events.json()
     assert len(body) >= 2
@@ -275,7 +290,11 @@ def test_guest_can_read_but_cannot_mutate_donations(client: TestClient) -> None:
 def test_donation_survives_new_app_instance(client: TestClient) -> None:
     create_response = client.post(
         "/api/v1/donations/public",
-        json={**donation_payload(), "donor_name": "Durable Donor", "donor_email": "durable@example.org"},
+        json={
+            **donation_payload(),
+            "donor_name": "Durable Donor",
+            "donor_email": "durable@example.org",
+        },
     )
     assert create_response.status_code == 201
     donation_id = create_response.json()["id"]

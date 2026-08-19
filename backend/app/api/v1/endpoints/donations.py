@@ -2,7 +2,16 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, Response, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    Header,
+    HTTPException,
+    Query,
+    Request,
+    Response,
+    status,
+)
 
 from app.api.dependencies.auth import get_current_role, require_write_access
 from app.api.dependencies.services import get_donation_service
@@ -29,8 +38,10 @@ from app.services.donation_service import (
     DonationReceiptUnavailableError,
     DonationService,
 )
-from app.services.payment_service import PaymentGatewayError, PaymentGatewayUnavailableError
-
+from app.services.payment_service import (
+    PaymentGatewayError,
+    PaymentGatewayUnavailableError,
+)
 
 router = APIRouter(prefix="/donations", tags=["donations"])
 
@@ -58,7 +69,9 @@ async def create_donation(
             actor_email=x_user_email,
         )
     except DonationMarkPaidError as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)
+        ) from exc
 
 
 @router.post("/public", response_model=Donation, status_code=status.HTTP_201_CREATED)
@@ -75,7 +88,9 @@ async def register_public_donation(
             actor_email=None,
         )
     except DonationPublicDisabledError as exc:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)
+        ) from exc
 
 
 @router.post("/{donation_id}/checkout", response_model=DonationCheckoutSession)
@@ -86,11 +101,17 @@ async def create_checkout_session(
     try:
         return await service.create_checkout_session(donation_id)
     except DonationNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+        ) from exc
     except PaymentGatewayUnavailableError as exc:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)
+        ) from exc
     except PaymentGatewayError as exc:
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)
+        ) from exc
 
 
 @router.get("/{donation_id}", response_model=Donation)
@@ -101,7 +122,9 @@ async def get_donation(
     try:
         return await service.get_donation(donation_id)
     except DonationNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+        ) from exc
 
 
 @router.get("/{donation_id}/events", response_model=list[DonationStatusEvent])
@@ -118,7 +141,9 @@ async def list_donation_events(
     try:
         return await service.list_status_events(donation_id)
     except DonationNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+        ) from exc
 
 
 @router.post("/{donation_id}/mark-paid", response_model=Donation)
@@ -137,11 +162,17 @@ async def mark_donation_paid(
             actor_email=x_user_email,
         )
     except DonationNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+        ) from exc
     except DonationMarkPaidError as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)
+        ) from exc
     except DonationReceiptFrozenError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail=str(exc)
+        ) from exc
 
 
 @router.patch("/{donation_id}", response_model=Donation)
@@ -160,11 +191,17 @@ async def update_donation(
             actor_email=x_user_email,
         )
     except DonationNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+        ) from exc
     except DonationMarkPaidError as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)
+        ) from exc
     except DonationReceiptFrozenError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail=str(exc)
+        ) from exc
 
 
 @router.post("/{donation_id}/receipt", response_model=DonationReceipt)
@@ -176,9 +213,13 @@ async def issue_receipt(
     try:
         return await service.issue_receipt(donation_id)
     except DonationNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+        ) from exc
     except DonationReceiptUnavailableError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail=str(exc)
+        ) from exc
 
 
 @router.delete("/{donation_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -190,5 +231,7 @@ async def delete_donation(
     try:
         await service.delete_donation(donation_id)
     except DonationNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+        ) from exc
     return Response(status_code=status.HTTP_204_NO_CONTENT)

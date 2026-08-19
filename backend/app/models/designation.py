@@ -16,7 +16,9 @@ class DesignationModel(Base):
         UniqueConstraint("organization_id", "code", name="uq_designations_org_code"),
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
     organization_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("organizations.id", ondelete="RESTRICT"),
@@ -31,8 +33,12 @@ class DesignationModel(Base):
     reports_to: Mapped[str | None] = mapped_column(String(120), nullable=True)
     description: Mapped[str] = mapped_column(String(700), nullable=False)
     assignment_scope: Mapped[str] = mapped_column(String(160), nullable=False)
-    responsibilities: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
-    required_documents: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
+    responsibilities: Mapped[list[str]] = mapped_column(
+        JSONB, nullable=False, default=list
+    )
+    required_documents: Mapped[list[str]] = mapped_column(
+        JSONB, nullable=False, default=list
+    )
     staff_assigned: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     volunteer_slots: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
@@ -42,5 +48,8 @@ class DesignationModel(Base):
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
     )

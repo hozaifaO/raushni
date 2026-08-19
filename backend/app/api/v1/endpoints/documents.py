@@ -4,15 +4,14 @@ from fastapi import APIRouter, Query, Request, Response
 
 from app.services.document_service import DocumentService
 
-
 router = APIRouter(prefix="/documents", tags=["documents"])
 
 
 def get_document_service(request: Request) -> DocumentService:
     service = getattr(request.app.state, "document_service", None)
     if service is None:
-      service = DocumentService()
-      request.app.state.document_service = service
+        service = DocumentService()
+        request.app.state.document_service = service
     return service
 
 

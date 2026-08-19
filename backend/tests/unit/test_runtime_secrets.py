@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import os
-
 import pytest
 
 from app.core.config import (
@@ -12,13 +10,16 @@ from app.core.config import (
     strip_ssl_query_for_asyncpg,
 )
 
-
 pytestmark = [pytest.mark.unit]
 
 
 def test_normalize_database_url_asyncpg() -> None:
-    assert normalize_database_url("postgresql://u:p@h/db").startswith("postgresql+asyncpg://")
-    assert normalize_database_url("postgres://u:p@h/db").startswith("postgresql+asyncpg://")
+    assert normalize_database_url("postgresql://u:p@h/db").startswith(
+        "postgresql+asyncpg://"
+    )
+    assert normalize_database_url("postgres://u:p@h/db").startswith(
+        "postgresql+asyncpg://"
+    )
 
 
 def test_sslmode_require_sets_connect_args() -> None:
@@ -41,10 +42,14 @@ def test_placeholder_secret_detection() -> None:
     assert not is_placeholder_secret("a" * 32)
 
 
-def test_validate_runtime_secrets_fails_in_production(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_validate_runtime_secrets_fails_in_production(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setenv("ENVIRONMENT", "production")
     monkeypatch.setenv("REQUIRE_AUTH", "true")
-    monkeypatch.setenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/raushni_backend")
+    monkeypatch.setenv(
+        "DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/raushni_backend"
+    )
     monkeypatch.setenv("REDIS_URL", "redis://localhost:6379")
     monkeypatch.setenv("INTERNAL_API_KEY", "change-me")
     monkeypatch.setenv("CMS_API_TOKEN", "change-me")
@@ -83,7 +88,10 @@ def test_org_secrets_path_stub() -> None:
         ENVIRONMENT="staging",
     )
     assert settings.resolved_org_secrets_prefix == "/raushni/staging/orgs"
-    assert settings.org_secret_path("acme", "razorpay") == "/raushni/staging/orgs/acme/razorpay"
+    assert (
+        settings.org_secret_path("acme", "razorpay")
+        == "/raushni/staging/orgs/acme/razorpay"
+    )
     overridden = Settings(
         DATABASE_URL="postgresql://postgres:postgres@localhost:5432/raushni_backend",
         REDIS_URL="redis://localhost:6379",

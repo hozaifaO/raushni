@@ -17,7 +17,6 @@ from app.schemas.crowdfunding import (
 )
 from app.services.crowdfunding_service import CampaignNotFoundError, CrowdfundingService
 
-
 router = APIRouter(prefix="/crowdfunding", tags=["crowdfunding"])
 
 
@@ -50,7 +49,9 @@ async def get_campaign(
     try:
         return await service.get_campaign(campaign_id)
     except CampaignNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+        ) from exc
 
 
 @router.patch("/{campaign_id}", response_model=Campaign)
@@ -63,7 +64,9 @@ async def update_campaign(
     try:
         return await service.update_campaign(campaign_id, payload)
     except CampaignNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+        ) from exc
 
 
 @router.post("/{campaign_id}/status/{campaign_status}", response_model=Campaign)
@@ -76,7 +79,9 @@ async def set_campaign_status(
     try:
         return await service.set_status(campaign_id, campaign_status)
     except CampaignNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+        ) from exc
 
 
 @router.delete("/{campaign_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -88,7 +93,9 @@ async def delete_campaign(
     try:
         await service.delete_campaign(campaign_id)
     except CampaignNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+        ) from exc
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
@@ -100,10 +107,16 @@ async def list_campaign_donations(
     try:
         return await service.list_donations(campaign_id)
     except CampaignNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+        ) from exc
 
 
-@router.post("/{campaign_id}/donations", response_model=Campaign, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/{campaign_id}/donations",
+    response_model=Campaign,
+    status_code=status.HTTP_201_CREATED,
+)
 async def record_campaign_donation(
     campaign_id: UUID,
     payload: CampaignDonationCreate,
@@ -113,4 +126,6 @@ async def record_campaign_donation(
     try:
         return await service.record_donation(campaign_id, payload)
     except CampaignNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+        ) from exc

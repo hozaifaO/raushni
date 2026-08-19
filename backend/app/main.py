@@ -19,7 +19,6 @@ from app.core.telemetry import configure_telemetry
 from app.services.document_service import DocumentService
 from app.services.settings_service import UserAccountStore
 
-
 APP_NAME = "Raushni NGO API"
 APP_VERSION = "1.0.0"
 
@@ -71,7 +70,9 @@ def create_app() -> FastAPI:
         if not ready:
             response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
         return {
-            "status": "ready" if ready and redis_ok else ("degraded" if ready else "unavailable"),
+            "status": "ready"
+            if ready and redis_ok
+            else ("degraded" if ready else "unavailable"),
             "database": "ok" if db_ok else "error",
             "redis": "ok" if redis_ok else "error",
             "timestamp": datetime.now(timezone.utc).isoformat(),

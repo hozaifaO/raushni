@@ -38,7 +38,9 @@ class ProjectRepository:
         if status_filter is not None:
             stmt = stmt.where(ProjectModel.status == status_filter.value)
 
-        stmt = stmt.order_by(ProjectModel.start_date.desc(), ProjectModel.created_at.desc())
+        stmt = stmt.order_by(
+            ProjectModel.start_date.desc(), ProjectModel.created_at.desc()
+        )
         result = await self._session.execute(stmt)
         items = list(result.scalars().all())
 
@@ -94,7 +96,9 @@ class ProjectRepository:
         await self._session.refresh(project)
         return project
 
-    async def update(self, project_id: uuid.UUID, payload: ProjectUpdate) -> ProjectModel | None:
+    async def update(
+        self, project_id: uuid.UUID, payload: ProjectUpdate
+    ) -> ProjectModel | None:
         project = await self.get(project_id)
         if project is None:
             return None

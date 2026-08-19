@@ -20,7 +20,9 @@ class StripeCheckoutSessionObject(BaseModel):
 class StripeEventData(BaseModel):
     model_config = ConfigDict(extra="allow")
 
-    object: StripeCheckoutSessionObject = Field(default_factory=StripeCheckoutSessionObject)
+    object: StripeCheckoutSessionObject = Field(
+        default_factory=StripeCheckoutSessionObject
+    )
 
 
 class StripeWebhookEvent(BaseModel):

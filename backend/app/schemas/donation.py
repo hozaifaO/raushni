@@ -7,7 +7,11 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from app.core.sanitize import OptionalFreeTextSanitizedStr, OptionalSanitizedStr, SanitizedStr
+from app.core.sanitize import (
+    OptionalFreeTextSanitizedStr,
+    OptionalSanitizedStr,
+    SanitizedStr,
+)
 
 
 class DonationPaymentMethod(StrEnum):
@@ -84,7 +88,9 @@ def _normalize_reference(value: str | None) -> str | None:
     return trimmed or None
 
 
-def _require_phone_unless_anonymous(*, is_anonymous: bool, donor_phone: str | None) -> str | None:
+def _require_phone_unless_anonymous(
+    *, is_anonymous: bool, donor_phone: str | None
+) -> str | None:
     phone = _normalize_reference(donor_phone)
     if is_anonymous:
         if phone is not None and len(phone) < 7:
@@ -100,7 +106,9 @@ class DonorBase(BaseModel):
     donor_email: str | None = Field(default=None, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
     donor_phone: OptionalSanitizedStr = Field(default=None, max_length=20)
     donor_address: OptionalSanitizedStr = Field(default=None, max_length=260)
-    donor_pan: Annotated[str | None, Field(default=None, pattern=r"^[A-Z]{5}[0-9]{4}[A-Z]$")] = None
+    donor_pan: Annotated[
+        str | None, Field(default=None, pattern=r"^[A-Z]{5}[0-9]{4}[A-Z]$")
+    ] = None
     donor_type: DonorType = DonorType.INDIVIDUAL
 
 
@@ -172,7 +180,9 @@ class DonationUpdate(BaseModel):
     donor_email: str | None = Field(default=None, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
     donor_phone: OptionalSanitizedStr = Field(default=None, max_length=20)
     donor_address: OptionalSanitizedStr = Field(default=None, max_length=260)
-    donor_pan: Annotated[str | None, Field(default=None, pattern=r"^[A-Z]{5}[0-9]{4}[A-Z]$")] = None
+    donor_pan: Annotated[
+        str | None, Field(default=None, pattern=r"^[A-Z]{5}[0-9]{4}[A-Z]$")
+    ] = None
     donor_type: DonorType | None = None
     amount: float | None = Field(default=None, gt=0)
     currency: str | None = Field(default=None, min_length=3, max_length=3)

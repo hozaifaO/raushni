@@ -3,7 +3,13 @@ from __future__ import annotations
 from uuid import UUID
 
 from app.repositories.member_repository import MemberRepository
-from app.schemas.member import Member, MemberCreate, MemberListResponse, MemberStatus, MemberUpdate
+from app.schemas.member import (
+    Member,
+    MemberCreate,
+    MemberListResponse,
+    MemberStatus,
+    MemberUpdate,
+)
 
 
 class MemberNotFoundError(LookupError):

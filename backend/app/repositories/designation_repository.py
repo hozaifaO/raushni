@@ -7,7 +7,11 @@ from sqlalchemy import Select, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.designation import DesignationModel
-from app.schemas.designation import DesignationCreate, DesignationStatus, DesignationUpdate
+from app.schemas.designation import (
+    DesignationCreate,
+    DesignationStatus,
+    DesignationUpdate,
+)
 
 
 class DesignationRepository:
@@ -38,9 +42,13 @@ class DesignationRepository:
         if status_filter is not None:
             stmt = stmt.where(DesignationModel.status == status_filter.value)
         if department:
-            stmt = stmt.where(func.lower(DesignationModel.department) == department.strip().lower())
+            stmt = stmt.where(
+                func.lower(DesignationModel.department) == department.strip().lower()
+            )
 
-        stmt = stmt.order_by(DesignationModel.sort_order.asc(), func.lower(DesignationModel.title).asc())
+        stmt = stmt.order_by(
+            DesignationModel.sort_order.asc(), func.lower(DesignationModel.title).asc()
+        )
         result = await self._session.execute(stmt)
         items = list(result.scalars().all())
 
@@ -60,7 +68,11 @@ class DesignationRepository:
             select(
                 func.coalesce(
                     func.sum(
-                        func.greatest(DesignationModel.volunteer_slots - DesignationModel.staff_assigned, 0)
+                        func.greatest(
+                            DesignationModel.volunteer_slots
+                            - DesignationModel.staff_assigned,
+                            0,
+                        )
                     ),
                     0,
                 )
@@ -87,7 +99,9 @@ class DesignationRepository:
         )
         return result.scalar_one_or_none()
 
-    async def get_by_code(self, code: str, *, ignore_id: uuid.UUID | None = None) -> DesignationModel | None:
+    async def get_by_code(
+        self, code: str, *, ignore_id: uuid.UUID | None = None
+    ) -> DesignationModel | None:
         stmt = select(DesignationModel).where(
             DesignationModel.organization_id == self._organization_id,
             func.lower(DesignationModel.code) == code.strip().lower(),
@@ -114,7 +128,9 @@ class DesignationRepository:
         await self._session.refresh(designation)
         return designation
 
-    async def update(self, designation_id: uuid.UUID, payload: DesignationUpdate) -> DesignationModel | None:
+    async def update(
+        self, designation_id: uuid.UUID, payload: DesignationUpdate
+    ) -> DesignationModel | None:
         designation = await self.get(designation_id)
         if designation is None:
             return None

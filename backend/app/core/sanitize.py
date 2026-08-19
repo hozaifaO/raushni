@@ -18,7 +18,10 @@ def reject_control_chars(value: str) -> str:
 def strip_and_collapse_ws(value: str) -> str:
     """Trim ends and collapse runs of horizontal whitespace; preserve newlines."""
     cleaned = reject_control_chars(value)
-    lines = [_COLLAPSE_WS.sub(" ", line).strip() for line in cleaned.replace("\r\n", "\n").split("\n")]
+    lines = [
+        _COLLAPSE_WS.sub(" ", line).strip()
+        for line in cleaned.replace("\r\n", "\n").split("\n")
+    ]
     return "\n".join(line for line in lines if line or len(lines) == 1).strip()
 
 
@@ -54,4 +57,6 @@ def _sanitize_optional_free_text(value: Any) -> Any:
 SanitizedStr = Annotated[str, BeforeValidator(_sanitize_plain)]
 OptionalSanitizedStr = Annotated[str | None, BeforeValidator(_sanitize_optional_plain)]
 FreeTextSanitizedStr = Annotated[str, BeforeValidator(_sanitize_free_text)]
-OptionalFreeTextSanitizedStr = Annotated[str | None, BeforeValidator(_sanitize_optional_free_text)]
+OptionalFreeTextSanitizedStr = Annotated[
+    str | None, BeforeValidator(_sanitize_optional_free_text)
+]

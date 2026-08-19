@@ -4,7 +4,6 @@ from fastapi import APIRouter
 
 from app.schemas.landing import LandingContact, LandingContent, LandingSection
 
-
 router = APIRouter(prefix="/landing", tags=["landing"])
 
 

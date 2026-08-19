@@ -4,13 +4,13 @@ on:
   push:
     branches: [main, develop]
     paths:
-      - 'backend/**'
-      - 'tests/backend/**'
+      - "backend/**"
+      - ".github/workflows/test-backend.yml"
   pull_request:
     branches: [main]
     paths:
-      - 'backend/**'
-      - 'tests/backend/**'
+      - "backend/**"
+      - ".github/workflows/test-backend.yml"
 
 jobs:
   test:
@@ -47,11 +47,12 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install dependencies
         run: |
           cd backend
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r requirements-test.txt
 
@@ -65,7 +66,7 @@ jobs:
       - name: Run type checking
         run: |
           cd backend
-          mypy app
+          mypy
 
       - name: Run tests with coverage
         run: |
@@ -75,10 +76,18 @@ jobs:
           DATABASE_URL: postgresql://test_user:test_pass@localhost:5432/raushni_test
           REDIS_URL: redis://localhost:6379
           ENVIRONMENT: testing
+          REQUIRE_AUTH: "false"
+          ALEMBIC_AUTO_UPGRADE: "true"
+          OTEL_SDK_DISABLED: "true"
+          INTERNAL_API_KEY: test-internal-api-key-32chars-ok!!
+          CMS_API_TOKEN: test-cms-api-token-32chars-ok!!!!!
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        if: always()
+        continue-on-error: true
+        uses: codecov/codecov-action@v4
         with:
-          file: ./backend/coverage.xml
+          files: ./backend/coverage.xml
           flags: backend
           name: backend-coverage
+          fail_ci_if_error: false

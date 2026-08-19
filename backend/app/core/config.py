@@ -94,7 +94,9 @@ class Settings(BaseSettings):
         alias="CORS_ORIGINS",
     )
     rate_limit_default: str = Field(default="120/minute", alias="RATE_LIMIT_DEFAULT")
-    rate_limit_public_write: str = Field(default="10/minute", alias="RATE_LIMIT_PUBLIC_WRITE")
+    rate_limit_public_write: str = Field(
+        default="10/minute", alias="RATE_LIMIT_PUBLIC_WRITE"
+    )
 
     def cors_origin_list(self) -> list[str]:
         return [part.strip() for part in self.cors_origins.split(",") if part.strip()]
@@ -135,7 +137,9 @@ class Settings(BaseSettings):
 
     @property
     def is_production_like(self) -> bool:
-        return self.environment.lower() in {"production", "staging"} or self.require_auth
+        return (
+            self.environment.lower() in {"production", "staging"} or self.require_auth
+        )
 
     def validate_runtime_secrets(self) -> None:
         if not self.database_url.strip():
@@ -145,17 +149,27 @@ class Settings(BaseSettings):
 
         if not self.is_production_like:
             if not self.internal_api_key.strip():
-                logger.warning("INTERNAL_API_KEY is empty (local DX). Set it for BFF/auth testing.")
+                logger.warning(
+                    "INTERNAL_API_KEY is empty (local DX). Set it for BFF/auth testing."
+                )
             if not self.cms_api_token.strip():
-                logger.warning("CMS_API_TOKEN is empty (local DX). CMS Content API calls may fail.")
+                logger.warning(
+                    "CMS_API_TOKEN is empty (local DX). CMS Content API calls may fail."
+                )
             return
 
-        if is_placeholder_secret(self.internal_api_key) or len(self.internal_api_key.strip()) < 32:
+        if (
+            is_placeholder_secret(self.internal_api_key)
+            or len(self.internal_api_key.strip()) < 32
+        ):
             raise RuntimeError(
                 "INTERNAL_API_KEY must be set to a non-placeholder secret (min 32 chars) "
                 "when REQUIRE_AUTH=true or ENVIRONMENT is production/staging."
             )
-        if is_placeholder_secret(self.cms_api_token) or len(self.cms_api_token.strip()) < 32:
+        if (
+            is_placeholder_secret(self.cms_api_token)
+            or len(self.cms_api_token.strip()) < 32
+        ):
             raise RuntimeError(
                 "CMS_API_TOKEN must be set to a non-placeholder secret (min 32 chars) "
                 "when REQUIRE_AUTH=true or ENVIRONMENT is production/staging."

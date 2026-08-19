@@ -3,7 +3,6 @@ from __future__ import annotations
 import pytest
 from fastapi.testclient import TestClient
 
-
 pytestmark = [pytest.mark.api, pytest.mark.db]
 
 

@@ -6,7 +6,11 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.core.sanitize import OptionalFreeTextSanitizedStr, OptionalSanitizedStr, SanitizedStr
+from app.core.sanitize import (
+    OptionalFreeTextSanitizedStr,
+    OptionalSanitizedStr,
+    SanitizedStr,
+)
 
 
 class MemberStatus(StrEnum):

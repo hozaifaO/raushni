@@ -38,7 +38,9 @@ class MemberRepository:
         if status is not None:
             stmt = stmt.where(MemberModel.status == status.value)
 
-        stmt = stmt.order_by(MemberModel.joined_on.desc(), func.lower(MemberModel.full_name).desc())
+        stmt = stmt.order_by(
+            MemberModel.joined_on.desc(), func.lower(MemberModel.full_name).desc()
+        )
         result = await self._session.execute(stmt)
         items = list(result.scalars().all())
 
@@ -82,14 +84,18 @@ class MemberRepository:
         await self._session.refresh(member)
         return member
 
-    async def update(self, member_id: uuid.UUID, payload: MemberUpdate) -> MemberModel | None:
+    async def update(
+        self, member_id: uuid.UUID, payload: MemberUpdate
+    ) -> MemberModel | None:
         member = await self.get(member_id)
         if member is None:
             return None
         updates = payload.model_dump(exclude_unset=True)
         if "status" in updates and updates["status"] is not None:
             status = updates["status"]
-            updates["status"] = status.value if hasattr(status, "value") else str(status)
+            updates["status"] = (
+                status.value if hasattr(status, "value") else str(status)
+            )
         for key, value in updates.items():
             setattr(member, key, value)
         member.updated_at = datetime.now(timezone.utc)

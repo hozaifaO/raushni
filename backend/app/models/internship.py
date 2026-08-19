@@ -3,7 +3,16 @@ from __future__ import annotations
 import uuid
 from datetime import date, datetime
 
-from sqlalchemy import Date, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, func
+from sqlalchemy import (
+    Date,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -13,10 +22,14 @@ from app.models.base import Base
 class InternshipAnnouncementModel(Base):
     __tablename__ = "internship_announcements"
     __table_args__ = (
-        UniqueConstraint("organization_id", "slug", name="uq_internship_announcements_org_slug"),
+        UniqueConstraint(
+            "organization_id", "slug", name="uq_internship_announcements_org_slug"
+        ),
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
     organization_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("organizations.id", ondelete="RESTRICT"),
@@ -31,8 +44,12 @@ class InternshipAnnouncementModel(Base):
     end_date: Mapped[date] = mapped_column(Date, nullable=False)
     registration_deadline: Mapped[date] = mapped_column(Date, nullable=False)
     event_date: Mapped[date] = mapped_column(Date, nullable=False)
-    event_time: Mapped[str] = mapped_column(String(40), nullable=False, default="01:00 PM")
-    location: Mapped[str] = mapped_column(String(160), nullable=False, default="Web/Virtual, India")
+    event_time: Mapped[str] = mapped_column(
+        String(40), nullable=False, default="01:00 PM"
+    )
+    location: Mapped[str] = mapped_column(
+        String(160), nullable=False, default="Web/Virtual, India"
+    )
     mode: Mapped[str] = mapped_column(String(20), nullable=False, default="virtual")
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="published")
     poster_url: Mapped[str] = mapped_column(String(260), nullable=False)
@@ -46,7 +63,10 @@ class InternshipAnnouncementModel(Base):
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
     )
 
 
@@ -60,7 +80,9 @@ class InternshipApplicationModel(Base):
         ),
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
     organization_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("organizations.id", ondelete="RESTRICT"),
@@ -68,7 +90,9 @@ class InternshipApplicationModel(Base):
         index=True,
     )
     announcement_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("internship_announcements.id", ondelete="CASCADE"), nullable=False
+        UUID(as_uuid=True),
+        ForeignKey("internship_announcements.id", ondelete="CASCADE"),
+        nullable=False,
     )
     full_name: Mapped[str] = mapped_column(String(140), nullable=False)
     email: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -80,15 +104,22 @@ class InternshipApplicationModel(Base):
     github_url: Mapped[str | None] = mapped_column(String(260), nullable=True)
     portfolio_url: Mapped[str | None] = mapped_column(String(260), nullable=True)
     motivation: Mapped[str] = mapped_column(String(1000), nullable=False)
-    status: Mapped[str] = mapped_column(String(20), nullable=False, default="registered")
+    status: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="registered"
+    )
     completion_notes: Mapped[str | None] = mapped_column(String(800), nullable=True)
     registration_number: Mapped[str] = mapped_column(String(50), nullable=False)
-    certificate_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    certificate_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
     )
 
 
@@ -107,7 +138,9 @@ class InternshipCertificateModel(Base):
         ),
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
     organization_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("organizations.id", ondelete="RESTRICT"),

@@ -104,13 +104,19 @@ class CrowdfundingService:
         campaign = await self._repository.get(campaign_id)
         if campaign is None:
             raise CampaignNotFoundError(f"Campaign {campaign_id} was not found")
-        return self._to_campaign(campaign, await self._repository.donation_count(campaign_id))
+        return self._to_campaign(
+            campaign, await self._repository.donation_count(campaign_id)
+        )
 
-    async def update_campaign(self, campaign_id: UUID, payload: CampaignUpdate) -> Campaign:
+    async def update_campaign(
+        self, campaign_id: UUID, payload: CampaignUpdate
+    ) -> Campaign:
         campaign = await self._repository.update(campaign_id, payload)
         if campaign is None:
             raise CampaignNotFoundError(f"Campaign {campaign_id} was not found")
-        return self._to_campaign(campaign, await self._repository.donation_count(campaign_id))
+        return self._to_campaign(
+            campaign, await self._repository.donation_count(campaign_id)
+        )
 
     async def set_status(self, campaign_id: UUID, status: CampaignStatus) -> Campaign:
         return await self.update_campaign(campaign_id, CampaignUpdate(status=status))
@@ -138,8 +144,12 @@ class CrowdfundingService:
             for row in rows
         ]
 
-    async def record_donation(self, campaign_id: UUID, payload: CampaignDonationCreate) -> Campaign:
+    async def record_donation(
+        self, campaign_id: UUID, payload: CampaignDonationCreate
+    ) -> Campaign:
         campaign = await self._repository.record_donation(campaign_id, payload)
         if campaign is None:
             raise CampaignNotFoundError(f"Campaign {campaign_id} was not found")
-        return self._to_campaign(campaign, await self._repository.donation_count(campaign_id))
+        return self._to_campaign(
+            campaign, await self._repository.donation_count(campaign_id)
+        )

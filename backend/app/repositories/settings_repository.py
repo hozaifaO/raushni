@@ -9,7 +9,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.settings import PlatformSettingsModel
 from app.schemas.settings import PlatformSettings, PlatformSettingsUpdate
 
-
 _DEFAULTS = PlatformSettings()
 
 
@@ -34,7 +33,9 @@ class PlatformSettingsRepository:
             select(func.coalesce(func.max(PlatformSettingsModel.id), 0))
         )
         next_id = int(next_id_result.scalar_one()) + 1
-        org_name = (default_organization_name or "").strip() or _DEFAULTS.organization_name
+        org_name = (
+            default_organization_name or ""
+        ).strip() or _DEFAULTS.organization_name
         row = PlatformSettingsModel(
             id=next_id,
             organization_id=self._organization_id,
@@ -68,7 +69,9 @@ class PlatformSettingsRepository:
         *,
         default_organization_name: str | None = None,
     ) -> PlatformSettingsModel:
-        row = await self.get_or_create(default_organization_name=default_organization_name)
+        row = await self.get_or_create(
+            default_organization_name=default_organization_name
+        )
         updates = payload.model_dump(exclude_unset=True)
         for key, value in updates.items():
             setattr(row, key, value)

@@ -13,7 +13,10 @@ from app.schemas.simple_record import (
     SimpleRecordStatus,
     SimpleRecordUpdate,
 )
-from app.services.simple_crud_service import SimpleCrudService, SimpleRecordNotFoundError
+from app.services.simple_crud_service import (
+    SimpleCrudService,
+    SimpleRecordNotFoundError,
+)
 
 
 def build_simple_crud_router(
@@ -48,7 +51,9 @@ def build_simple_crud_router(
         try:
             return await service.get_record(record_id)
         except SimpleRecordNotFoundError as exc:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+            ) from exc
 
     @router.patch("/{record_id}", response_model=SimpleRecord)
     async def update_record(
@@ -60,7 +65,9 @@ def build_simple_crud_router(
         try:
             return await service.update_record(record_id, payload)
         except SimpleRecordNotFoundError as exc:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+            ) from exc
 
     @router.delete("/{record_id}", status_code=status.HTTP_204_NO_CONTENT)
     async def delete_record(
@@ -71,7 +78,9 @@ def build_simple_crud_router(
         try:
             await service.delete_record(record_id)
         except SimpleRecordNotFoundError as exc:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+            ) from exc
         return Response(status_code=status.HTTP_204_NO_CONTENT)
 
     return router

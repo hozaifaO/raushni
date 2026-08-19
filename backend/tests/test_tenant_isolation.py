@@ -11,7 +11,6 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from app.core.config import get_settings
 from tests.conftest import ADMIN_HEADERS, API_KEY
 
-
 pytestmark = [pytest.mark.api, pytest.mark.db]
 
 
@@ -80,7 +79,9 @@ def test_cross_tenant_member_get_returns_404(two_org_client: TestClient) -> None
     assert same_org.status_code == 200
     assert same_org.json()["full_name"] == "Org A Member"
 
-    cross = two_org_client.get(f"/api/v1/members/{member_id}", headers=OTHER_ORG_HEADERS)
+    cross = two_org_client.get(
+        f"/api/v1/members/{member_id}", headers=OTHER_ORG_HEADERS
+    )
     assert cross.status_code == 404
 
 
@@ -98,10 +99,14 @@ def test_cross_tenant_donation_get_returns_404(two_org_client: TestClient) -> No
     assert created.status_code == 201
     donation_id = created.json()["id"]
 
-    same_org = two_org_client.get(f"/api/v1/donations/{donation_id}", headers=ADMIN_HEADERS)
+    same_org = two_org_client.get(
+        f"/api/v1/donations/{donation_id}", headers=ADMIN_HEADERS
+    )
     assert same_org.status_code == 200
 
-    cross = two_org_client.get(f"/api/v1/donations/{donation_id}", headers=OTHER_ORG_HEADERS)
+    cross = two_org_client.get(
+        f"/api/v1/donations/{donation_id}", headers=OTHER_ORG_HEADERS
+    )
     assert cross.status_code == 404
 
 
@@ -209,6 +214,7 @@ def test_staff_listing_scoped_to_org_memberships(two_org_client: TestClient) -> 
     assert emails_b == {"admin@other.local"}
     assert emails_a.isdisjoint(emails_b)
 
+
 def test_public_donate_with_tenant_header_isolated(two_org_client: TestClient) -> None:
     a_resp = two_org_client.post(
         "/api/v1/donations/public",
@@ -256,7 +262,9 @@ def test_public_donate_with_tenant_header_isolated(two_org_client: TestClient) -
     assert same.json()["donor_name"] == "Acme Donor"
 
 
-def test_cross_tenant_write_blocked_without_membership(two_org_client: TestClient) -> None:
+def test_cross_tenant_write_blocked_without_membership(
+    two_org_client: TestClient,
+) -> None:
     """API key + spoofed ADMIN role cannot write into another tenant."""
     spoof = {
         "X-API-Key": API_KEY,
@@ -310,7 +318,9 @@ def test_cross_org_user_update_returns_404(two_org_client: TestClient) -> None:
     assert cross.status_code == 404
 
 
-def test_organization_id_header_cannot_override_tenant_slug(two_org_client: TestClient) -> None:
+def test_organization_id_header_cannot_override_tenant_slug(
+    two_org_client: TestClient,
+) -> None:
     acme = two_org_client.get("/api/v1/settings", headers=OTHER_ORG_HEADERS)
     assert acme.status_code == 200
     acme_org_id = acme.json()["organization_id"]

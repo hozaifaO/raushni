@@ -6,7 +6,6 @@ from collections.abc import Mapping
 
 from fastapi import FastAPI
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -16,8 +15,12 @@ def telemetry_enabled() -> bool:
 
 def _resource_attributes() -> Mapping[str, str]:
     environment = os.getenv("ENVIRONMENT", os.getenv("DD_ENV", "development"))
-    service_name = os.getenv("OTEL_SERVICE_NAME", os.getenv("DD_SERVICE", "raushni-backend"))
-    service_version = os.getenv("OTEL_SERVICE_VERSION", os.getenv("DD_VERSION", "1.0.0"))
+    service_name = os.getenv(
+        "OTEL_SERVICE_NAME", os.getenv("DD_SERVICE", "raushni-backend")
+    )
+    service_version = os.getenv(
+        "OTEL_SERVICE_VERSION", os.getenv("DD_VERSION", "1.0.0")
+    )
 
     return {
         "service.name": service_name,
@@ -39,7 +42,9 @@ def configure_telemetry(app: FastAPI) -> None:
         from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import (
             OTLPMetricExporter,
         )
-        from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+        from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import (
+            OTLPSpanExporter,
+        )
         from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
         from opentelemetry.instrumentation.logging import LoggingInstrumentor
         from opentelemetry.instrumentation.redis import RedisInstrumentor
@@ -59,7 +64,9 @@ def configure_telemetry(app: FastAPI) -> None:
     trace.set_tracer_provider(trace_provider)
 
     metric_reader = PeriodicExportingMetricReader(OTLPMetricExporter())
-    metrics.set_meter_provider(MeterProvider(resource=resource, metric_readers=[metric_reader]))
+    metrics.set_meter_provider(
+        MeterProvider(resource=resource, metric_readers=[metric_reader])
+    )
 
     FastAPIInstrumentor.instrument_app(
         app,
@@ -69,7 +76,9 @@ def configure_telemetry(app: FastAPI) -> None:
     # SQLAlchemy/Redis engines are attached after init_db/init_redis via instrument_data_clients.
     RedisInstrumentor().instrument()
 
-    logger.info("OpenTelemetry configured for %s", _resource_attributes()["service.name"])
+    logger.info(
+        "OpenTelemetry configured for %s", _resource_attributes()["service.name"]
+    )
 
 
 def instrument_data_clients(engine: object | None = None) -> None:

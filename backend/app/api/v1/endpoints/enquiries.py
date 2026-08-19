@@ -7,7 +7,6 @@ from app.core.rate_limit import limiter
 from app.schemas.simple_record import PublicEnquiryCreate, SimpleRecord
 from app.services.simple_crud_service import SimpleCrudService
 
-
 router: APIRouter = build_simple_crud_router(
     prefix="/enquiries",
     tag="enquiries",
@@ -15,7 +14,9 @@ router: APIRouter = build_simple_crud_router(
 )
 
 
-@router.post("/public", response_model=SimpleRecord, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/public", response_model=SimpleRecord, status_code=status.HTTP_201_CREATED
+)
 @limiter.limit(get_settings().rate_limit_public_write)
 async def register_public_enquiry(
     request: Request,

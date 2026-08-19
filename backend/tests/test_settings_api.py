@@ -6,7 +6,6 @@ from fastapi.testclient import TestClient
 from app.main import create_app
 from tests.conftest import ADMIN_HEADERS, GUEST_HEADERS, STAFF_HEADERS
 
-
 pytestmark = [pytest.mark.api, pytest.mark.db]
 
 
@@ -29,7 +28,11 @@ def test_settings_platform_persists_across_app_restart(client: TestClient) -> No
     settings = read_response.json()
     assert settings["tenant_slug"] == "raushni"
     assert len(settings["users"]) >= 1
-    assert any(user["email"].endswith("@raushni.local") or user["email"].endswith("@raushni.com") for user in settings["users"])
+    assert any(
+        user["email"].endswith("@raushni.local")
+        or user["email"].endswith("@raushni.com")
+        for user in settings["users"]
+    )
     assert settings["platform"]["receipt_prefix"] == "RSH-DON"
 
     update_response = client.patch(

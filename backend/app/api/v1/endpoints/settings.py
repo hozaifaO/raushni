@@ -7,10 +7,13 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.api.dependencies.auth import require_admin_access
 from app.api.dependencies.services import get_settings_service
 from app.constants.roles import UserRole
-from app.schemas.settings import PlatformSettings, PlatformSettingsUpdate, SettingsDashboard
+from app.schemas.settings import (
+    PlatformSettings,
+    PlatformSettingsUpdate,
+    SettingsDashboard,
+)
 from app.schemas.user import UserAccount, UserAccountUpdate
 from app.services.settings_service import SettingsService, UserAccountNotFoundError
-
 
 router = APIRouter(prefix="/settings", tags=["settings"])
 
@@ -41,4 +44,6 @@ async def update_user_account(
     try:
         return await service.update_user(user_id, payload)
     except UserAccountNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+        ) from exc

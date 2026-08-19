@@ -3,12 +3,16 @@ from __future__ import annotations
 import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
-from typing import Any
+from typing import Any, List
 
 from sqlalchemy import Select, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.donation import DonationModel, DonationStatusEventModel, ReceiptCounterModel
+from app.models.donation import (
+    DonationModel,
+    DonationStatusEventModel,
+    ReceiptCounterModel,
+)
 from app.schemas.donation import DonationCreate, DonationPaymentStatus, DonationUpdate
 
 
@@ -56,14 +60,20 @@ class DonationRepository:
                     func.lower(DonationModel.donor_name).like(query),
                     func.lower(DonationModel.donor_phone).like(query),
                     func.lower(DonationModel.receipt_number).like(query),
-                    func.lower(func.coalesce(DonationModel.donor_email, "")).like(query),
-                    func.lower(func.coalesce(DonationModel.transaction_reference, "")).like(query),
+                    func.lower(func.coalesce(DonationModel.donor_email, "")).like(
+                        query
+                    ),
+                    func.lower(
+                        func.coalesce(DonationModel.transaction_reference, "")
+                    ).like(query),
                 )
             )
         if payment_status is not None:
             stmt = stmt.where(DonationModel.payment_status == payment_status.value)
 
-        stmt = stmt.order_by(DonationModel.donation_date.desc(), DonationModel.created_at.desc())
+        stmt = stmt.order_by(
+            DonationModel.donation_date.desc(), DonationModel.created_at.desc()
+        )
         result = await self._session.execute(stmt)
         items = list(result.scalars().all())
 
@@ -100,7 +110,9 @@ class DonationRepository:
         )
         return result.scalar_one_or_none()
 
-    async def get_by_gateway_session_id(self, gateway_session_id: str) -> DonationModel | None:
+    async def get_by_gateway_session_id(
+        self, gateway_session_id: str
+    ) -> DonationModel | None:
         result = await self._session.execute(
             select(DonationModel).where(
                 DonationModel.gateway_session_id == gateway_session_id,
@@ -109,7 +121,9 @@ class DonationRepository:
         )
         return result.scalar_one_or_none()
 
-    async def create(self, payload: DonationCreate, receipt_number: str) -> DonationModel:
+    async def create(
+        self, payload: DonationCreate, receipt_number: str
+    ) -> DonationModel:
         now = datetime.now(timezone.utc)
         data = payload.model_dump()
         data["purpose"] = payload.purpose.value
@@ -135,7 +149,9 @@ class DonationRepository:
         await self._session.refresh(donation)
         return donation
 
-    async def update(self, donation_id: uuid.UUID, payload: DonationUpdate) -> DonationModel | None:
+    async def update(
+        self, donation_id: uuid.UUID, payload: DonationUpdate
+    ) -> DonationModel | None:
         donation = await self.get(donation_id)
         if donation is None:
             return None
@@ -194,7 +210,9 @@ class DonationRepository:
         await self._session.refresh(event)
         return event
 
-    async def list_status_events(self, donation_id: uuid.UUID) -> list[DonationStatusEventModel]:
+    async def list_status_events(
+        self, donation_id: uuid.UUID
+    ) -> List[DonationStatusEventModel]:
         result = await self._session.execute(
             select(DonationStatusEventModel)
             .where(

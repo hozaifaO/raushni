@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from app.constants.roles import UserRole
 
-
 READ_PERMISSIONS = {
     "activities:read",
     "beneficiaries:read",

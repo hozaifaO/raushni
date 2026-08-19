@@ -8,7 +8,6 @@ from app.constants.roles import UserRole
 from app.schemas.settings import AccountProfile
 from app.services.settings_service import SettingsService
 
-
 router = APIRouter(prefix="/account", tags=["account"])
 
 

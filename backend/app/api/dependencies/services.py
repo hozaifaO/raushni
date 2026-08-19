@@ -11,8 +11,8 @@ from app.repositories.designation_repository import DesignationRepository
 from app.repositories.donation_repository import DonationRepository
 from app.repositories.internship_repository import InternshipRepository
 from app.repositories.member_repository import MemberRepository
-from app.repositories.project_repository import ProjectRepository
 from app.repositories.organization_repository import OrganizationRepository
+from app.repositories.project_repository import ProjectRepository
 from app.repositories.settings_repository import PlatformSettingsRepository
 from app.repositories.simple_record_repository import SimpleRecordRepository
 from app.services.crowdfunding_service import CrowdfundingService
@@ -46,7 +46,9 @@ def get_designation_service(
     session: AsyncSession = Depends(get_db),
     organization: OrganizationModel = Depends(get_current_organization),
 ) -> DesignationService:
-    return DesignationService(DesignationRepository(session, organization_id=organization.id))
+    return DesignationService(
+        DesignationRepository(session, organization_id=organization.id)
+    )
 
 
 def get_project_service(
@@ -60,14 +62,18 @@ def get_crowdfunding_service(
     session: AsyncSession = Depends(get_db),
     organization: OrganizationModel = Depends(get_current_organization),
 ) -> CrowdfundingService:
-    return CrowdfundingService(CrowdfundingRepository(session, organization_id=organization.id))
+    return CrowdfundingService(
+        CrowdfundingRepository(session, organization_id=organization.id)
+    )
 
 
 def get_internship_service(
     session: AsyncSession = Depends(get_db),
     organization: OrganizationModel = Depends(get_current_organization),
 ) -> InternshipService:
-    return InternshipService(InternshipRepository(session, organization_id=organization.id))
+    return InternshipService(
+        InternshipRepository(session, organization_id=organization.id)
+    )
 
 
 def get_user_account_store(request: Request) -> UserAccountStore:
@@ -87,7 +93,9 @@ def get_settings_service(
     )
 
 
-def _simple_service(session: AsyncSession, module: str, organization_id) -> SimpleCrudService:
+def _simple_service(
+    session: AsyncSession, module: str, organization_id
+) -> SimpleCrudService:
     return SimpleCrudService(
         SimpleRecordRepository(session, module=module, organization_id=organization_id)
     )

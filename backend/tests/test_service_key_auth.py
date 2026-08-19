@@ -9,7 +9,6 @@ from app.core.config import get_settings
 from app.main import create_app
 from tests.conftest import ADMIN_HEADERS, API_KEY
 
-
 pytestmark = [pytest.mark.api]
 
 

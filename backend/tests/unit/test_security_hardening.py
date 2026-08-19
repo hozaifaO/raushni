@@ -8,7 +8,6 @@ import pytest
 from app.core.config import Settings
 from app.services.payment_service import PaymentGatewayError, StripePaymentService
 
-
 pytestmark = [pytest.mark.unit]
 
 
@@ -26,7 +25,9 @@ def test_cors_origin_list_splits() -> None:
 def test_stripe_webhook_fail_closed_in_production() -> None:
     service = StripePaymentService()
     service.webhook_secret = ""
-    payload = json.dumps({"id": "evt_1", "type": "checkout.session.completed", "data": {"object": {}}}).encode()
+    payload = json.dumps(
+        {"id": "evt_1", "type": "checkout.session.completed", "data": {"object": {}}}
+    ).encode()
     with patch("app.core.config.get_settings") as mocked:
         mocked.return_value = Settings.model_validate(
             {
@@ -49,7 +50,9 @@ def test_stripe_webhook_unsigned_allowed_in_development() -> None:
         {
             "id": "evt_1",
             "type": "checkout.session.completed",
-            "data": {"object": {"id": "cs_1", "payment_status": "paid", "metadata": {}}},
+            "data": {
+                "object": {"id": "cs_1", "payment_status": "paid", "metadata": {}}
+            },
         }
     ).encode()
     with patch("app.core.config.get_settings") as mocked:

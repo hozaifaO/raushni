@@ -52,17 +52,21 @@ class InternshipRepository:
         prefix = "RSH-INT" if kind == "registration" else "RSH-CERT"
         return f"{prefix}-{year}-{counter.last_value}"
 
-    async def list_announcements(self, *, published_only: bool = False) -> list[InternshipAnnouncementModel]:
-        stmt: Select[tuple[InternshipAnnouncementModel]] = select(InternshipAnnouncementModel).where(
-            InternshipAnnouncementModel.organization_id == self._organization_id
-        )
+    async def list_announcements(
+        self, *, published_only: bool = False
+    ) -> list[InternshipAnnouncementModel]:
+        stmt: Select[tuple[InternshipAnnouncementModel]] = select(
+            InternshipAnnouncementModel
+        ).where(InternshipAnnouncementModel.organization_id == self._organization_id)
         if published_only:
             stmt = stmt.where(InternshipAnnouncementModel.status == "published")
         stmt = stmt.order_by(InternshipAnnouncementModel.event_date.desc())
         result = await self._session.execute(stmt)
         return list(result.scalars().all())
 
-    async def get_announcement(self, announcement_id: uuid.UUID) -> InternshipAnnouncementModel | None:
+    async def get_announcement(
+        self, announcement_id: uuid.UUID
+    ) -> InternshipAnnouncementModel | None:
         result = await self._session.execute(
             select(InternshipAnnouncementModel).where(
                 InternshipAnnouncementModel.id == announcement_id,
@@ -71,7 +75,9 @@ class InternshipRepository:
         )
         return result.scalar_one_or_none()
 
-    async def create_announcement(self, payload: InternshipAnnouncementCreate) -> InternshipAnnouncementModel:
+    async def create_announcement(
+        self, payload: InternshipAnnouncementCreate
+    ) -> InternshipAnnouncementModel:
         now = datetime.now(timezone.utc)
         data = payload.model_dump()
         data["mode"] = payload.mode.value
@@ -111,9 +117,9 @@ class InternshipRepository:
         search: str | None = None,
         application_status: InternshipApplicationStatus | None = None,
     ) -> list[InternshipApplicationModel]:
-        stmt: Select[tuple[InternshipApplicationModel]] = select(InternshipApplicationModel).where(
-            InternshipApplicationModel.organization_id == self._organization_id
-        )
+        stmt: Select[tuple[InternshipApplicationModel]] = select(
+            InternshipApplicationModel
+        ).where(InternshipApplicationModel.organization_id == self._organization_id)
         if search:
             query = f"%{search.strip().lower()}%"
             stmt = stmt.where(
@@ -121,12 +127,16 @@ class InternshipRepository:
                     func.lower(InternshipApplicationModel.full_name).like(query),
                     func.lower(InternshipApplicationModel.email).like(query),
                     func.lower(InternshipApplicationModel.phone).like(query),
-                    func.lower(InternshipApplicationModel.registration_number).like(query),
+                    func.lower(InternshipApplicationModel.registration_number).like(
+                        query
+                    ),
                     func.lower(InternshipApplicationModel.track).like(query),
                 )
             )
         if application_status is not None:
-            stmt = stmt.where(InternshipApplicationModel.status == application_status.value)
+            stmt = stmt.where(
+                InternshipApplicationModel.status == application_status.value
+            )
         stmt = stmt.order_by(InternshipApplicationModel.created_at.desc())
         result = await self._session.execute(stmt)
         return list(result.scalars().all())
@@ -139,7 +149,9 @@ class InternshipRepository:
         )
         return {row[0]: int(row[1]) for row in result.all()}
 
-    async def get_application(self, application_id: uuid.UUID) -> InternshipApplicationModel | None:
+    async def get_application(
+        self, application_id: uuid.UUID
+    ) -> InternshipApplicationModel | None:
         result = await self._session.execute(
             select(InternshipApplicationModel).where(
                 InternshipApplicationModel.id == application_id,
@@ -185,7 +197,9 @@ class InternshipRepository:
         await self._session.refresh(row)
         return row
 
-    async def save_application(self, application: InternshipApplicationModel) -> InternshipApplicationModel:
+    async def save_application(
+        self, application: InternshipApplicationModel
+    ) -> InternshipApplicationModel:
         application.updated_at = datetime.now(timezone.utc)
         await self._session.flush()
         await self._session.refresh(application)
@@ -218,7 +232,9 @@ class InternshipRepository:
         )
         return result.scalar_one_or_none()
 
-    async def get_certificate_by_code(self, verification_code: str) -> InternshipCertificateModel | None:
+    async def get_certificate_by_code(
+        self, verification_code: str
+    ) -> InternshipCertificateModel | None:
         result = await self._session.execute(
             select(InternshipCertificateModel).where(
                 InternshipCertificateModel.verification_code == verification_code,
@@ -228,7 +244,9 @@ class InternshipRepository:
         )
         return result.scalar_one_or_none()
 
-    async def create_certificate(self, certificate: InternshipCertificateModel) -> InternshipCertificateModel:
+    async def create_certificate(
+        self, certificate: InternshipCertificateModel
+    ) -> InternshipCertificateModel:
         certificate.organization_id = self._organization_id
         self._session.add(certificate)
         await self._session.flush()

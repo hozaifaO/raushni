@@ -31,7 +31,15 @@ class DesignationService:
         status_filter: DesignationStatus | None = None,
         department: str | None = None,
     ) -> DesignationListResponse:
-        items, total, active, inactive, archived, assigned_staff, open_slots = await self._repository.list(
+        (
+            items,
+            total,
+            active,
+            inactive,
+            archived,
+            assigned_staff,
+            open_slots,
+        ) = await self._repository.list(
             search=search,
             status_filter=status_filter,
             department=department,
@@ -49,27 +57,41 @@ class DesignationService:
     async def create_designation(self, payload: DesignationCreate) -> Designation:
         existing = await self._repository.get_by_code(payload.code)
         if existing is not None:
-            raise DesignationConflictError(f"Designation code {payload.code} already exists")
+            raise DesignationConflictError(
+                f"Designation code {payload.code} already exists"
+            )
         designation = await self._repository.create(payload)
         return Designation.model_validate(designation)
 
     async def get_designation(self, designation_id: UUID) -> Designation:
         designation = await self._repository.get(designation_id)
         if designation is None:
-            raise DesignationNotFoundError(f"Designation {designation_id} was not found")
+            raise DesignationNotFoundError(
+                f"Designation {designation_id} was not found"
+            )
         return Designation.model_validate(designation)
 
-    async def update_designation(self, designation_id: UUID, payload: DesignationUpdate) -> Designation:
+    async def update_designation(
+        self, designation_id: UUID, payload: DesignationUpdate
+    ) -> Designation:
         if payload.code is not None:
-            existing = await self._repository.get_by_code(payload.code, ignore_id=designation_id)
+            existing = await self._repository.get_by_code(
+                payload.code, ignore_id=designation_id
+            )
             if existing is not None:
-                raise DesignationConflictError(f"Designation code {payload.code} already exists")
+                raise DesignationConflictError(
+                    f"Designation code {payload.code} already exists"
+                )
         designation = await self._repository.update(designation_id, payload)
         if designation is None:
-            raise DesignationNotFoundError(f"Designation {designation_id} was not found")
+            raise DesignationNotFoundError(
+                f"Designation {designation_id} was not found"
+            )
         return Designation.model_validate(designation)
 
     async def delete_designation(self, designation_id: UUID) -> None:
         deleted = await self._repository.delete(designation_id)
         if not deleted:
-            raise DesignationNotFoundError(f"Designation {designation_id} was not found")
+            raise DesignationNotFoundError(
+                f"Designation {designation_id} was not found"
+            )

@@ -13,7 +13,6 @@ from app.repositories.settings_repository import PlatformSettingsRepository
 from app.services.donation_service import DonationNotFoundError, DonationService
 from app.services.payment_service import PaymentGatewayError, StripePaymentService
 
-
 router = APIRouter(prefix="/webhooks", tags=["webhooks"])
 
 
@@ -28,7 +27,9 @@ async def stripe_webhook(
     try:
         event = payment_service.parse_webhook_event(payload, signature)
     except PaymentGatewayError as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)
+        ) from exc
 
     if event.type == "checkout.session.completed":
         checkout_session = event.data.object if event.data is not None else None
@@ -36,10 +37,14 @@ async def stripe_webhook(
         payment_intent = checkout_session.payment_intent if checkout_session else None
         metadata = getattr(checkout_session, "metadata", None) or {}
         org_repo = OrganizationRepository(session)
-        organization_id_raw = metadata.get("organization_id") if isinstance(metadata, dict) else None
+        organization_id_raw = (
+            metadata.get("organization_id") if isinstance(metadata, dict) else None
+        )
         if not organization_id_raw:
             # Legacy sessions without org metadata: only default tenant (pre-multi-tenant).
-            organization = await org_repo.get_by_slug(get_settings().default_tenant_slug)
+            organization = await org_repo.get_by_slug(
+                get_settings().default_tenant_slug
+            )
             if organization is None:
                 return {"status": "ignored", "reason": "default_organization_not_found"}
         else:

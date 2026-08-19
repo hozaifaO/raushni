@@ -5,7 +5,6 @@ from fastapi.testclient import TestClient
 
 from tests.conftest import ADMIN_HEADERS
 
-
 pytestmark = [pytest.mark.api, pytest.mark.db]
 
 
@@ -35,7 +34,9 @@ def test_public_enquiry_creates_active_simple_record(client: TestClient) -> None
     assert body["notes"] == "Phone: +91 9876543210"
     assert body["amount"] is None
 
-    listing = client.get("/api/v1/enquiries", headers=ADMIN_HEADERS, params={"search": "Public Contact"})
+    listing = client.get(
+        "/api/v1/enquiries", headers=ADMIN_HEADERS, params={"search": "Public Contact"}
+    )
     assert listing.status_code == 200
     assert listing.json()["total"] >= 1
 

@@ -6,7 +6,6 @@ from fastapi.testclient import TestClient
 from app.main import create_app
 from tests.conftest import ADMIN_HEADERS, GUEST_HEADERS
 
-
 pytestmark = [pytest.mark.api, pytest.mark.db]
 
 
@@ -88,11 +87,15 @@ def test_internship_registration_and_certificate_workflow(client: TestClient) ->
     assert "<svg" in certificate["qr_code_svg"]
     assert "Certificate of Completion" in certificate["html_template"]
 
-    verify = client.get(f"/api/v1/internships/certificates/{certificate['verification_code']}")
+    verify = client.get(
+        f"/api/v1/internships/certificates/{certificate['verification_code']}"
+    )
     assert verify.status_code == 200
     assert verify.json()["certificate_number"] == certificate["certificate_number"]
 
-    html = client.get(f"/api/v1/internships/certificates/{certificate['verification_code']}/html")
+    html = client.get(
+        f"/api/v1/internships/certificates/{certificate['verification_code']}/html"
+    )
     assert html.status_code == 200
     assert "text/html" in html.headers["content-type"]
     assert "Aman Kumar" in html.text
@@ -103,7 +106,9 @@ def test_internship_registration_and_certificate_workflow(client: TestClient) ->
         assert dashboard.json()["total_applications"] >= 1
 
 
-def test_guest_can_read_but_cannot_create_internship_announcement(client: TestClient) -> None:
+def test_guest_can_read_but_cannot_create_internship_announcement(
+    client: TestClient,
+) -> None:
     list_response = client.get("/api/v1/internships", headers=GUEST_HEADERS)
     assert list_response.status_code == 200
 

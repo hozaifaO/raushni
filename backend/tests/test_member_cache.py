@@ -7,7 +7,6 @@ from fastapi.testclient import TestClient
 
 from tests.conftest import ADMIN_HEADERS
 
-
 pytestmark = [pytest.mark.api, pytest.mark.db]
 
 

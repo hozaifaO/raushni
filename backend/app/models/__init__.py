@@ -3,7 +3,11 @@ from __future__ import annotations
 from app.models.base import Base
 from app.models.crowdfunding import CampaignDonationModel, CampaignModel
 from app.models.designation import DesignationModel
-from app.models.donation import DonationModel, DonationStatusEventModel, ReceiptCounterModel
+from app.models.donation import (
+    DonationModel,
+    DonationStatusEventModel,
+    ReceiptCounterModel,
+)
 from app.models.internship import (
     InternshipAnnouncementModel,
     InternshipApplicationModel,

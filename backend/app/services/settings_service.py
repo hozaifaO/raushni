@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from uuid import UUID, uuid5, NAMESPACE_URL
+from uuid import NAMESPACE_URL, UUID, uuid5
 
 from app.constants.permissions import ROLE_PERMISSIONS
 from app.constants.roles import UserRole, normalize_role
@@ -75,7 +75,9 @@ class SettingsService:
         self._organization = organization
         self._users = user_store
 
-    async def get_profile(self, *, role: UserRole, email: str | None = None) -> AccountProfile:
+    async def get_profile(
+        self, *, role: UserRole, email: str | None = None
+    ) -> AccountProfile:
         user = await self._resolve_user(role=role, email=email)
         return AccountProfile(
             user=user,
@@ -92,7 +94,9 @@ class SettingsService:
             default_organization_name=self._organization.name
         )
         memberships = await self._organizations.list_memberships(self._organization.id)
-        users = [self._users.apply(self._membership_to_account(row)) for row in memberships]
+        users = [
+            self._users.apply(self._membership_to_account(row)) for row in memberships
+        ]
         users.sort(key=lambda user: (user.role.value, user.name.lower()))
         return SettingsDashboard(
             users=users,
@@ -104,15 +108,21 @@ class SettingsService:
             organization_name=self._organization.name,
         )
 
-    async def update_platform(self, payload: PlatformSettingsUpdate) -> PlatformSettings:
+    async def update_platform(
+        self, payload: PlatformSettingsUpdate
+    ) -> PlatformSettings:
         row = await self._repository.update(
             payload,
             default_organization_name=self._organization.name,
         )
         return PlatformSettings.model_validate(row)
 
-    async def update_user(self, user_id: UUID, payload: UserAccountUpdate) -> UserAccount:
-        membership = await self._organizations.get_membership(self._organization.id, user_id)
+    async def update_user(
+        self, user_id: UUID, payload: UserAccountUpdate
+    ) -> UserAccount:
+        membership = await self._organizations.get_membership(
+            self._organization.id, user_id
+        )
         if membership is None:
             raise UserAccountNotFoundError(f"User {user_id} was not found")
 
@@ -151,32 +161,43 @@ class SettingsService:
             NAMESPACE_URL,
             f"org:{self._organization.id}:email:{normalized_email or role.value}",
         )
-        display = (
-            _KNOWN_DISPLAY_NAMES.get(normalized_email or "", "")
-            or (normalized_email.split("@", 1)[0].replace(".", " ").title() if normalized_email else role.value.title())
+        display = _KNOWN_DISPLAY_NAMES.get(normalized_email or "", "") or (
+            normalized_email.split("@", 1)[0].replace(".", " ").title()
+            if normalized_email
+            else role.value.title()
         )
         return self._users.apply(
             UserAccount(
                 id=synthetic_id,
                 name=display,
-                email=normalized_email or f"{role.value.lower()}@{self._organization.slug}.local",
+                email=normalized_email
+                or f"{role.value.lower()}@{self._organization.slug}.local",
                 role=role,
-                access_level="write" if role in {UserRole.ADMIN, UserRole.STAFF} else "read",
+                access_level="write"
+                if role in {UserRole.ADMIN, UserRole.STAFF}
+                else "read",
                 last_login_at=datetime.now(timezone.utc),
             )
         )
 
-    def _membership_to_account(self, membership: OrganizationMembershipModel) -> UserAccount:
+    def _membership_to_account(
+        self, membership: OrganizationMembershipModel
+    ) -> UserAccount:
         role = normalize_role(membership.role)
         email = membership.email
-        name = _KNOWN_DISPLAY_NAMES.get(email) or email.split("@", 1)[0].replace(".", " ").title()
+        name = (
+            _KNOWN_DISPLAY_NAMES.get(email)
+            or email.split("@", 1)[0].replace(".", " ").title()
+        )
         return UserAccount(
             id=membership.id,
             name=name,
             email=email,
             role=role,
             status=UserStatus.ACTIVE,
-            access_level="write" if role in {UserRole.ADMIN, UserRole.STAFF} else "read",
+            access_level="write"
+            if role in {UserRole.ADMIN, UserRole.STAFF}
+            else "read",
             last_login_at=None,
         )
 

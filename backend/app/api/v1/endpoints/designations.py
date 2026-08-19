@@ -13,8 +13,11 @@ from app.schemas.designation import (
     DesignationStatus,
     DesignationUpdate,
 )
-from app.services.designation_service import DesignationConflictError, DesignationNotFoundError, DesignationService
-
+from app.services.designation_service import (
+    DesignationConflictError,
+    DesignationNotFoundError,
+    DesignationService,
+)
 
 router = APIRouter(prefix="/designations", tags=["designations"])
 
@@ -40,7 +43,9 @@ async def create_designation(
     try:
         return await service.create_designation(payload)
     except DesignationConflictError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail=str(exc)
+        ) from exc
 
 
 @router.get("/{designation_id}", response_model=Designation)
@@ -51,7 +56,9 @@ async def get_designation(
     try:
         return await service.get_designation(designation_id)
     except DesignationNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+        ) from exc
 
 
 @router.patch("/{designation_id}", response_model=Designation)
@@ -64,9 +71,13 @@ async def update_designation(
     try:
         return await service.update_designation(designation_id, payload)
     except DesignationConflictError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail=str(exc)
+        ) from exc
     except DesignationNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+        ) from exc
 
 
 @router.delete("/{designation_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -78,5 +89,7 @@ async def delete_designation(
     try:
         await service.delete_designation(designation_id)
     except DesignationNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+        ) from exc
     return Response(status_code=status.HTTP_204_NO_CONTENT)

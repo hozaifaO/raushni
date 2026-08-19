@@ -10,7 +10,6 @@ from app.api.dependencies.services import get_settings_service
 from app.models.organization import OrganizationModel
 from app.services.settings_service import SettingsService
 
-
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
 

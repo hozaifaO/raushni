@@ -13,18 +13,22 @@ from app.core.db import get_db
 from app.models.organization import OrganizationModel
 from app.repositories.organization_repository import OrganizationRepository
 
-
 READ_ONLY_MESSAGE = "Guest users have read-only access."
 MEMBERSHIP_REQUIRED_MESSAGE = "You are not a member of this organization."
 EMAIL_REQUIRED_MESSAGE = "X-User-Email is required for write access."
 
 
 def _auth_required() -> bool:
-    return get_settings().require_auth or os.getenv("REQUIRE_AUTH", "false").lower() == "true"
+    return (
+        get_settings().require_auth
+        or os.getenv("REQUIRE_AUTH", "false").lower() == "true"
+    )
 
 
 def _configured_api_key() -> str:
-    return (get_settings().internal_api_key or os.getenv("INTERNAL_API_KEY", "")).strip()
+    return (
+        get_settings().internal_api_key or os.getenv("INTERNAL_API_KEY", "")
+    ).strip()
 
 
 def _extract_api_key(

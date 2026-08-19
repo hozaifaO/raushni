@@ -6,7 +6,6 @@ from fastapi.testclient import TestClient
 from app.main import create_app
 from tests.conftest import ADMIN_HEADERS, GUEST_HEADERS
 
-
 pytestmark = [pytest.mark.api, pytest.mark.db]
 
 
@@ -51,11 +50,15 @@ def test_member_management_crud_workflow(client: TestClient) -> None:
     assert updated["role"] == "Program Lead"
     assert updated["status"] == "inactive"
 
-    filtered_response = client.get("/api/v1/members", params={"status_filter": "inactive"})
+    filtered_response = client.get(
+        "/api/v1/members", params={"status_filter": "inactive"}
+    )
     assert filtered_response.status_code == 200
     assert filtered_response.json()["items"][0]["id"] == member_id
 
-    delete_response = client.delete(f"/api/v1/members/{member_id}", headers=ADMIN_HEADERS)
+    delete_response = client.delete(
+        f"/api/v1/members/{member_id}", headers=ADMIN_HEADERS
+    )
     assert delete_response.status_code == 204
 
     missing_response = client.get(f"/api/v1/members/{member_id}")

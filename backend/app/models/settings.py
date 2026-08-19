@@ -3,7 +3,15 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, UniqueConstraint, func
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -15,7 +23,9 @@ class PlatformSettingsModel(Base):
 
     __tablename__ = "platform_settings"
     __table_args__ = (
-        UniqueConstraint("organization_id", name="uq_platform_settings_organization_id"),
+        UniqueConstraint(
+            "organization_id", name="uq_platform_settings_organization_id"
+        ),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -30,8 +40,12 @@ class PlatformSettingsModel(Base):
     cms_url: Mapped[str] = mapped_column(String(180), nullable=False)
     timezone: Mapped[str] = mapped_column(String(80), nullable=False)
     receipt_prefix: Mapped[str] = mapped_column(String(20), nullable=False)
-    public_donations_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
-    maintenance_mode: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    public_donations_enabled: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=True
+    )
+    maintenance_mode: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False
+    )
     theme_name: Mapped[str] = mapped_column(String(80), nullable=False)
     primary_color: Mapped[str] = mapped_column(String(7), nullable=False)
     accent_color: Mapped[str] = mapped_column(String(7), nullable=False)
@@ -43,5 +57,8 @@ class PlatformSettingsModel(Base):
     public_logo_url: Mapped[str] = mapped_column(String(240), nullable=False)
     stamp_logo_url: Mapped[str] = mapped_column(String(240), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
     )

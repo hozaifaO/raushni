@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any
+from typing import Any, cast
 
 from redis.asyncio import Redis
 
@@ -19,13 +19,16 @@ _redis: Redis | None = None
 async def init_redis(settings: Settings | None = None) -> Redis:
     global _redis
     cfg = settings or get_settings()
-    _redis = Redis.from_url(cfg.redis_url, decode_responses=True)
-    return _redis
+    client = cast(Redis, Redis.from_url(cfg.redis_url, decode_responses=True))
+    _redis = client
+    return client
 
 
 def get_redis_client() -> Redis:
     if _redis is None:
-        raise RuntimeError("Redis client is not initialized. Call init_redis() during app startup.")
+        raise RuntimeError(
+            "Redis client is not initialized. Call init_redis() during app startup."
+        )
     return _redis
 
 

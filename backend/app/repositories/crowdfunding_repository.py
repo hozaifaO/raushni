@@ -28,7 +28,9 @@ class CrowdfundingRepository:
         search: str | None = None,
         status_filter: CampaignStatus | None = None,
         public_only: bool = False,
-    ) -> tuple[list[CampaignModel], dict[uuid.UUID, int], int, int, int, int, float, float]:
+    ) -> tuple[
+        list[CampaignModel], dict[uuid.UUID, int], int, int, int, int, float, float
+    ]:
         stmt: Select[tuple[CampaignModel]] = select(CampaignModel).where(
             CampaignModel.organization_id == self._organization_id
         )
@@ -47,7 +49,9 @@ class CrowdfundingRepository:
         if status_filter is not None:
             stmt = stmt.where(CampaignModel.status == status_filter.value)
 
-        stmt = stmt.order_by(CampaignModel.end_date.asc(), CampaignModel.created_at.desc())
+        stmt = stmt.order_by(
+            CampaignModel.end_date.asc(), CampaignModel.created_at.desc()
+        )
         result = await self._session.execute(stmt)
         items = list(result.scalars().all())
 
@@ -123,7 +127,9 @@ class CrowdfundingRepository:
         await self._session.refresh(campaign)
         return campaign
 
-    async def update(self, campaign_id: uuid.UUID, payload: CampaignUpdate) -> CampaignModel | None:
+    async def update(
+        self, campaign_id: uuid.UUID, payload: CampaignUpdate
+    ) -> CampaignModel | None:
         campaign = await self.get(campaign_id)
         if campaign is None:
             return None
@@ -150,7 +156,9 @@ class CrowdfundingRepository:
         await self._session.flush()
         return True
 
-    async def list_donations(self, campaign_id: uuid.UUID) -> builtins.list[CampaignDonationModel]:
+    async def list_donations(
+        self, campaign_id: uuid.UUID
+    ) -> builtins.list[CampaignDonationModel]:
         result = await self._session.execute(
             select(CampaignDonationModel)
             .where(
@@ -188,7 +196,9 @@ class CrowdfundingRepository:
             created_at=datetime.now(timezone.utc),
         )
         self._session.add(donation)
-        campaign.amount_raised = Decimal(str(campaign.amount_raised)) + Decimal(str(payload.amount))
+        campaign.amount_raised = Decimal(str(campaign.amount_raised)) + Decimal(
+            str(payload.amount)
+        )
         if campaign.amount_raised >= campaign.target_amount:
             campaign.status = CampaignStatus.FUNDED.value
         campaign.updated_at = datetime.now(timezone.utc)

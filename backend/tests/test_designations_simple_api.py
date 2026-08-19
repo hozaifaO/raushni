@@ -6,7 +6,6 @@ from fastapi.testclient import TestClient
 from app.main import create_app
 from tests.conftest import ADMIN_HEADERS, GUEST_HEADERS
 
-
 pytestmark = [pytest.mark.api, pytest.mark.db]
 
 
@@ -30,7 +29,9 @@ def designation_payload(**overrides: object) -> dict[str, object]:
 
 
 def test_designation_crud_and_persistence(client: TestClient) -> None:
-    create = client.post("/api/v1/designations", headers=ADMIN_HEADERS, json=designation_payload())
+    create = client.post(
+        "/api/v1/designations", headers=ADMIN_HEADERS, json=designation_payload()
+    )
     assert create.status_code == 201
     created = create.json()
     designation_id = created["id"]
@@ -47,7 +48,9 @@ def test_designation_crud_and_persistence(client: TestClient) -> None:
     assert update.status_code == 200
     assert update.json()["status"] == "inactive"
 
-    delete = client.delete(f"/api/v1/designations/{designation_id}", headers=ADMIN_HEADERS)
+    delete = client.delete(
+        f"/api/v1/designations/{designation_id}", headers=ADMIN_HEADERS
+    )
     assert delete.status_code == 204
 
     # Recreate then prove persistence across a new app instance (nested client last).
@@ -65,7 +68,11 @@ def test_designation_crud_and_persistence(client: TestClient) -> None:
 
 
 def test_guest_cannot_create_designation(client: TestClient) -> None:
-    response = client.post("/api/v1/designations", headers=GUEST_HEADERS, json=designation_payload(code="GUEST"))
+    response = client.post(
+        "/api/v1/designations",
+        headers=GUEST_HEADERS,
+        json=designation_payload(code="GUEST"),
+    )
     assert response.status_code == 403
 
 
@@ -73,7 +80,13 @@ def test_designation_validation_422(client: TestClient) -> None:
     response = client.post(
         "/api/v1/designations",
         headers=ADMIN_HEADERS,
-        json={"title": "X", "code": "Y", "department": "Z", "description": "short", "assignment_scope": "ab"},
+        json={
+            "title": "X",
+            "code": "Y",
+            "department": "Z",
+            "description": "short",
+            "assignment_scope": "ab",
+        },
     )
     assert response.status_code == 422
 

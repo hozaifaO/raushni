@@ -6,7 +6,6 @@ from fastapi.testclient import TestClient
 from app.main import create_app
 from tests.conftest import ADMIN_HEADERS, GUEST_HEADERS
 
-
 pytestmark = [pytest.mark.api, pytest.mark.db]
 
 
@@ -49,7 +48,9 @@ def campaign_payload(**overrides: object) -> dict[str, object]:
 
 
 def test_projects_crud_and_persistence(client: TestClient) -> None:
-    create = client.post("/api/v1/projects", headers=ADMIN_HEADERS, json=project_payload())
+    create = client.post(
+        "/api/v1/projects", headers=ADMIN_HEADERS, json=project_payload()
+    )
     assert create.status_code == 201
     project_id = create.json()["id"]
 
@@ -65,7 +66,11 @@ def test_projects_crud_and_persistence(client: TestClient) -> None:
     assert update.status_code == 200
     assert update.json()["progress"] == 25
 
-    guest = client.post("/api/v1/projects", headers=GUEST_HEADERS, json=project_payload(slug="guest-block"))
+    guest = client.post(
+        "/api/v1/projects",
+        headers=GUEST_HEADERS,
+        json=project_payload(slug="guest-block"),
+    )
     assert guest.status_code == 403
 
     with TestClient(create_app()) as other:
@@ -73,7 +78,9 @@ def test_projects_crud_and_persistence(client: TestClient) -> None:
 
 
 def test_campaign_donation_updates_raised_transactionally(client: TestClient) -> None:
-    create = client.post("/api/v1/crowdfunding", headers=ADMIN_HEADERS, json=campaign_payload())
+    create = client.post(
+        "/api/v1/crowdfunding", headers=ADMIN_HEADERS, json=campaign_payload()
+    )
     assert create.status_code == 201
     campaign_id = create.json()["id"]
     assert create.json()["amount_raised"] == 0

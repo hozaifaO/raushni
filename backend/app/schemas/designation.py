@@ -7,7 +7,11 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.core.sanitize import OptionalFreeTextSanitizedStr, OptionalSanitizedStr, SanitizedStr
+from app.core.sanitize import (
+    OptionalFreeTextSanitizedStr,
+    OptionalSanitizedStr,
+    SanitizedStr,
+)
 
 
 class DesignationStatus(StrEnum):
@@ -58,8 +62,12 @@ class DesignationUpdate(BaseModel):
     level: DesignationLevel | None = None
     status: DesignationStatus | None = None
     reports_to: OptionalSanitizedStr = Field(default=None, max_length=120)
-    description: SanitizedStr | None = Field(default=None, min_length=10, max_length=700)
-    assignment_scope: SanitizedStr | None = Field(default=None, min_length=4, max_length=160)
+    description: SanitizedStr | None = Field(
+        default=None, min_length=10, max_length=700
+    )
+    assignment_scope: SanitizedStr | None = Field(
+        default=None, min_length=4, max_length=160
+    )
     responsibilities: list[BoundedText] | None = Field(default=None, max_length=12)
     required_documents: list[BoundedText] | None = Field(default=None, max_length=12)
     staff_assigned: int | None = Field(default=None, ge=0)

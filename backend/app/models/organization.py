@@ -32,7 +32,9 @@ class OrganizationModel(Base):
 class OrganizationMembershipModel(Base):
     __tablename__ = "organization_memberships"
     __table_args__ = (
-        UniqueConstraint("organization_id", "email", name="uq_organization_memberships_org_email"),
+        UniqueConstraint(
+            "organization_id", "email", name="uq_organization_memberships_org_email"
+        ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(

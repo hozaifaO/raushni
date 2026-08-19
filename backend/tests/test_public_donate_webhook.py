@@ -8,7 +8,6 @@ from fastapi.testclient import TestClient
 from app.schemas.webhook import StripeWebhookEvent
 from tests.conftest import ADMIN_HEADERS
 
-
 pytestmark = [pytest.mark.api, pytest.mark.db]
 
 
@@ -154,7 +153,9 @@ def test_stripe_webhook_completed_marks_paid(client: TestClient) -> None:
     assert body["receipt_issued"] is False
     assert body["transaction_reference"] == "pi_test_1"
 
-    events = client.get(f"/api/v1/donations/{donation_id}/events", headers=ADMIN_HEADERS)
+    events = client.get(
+        f"/api/v1/donations/{donation_id}/events", headers=ADMIN_HEADERS
+    )
     assert events.status_code == 200
     event_rows = events.json()
     paid_events = [row for row in event_rows if row["to_status"] == "paid"]

@@ -9,7 +9,6 @@ from string import Template
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-
 DEFAULT_DOCUMENT_TEMPLATES: dict[str, dict[str, object]] = {
     "donation-receipt": {
         "title": "Official Receipt",
@@ -38,13 +37,19 @@ def render_template(value: str, context: Mapping[str, object]) -> str:
 
 
 def _cms_api_token() -> str:
-    return (os.getenv("CMS_API_TOKEN") or os.getenv("STRAPI_CMS_API_TOKEN") or "").strip()
+    return (
+        os.getenv("CMS_API_TOKEN") or os.getenv("STRAPI_CMS_API_TOKEN") or ""
+    ).strip()
 
 
 @lru_cache(maxsize=32)
 def get_document_template(key: str) -> dict[str, object]:
     fallback = DEFAULT_DOCUMENT_TEMPLATES.get(key, {})
-    base_url = os.getenv("CMS_INTERNAL_URL") or os.getenv("NEXT_PUBLIC_CMS_URL") or "http://strapi:1337"
+    base_url = (
+        os.getenv("CMS_INTERNAL_URL")
+        or os.getenv("NEXT_PUBLIC_CMS_URL")
+        or "http://strapi:1337"
+    )
     query = urlencode({"filters[key][$eq]": key, "populate": "*"})
     url = f"{base_url.rstrip('/')}/api/document-templates?{query}"
     headers = {"Accept": "application/json"}

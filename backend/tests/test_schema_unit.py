@@ -9,7 +9,6 @@ from app.schemas.member import MemberCreate
 from app.schemas.project import ProjectCreate
 from app.schemas.simple_record import PublicEnquiryCreate, SimpleRecordStatus
 
-
 pytestmark = pytest.mark.unit
 
 

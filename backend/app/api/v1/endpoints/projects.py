@@ -6,9 +6,14 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
 from app.api.dependencies.auth import require_write_access
 from app.api.dependencies.services import get_project_service
-from app.schemas.project import Project, ProjectCreate, ProjectListResponse, ProjectStatus, ProjectUpdate
+from app.schemas.project import (
+    Project,
+    ProjectCreate,
+    ProjectListResponse,
+    ProjectStatus,
+    ProjectUpdate,
+)
 from app.services.project_service import ProjectNotFoundError, ProjectService
-
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 
@@ -39,7 +44,9 @@ async def get_project(
     try:
         return await service.get_project(project_id)
     except ProjectNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+        ) from exc
 
 
 @router.patch("/{project_id}", response_model=Project)
@@ -52,7 +59,9 @@ async def update_project(
     try:
         return await service.update_project(project_id, payload)
     except ProjectNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+        ) from exc
 
 
 @router.delete("/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -64,5 +73,7 @@ async def delete_project(
     try:
         await service.delete_project(project_id)
     except ProjectNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+        ) from exc
     return Response(status_code=status.HTTP_204_NO_CONTENT)

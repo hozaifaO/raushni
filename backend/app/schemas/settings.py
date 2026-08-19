@@ -42,11 +42,17 @@ class PlatformSettings(BaseModel):
 
 
 class PlatformSettingsUpdate(BaseModel):
-    organization_name: SanitizedStr | None = Field(default=None, min_length=2, max_length=160)
-    support_email: str | None = Field(default=None, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+    organization_name: SanitizedStr | None = Field(
+        default=None, min_length=2, max_length=160
+    )
+    support_email: str | None = Field(
+        default=None, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
+    )
     cms_url: SanitizedStr | None = Field(default=None, min_length=1, max_length=180)
     timezone: SanitizedStr | None = Field(default=None, min_length=2, max_length=80)
-    receipt_prefix: SanitizedStr | None = Field(default=None, min_length=2, max_length=20)
+    receipt_prefix: SanitizedStr | None = Field(
+        default=None, min_length=2, max_length=20
+    )
     public_donations_enabled: bool | None = None
     maintenance_mode: bool | None = None
     theme_name: SanitizedStr | None = Field(default=None, min_length=2, max_length=80)
@@ -55,10 +61,18 @@ class PlatformSettingsUpdate(BaseModel):
     header_theme: str | None = Field(default=None, pattern=r"^(light|dark|brand)$")
     footer_theme: str | None = Field(default=None, pattern=r"^(light|dark|brand)$")
     page_background: str | None = Field(default=None, pattern=r"^#[0-9a-fA-F]{6}$")
-    surface_radius: SanitizedStr | None = Field(default=None, min_length=2, max_length=12)
-    logo_diameter: SanitizedStr | None = Field(default=None, min_length=2, max_length=12)
-    public_logo_url: OptionalSanitizedStr = Field(default=None, min_length=1, max_length=240)
-    stamp_logo_url: OptionalSanitizedStr = Field(default=None, min_length=1, max_length=240)
+    surface_radius: SanitizedStr | None = Field(
+        default=None, min_length=2, max_length=12
+    )
+    logo_diameter: SanitizedStr | None = Field(
+        default=None, min_length=2, max_length=12
+    )
+    public_logo_url: OptionalSanitizedStr = Field(
+        default=None, min_length=1, max_length=240
+    )
+    stamp_logo_url: OptionalSanitizedStr = Field(
+        default=None, min_length=1, max_length=240
+    )
 
 
 class AccountProfile(BaseModel):

@@ -3,7 +3,13 @@ from __future__ import annotations
 from uuid import UUID
 
 from app.repositories.project_repository import ProjectRepository
-from app.schemas.project import Project, ProjectCreate, ProjectListResponse, ProjectStatus, ProjectUpdate
+from app.schemas.project import (
+    Project,
+    ProjectCreate,
+    ProjectListResponse,
+    ProjectStatus,
+    ProjectUpdate,
+)
 
 
 class ProjectNotFoundError(LookupError):
@@ -20,7 +26,15 @@ class ProjectService:
         search: str | None = None,
         status_filter: ProjectStatus | None = None,
     ) -> ProjectListResponse:
-        items, total, proposed, active, completed, total_budget, total_beneficiaries = await self._repository.list(
+        (
+            items,
+            total,
+            proposed,
+            active,
+            completed,
+            total_budget,
+            total_beneficiaries,
+        ) = await self._repository.list(
             search=search,
             status_filter=status_filter,
         )

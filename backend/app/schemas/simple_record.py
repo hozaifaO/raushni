@@ -6,7 +6,11 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.core.sanitize import OptionalFreeTextSanitizedStr, OptionalSanitizedStr, SanitizedStr
+from app.core.sanitize import (
+    OptionalFreeTextSanitizedStr,
+    OptionalSanitizedStr,
+    SanitizedStr,
+)
 
 
 class SimpleRecordStatus(StrEnum):
@@ -24,7 +28,9 @@ class SimpleRecordBase(BaseModel):
     status: SimpleRecordStatus = SimpleRecordStatus.ACTIVE
     record_date: date = Field(default_factory=date.today)
     contact_name: OptionalSanitizedStr = Field(default=None, max_length=140)
-    contact_email: str | None = Field(default=None, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+    contact_email: str | None = Field(
+        default=None, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
+    )
     amount: float | None = Field(default=None, ge=0)
     location: OptionalSanitizedStr = Field(default=None, max_length=180)
     notes: OptionalFreeTextSanitizedStr = Field(default=None, max_length=1200)
@@ -63,7 +69,9 @@ class SimpleRecordUpdate(BaseModel):
     status: SimpleRecordStatus | None = None
     record_date: date | None = None
     contact_name: OptionalSanitizedStr = Field(default=None, max_length=140)
-    contact_email: str | None = Field(default=None, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+    contact_email: str | None = Field(
+        default=None, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
+    )
     amount: float | None = Field(default=None, ge=0)
     location: OptionalSanitizedStr = Field(default=None, max_length=180)
     notes: OptionalFreeTextSanitizedStr = Field(default=None, max_length=1200)

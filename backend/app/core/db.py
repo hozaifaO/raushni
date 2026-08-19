@@ -38,13 +38,17 @@ def init_db(settings: Settings | None = None) -> AsyncEngine:
 
 def get_engine() -> AsyncEngine:
     if _engine is None:
-        raise RuntimeError("Database engine is not initialized. Call init_db() during app startup.")
+        raise RuntimeError(
+            "Database engine is not initialized. Call init_db() during app startup."
+        )
     return _engine
 
 
 def get_session_factory() -> async_sessionmaker[AsyncSession]:
     if _session_factory is None:
-        raise RuntimeError("Session factory is not initialized. Call init_db() during app startup.")
+        raise RuntimeError(
+            "Session factory is not initialized. Call init_db() during app startup."
+        )
     return _session_factory
 
 

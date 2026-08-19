@@ -57,9 +57,13 @@ class InternshipAnnouncementBase(BaseModel):
     location: SanitizedStr = Field(default="Web/Virtual, India", max_length=160)
     mode: InternshipMode = InternshipMode.VIRTUAL
     status: InternshipStatus = InternshipStatus.PUBLISHED
-    poster_url: SanitizedStr = Field(default="/assets/brand/internship-2026.jpg", max_length=260)
+    poster_url: SanitizedStr = Field(
+        default="/assets/brand/internship-2026.jpg", max_length=260
+    )
     apply_url: SanitizedStr = Field(default="/internships", max_length=160)
-    github_url: SanitizedStr = Field(default="https://github.com/owais4u/raushni", max_length=260)
+    github_url: SanitizedStr = Field(
+        default="https://github.com/owais4u/raushni", max_length=260
+    )
     contact_phone: SanitizedStr = Field(default="+91 7827860062", max_length=30)
     benefits: list[BoundedItem] = Field(default_factory=list, max_length=20)
     tracks: list[BoundedItem] = Field(default_factory=list, max_length=20)
@@ -74,7 +78,9 @@ class InternshipAnnouncementUpdate(BaseModel):
     title: SanitizedStr | None = Field(default=None, min_length=3, max_length=160)
     slug: SanitizedStr | None = Field(default=None, min_length=3, max_length=120)
     summary: SanitizedStr | None = Field(default=None, min_length=10, max_length=500)
-    description: FreeTextSanitizedStr | None = Field(default=None, min_length=20, max_length=1600)
+    description: FreeTextSanitizedStr | None = Field(
+        default=None, min_length=20, max_length=1600
+    )
     start_date: date | None = None
     end_date: date | None = None
     registration_deadline: date | None = None
@@ -130,7 +136,9 @@ class InternshipApplicationUpdate(BaseModel):
     track: SanitizedStr | None = Field(default=None, min_length=2, max_length=120)
     github_url: OptionalSanitizedStr = Field(default=None, max_length=260)
     portfolio_url: OptionalSanitizedStr = Field(default=None, max_length=260)
-    motivation: FreeTextSanitizedStr | None = Field(default=None, min_length=20, max_length=1000)
+    motivation: FreeTextSanitizedStr | None = Field(
+        default=None, min_length=20, max_length=1000
+    )
     status: InternshipApplicationStatus | None = None
     completion_notes: OptionalFreeTextSanitizedStr = Field(default=None, max_length=800)
 

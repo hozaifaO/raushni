@@ -82,7 +82,9 @@ def _build_receipt_snapshot(donation: DonationModel) -> dict[str, Any]:
     }
 
 
-def _donation_from_snapshot(donation: DonationModel, snapshot: dict[str, Any]) -> Donation:
+def _donation_from_snapshot(
+    donation: DonationModel, snapshot: dict[str, Any]
+) -> Donation:
     """Merge frozen snapshot fields onto the live donation for receipt display."""
     base = Donation.model_validate(donation).model_dump()
     for key in (
@@ -159,10 +161,14 @@ class DonationService:
                 raise DonationPublicDisabledError("Public donations are not available.")
             settings = await self._settings_repository.get_or_create()
             if not settings.public_donations_enabled:
-                raise DonationPublicDisabledError("Public donations are currently disabled.")
+                raise DonationPublicDisabledError(
+                    "Public donations are currently disabled."
+                )
 
         if payload.payment_status == DonationPaymentStatus.PAID:
-            self._assert_utr_for_paid(payload.payment_method, payload.transaction_reference)
+            self._assert_utr_for_paid(
+                payload.payment_method, payload.transaction_reference
+            )
 
         receipt_number = await self._repository.allocate_receipt_number()
         donation = await self._repository.create(payload, receipt_number=receipt_number)
@@ -204,7 +210,9 @@ class DonationService:
 
         updates = payload.model_dump(exclude_unset=True)
         if donation.receipt_issued:
-            frozen_touched = sorted(field for field in updates if field in RECEIPT_FROZEN_FIELDS)
+            frozen_touched = sorted(
+                field for field in updates if field in RECEIPT_FROZEN_FIELDS
+            )
             if frozen_touched:
                 raise DonationReceiptFrozenError(
                     "Receipt already issued; cannot modify frozen fields: "
@@ -213,11 +221,15 @@ class DonationService:
 
         next_status = updates.get("payment_status")
         next_status_value = (
-            next_status.value if isinstance(next_status, DonationPaymentStatus) else next_status
+            next_status.value
+            if isinstance(next_status, DonationPaymentStatus)
+            else next_status
         )
         next_method = updates.get("payment_method", donation.payment_method)
         next_method_value = (
-            next_method.value if isinstance(next_method, DonationPaymentMethod) else next_method
+            next_method.value
+            if isinstance(next_method, DonationPaymentMethod)
+            else next_method
         )
         next_reference = updates.get(
             "transaction_reference",
@@ -255,9 +267,9 @@ class DonationService:
         if donation is None:
             raise DonationNotFoundError(f"Donation {donation_id} was not found")
 
-        reference = _normalize_reference(payload.transaction_reference) or _normalize_reference(
-            donation.transaction_reference
-        )
+        reference = _normalize_reference(
+            payload.transaction_reference
+        ) or _normalize_reference(donation.transaction_reference)
         self._assert_utr_for_paid(donation.payment_method, reference)
 
         if donation.payment_status == DonationPaymentStatus.PAID.value:
@@ -297,8 +309,12 @@ class DonationService:
 
         template = get_document_template("donation-receipt")
         settings = template.get("settings", {})
-        organization = settings.get("organization") if isinstance(settings, dict) else None
-        organization_name = str(organization or "Raushni Educational & Social Welfare Trust")
+        organization = (
+            settings.get("organization") if isinstance(settings, dict) else None
+        )
+        organization_name = str(
+            organization or "Raushni Educational & Social Welfare Trust"
+        )
         if self._settings_repository is not None:
             platform = await self._settings_repository.get_or_create()
             if platform.organization_name:
@@ -312,7 +328,9 @@ class DonationService:
 
         if donation_model.receipt_issued and donation_model.receipt_snapshot:
             issued_at = donation_model.receipt_issued_at or datetime.now(timezone.utc)
-            donation = _donation_from_snapshot(donation_model, donation_model.receipt_snapshot)
+            donation = _donation_from_snapshot(
+                donation_model, donation_model.receipt_snapshot
+            )
             return DonationReceipt(
                 receipt_number=donation.receipt_number,
                 issued_at=issued_at,
@@ -337,7 +355,9 @@ class DonationService:
             donation=donation,
         )
 
-    async def create_checkout_session(self, donation_id: UUID) -> DonationCheckoutSession:
+    async def create_checkout_session(
+        self, donation_id: UUID
+    ) -> DonationCheckoutSession:
         donation_model = await self._repository.get(donation_id)
         if donation_model is None:
             raise DonationNotFoundError(f"Donation {donation_id} was not found")

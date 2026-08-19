@@ -9,12 +9,18 @@ try:
 except ModuleNotFoundError:
     qrcode = None
 
-from app.services.cms_template_service import DEFAULT_DOCUMENT_TEMPLATES, get_document_template
+from app.services.cms_template_service import (
+    DEFAULT_DOCUMENT_TEMPLATES,
+    get_document_template,
+)
 
 
 class DocumentService:
     def list_templates(self) -> list[dict[str, object]]:
-        return [get_document_template(key) | {"key": key} for key in DEFAULT_DOCUMENT_TEMPLATES]
+        return [
+            get_document_template(key) | {"key": key}
+            for key in DEFAULT_DOCUMENT_TEMPLATES
+        ]
 
     def get_template(self, key: str) -> dict[str, object]:
         return get_document_template(key) | {"key": key}
@@ -38,8 +44,14 @@ class DocumentService:
         ]
         for y in range(cells):
             for x in range(cells):
-                finder = (x < 7 and y < 7) or (x >= cells - 7 and y < 7) or (x < 7 and y >= cells - 7)
+                finder = (
+                    (x < 7 and y < 7)
+                    or (x >= cells - 7 and y < 7)
+                    or (x < 7 and y >= cells - 7)
+                )
                 byte = digest[(x + y * cells) % len(digest)]
                 if finder or ((byte >> (x % 8)) & 1):
-                    rects.append(f'<rect x="{x * cell}" y="{y * cell}" width="{cell}" height="{cell}" fill="#111827"/>')
+                    rects.append(
+                        f'<rect x="{x * cell}" y="{y * cell}" width="{cell}" height="{cell}" fill="#111827"/>'
+                    )
         return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {size} {size}" role="img" aria-label="Document verification QR code">{"".join(rects)}</svg>'

@@ -8,5 +8,11 @@ pytest-mock==3.12.0
 # FastAPI TestClient
 httpx==0.25.1
 
-# Coverage / quality (optional local)
+# Coverage
 coverage==7.3.2
+
+# Lint / format / types (CI)
+black==23.11.0
+isort==5.12.0
+flake8==6.1.0
+mypy==1.7.0

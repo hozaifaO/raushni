@@ -40,7 +40,9 @@ class StripePaymentService:
 
     def create_checkout_session(self, donation: Donation) -> DonationCheckoutSession:
         if not self.enabled:
-            raise PaymentGatewayUnavailableError("Stripe is not configured. Set STRIPE_SECRET_KEY and STRIPE_PUBLISHABLE_KEY.")
+            raise PaymentGatewayUnavailableError(
+                "Stripe is not configured. Set STRIPE_SECRET_KEY and STRIPE_PUBLISHABLE_KEY."
+            )
 
         try:
             session = stripe.checkout.Session.create(
@@ -70,8 +72,12 @@ class StripePaymentService:
                 success_url=f"{self.app_public_url}/donate?payment=success&receipt={donation.receipt_number}",
                 cancel_url=f"{self.app_public_url}/donate?payment=cancelled&receipt={donation.receipt_number}",
             )
-        except Exception as exc:  # Stripe raises several typed exceptions; preserve a clean API message.
-            raise PaymentGatewayError(f"Unable to create Stripe checkout session: {exc}") from exc
+        except (
+            Exception
+        ) as exc:  # Stripe raises several typed exceptions; preserve a clean API message.
+            raise PaymentGatewayError(
+                f"Unable to create Stripe checkout session: {exc}"
+            ) from exc
 
         checkout_url = str(session.get("url") or "")
         session_id = str(session.get("id") or "")
@@ -86,13 +92,19 @@ class StripePaymentService:
             publishable_key=self.publishable_key,
         )
 
-    def parse_webhook_event(self, payload: bytes, signature: str | None) -> StripeWebhookEvent:
+    def parse_webhook_event(
+        self, payload: bytes, signature: str | None
+    ) -> StripeWebhookEvent:
         raw: dict[str, Any]
         if self.webhook_secret:
             try:
-                constructed = stripe.Webhook.construct_event(payload, signature or "", self.webhook_secret)
+                constructed = stripe.Webhook.construct_event(
+                    payload, signature or "", self.webhook_secret
+                )
             except Exception as exc:
-                raise PaymentGatewayError(f"Invalid Stripe webhook signature: {exc}") from exc
+                raise PaymentGatewayError(
+                    f"Invalid Stripe webhook signature: {exc}"
+                ) from exc
             if hasattr(constructed, "to_dict"):
                 raw = cast(dict[str, Any], constructed.to_dict())
             else:
@@ -109,9 +121,13 @@ class StripePaymentService:
             try:
                 parsed = json.loads(payload.decode("utf-8"))
             except Exception as exc:
-                raise PaymentGatewayError(f"Invalid Stripe webhook payload: {exc}") from exc
+                raise PaymentGatewayError(
+                    f"Invalid Stripe webhook payload: {exc}"
+                ) from exc
             if not isinstance(parsed, dict):
-                raise PaymentGatewayError("Invalid Stripe webhook payload: expected object")
+                raise PaymentGatewayError(
+                    "Invalid Stripe webhook payload: expected object"
+                )
             raw = cast(dict[str, Any], parsed)
         try:
             return StripeWebhookEvent.from_stripe_payload(raw)

@@ -19,7 +19,6 @@ from app.api.dependencies.auth import (
 from app.constants.roles import UserRole, normalize_role
 from app.core.config import get_settings
 
-
 pytestmark = pytest.mark.unit
 
 
@@ -29,7 +28,9 @@ def test_normalize_role_aliases() -> None:
     assert normalize_role("unknown") == UserRole.GUEST
 
 
-def test_require_service_key_when_auth_required(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_require_service_key_when_auth_required(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setenv("REQUIRE_AUTH", "true")
     monkeypatch.setenv("INTERNAL_API_KEY", "test-internal-api-key")
     get_settings.cache_clear()
@@ -54,12 +55,16 @@ def test_resolve_membership_role_requires_email() -> None:
     org = SimpleNamespace(id="org-1")
     session = MagicMock()
     with pytest.raises(HTTPException) as exc:
-        asyncio.run(resolve_membership_role(organization=org, session=session, email=None))
+        asyncio.run(
+            resolve_membership_role(organization=org, session=session, email=None)
+        )
     assert exc.value.status_code == 403
     assert exc.value.detail == EMAIL_REQUIRED_MESSAGE
 
 
-def test_resolve_membership_role_requires_membership(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_resolve_membership_role_requires_membership(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     org = SimpleNamespace(id="org-1")
     session = MagicMock()
     repo = MagicMock()

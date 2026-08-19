@@ -46,16 +46,24 @@ class SimpleCrudService:
     async def get_record(self, record_id: UUID) -> SimpleRecord:
         record = await self._repository.get(record_id)
         if record is None:
-            raise SimpleRecordNotFoundError(f"{self.module} record {record_id} was not found")
+            raise SimpleRecordNotFoundError(
+                f"{self.module} record {record_id} was not found"
+            )
         return SimpleRecord.model_validate(record)
 
-    async def update_record(self, record_id: UUID, payload: SimpleRecordUpdate) -> SimpleRecord:
+    async def update_record(
+        self, record_id: UUID, payload: SimpleRecordUpdate
+    ) -> SimpleRecord:
         record = await self._repository.update(record_id, payload)
         if record is None:
-            raise SimpleRecordNotFoundError(f"{self.module} record {record_id} was not found")
+            raise SimpleRecordNotFoundError(
+                f"{self.module} record {record_id} was not found"
+            )
         return SimpleRecord.model_validate(record)
 
     async def delete_record(self, record_id: UUID) -> None:
         deleted = await self._repository.delete(record_id)
         if not deleted:
-            raise SimpleRecordNotFoundError(f"{self.module} record {record_id} was not found")
+            raise SimpleRecordNotFoundError(
+                f"{self.module} record {record_id} was not found"
+            )
