@@ -11,7 +11,18 @@ module.exports = ({ env }) => {
   const urlOrigins = [publicUrl, adminUrl]
     .filter((value) => value && value.startsWith('http'))
     .map((value) => new URL(value).origin);
-  const allowedOrigins = Array.from(new Set([...configuredOrigins, ...localOrigins, ...urlOrigins]));
+  // Always allow the CMS public origin (admin SPA same-origin login).
+  let publicOrigin = '';
+  try {
+    publicOrigin = publicUrl.startsWith('http') ? new URL(publicUrl).origin : '';
+  } catch {
+    publicOrigin = '';
+  }
+  const allowedOrigins = Array.from(
+    new Set([...configuredOrigins, ...localOrigins, ...urlOrigins, publicOrigin].filter(Boolean)),
+  );
+  // Allow media from S3-compatible CDNs (Railway Buckets, R2, etc.).
+  const mediaHosts = csv(env('UPLOAD_CSP_ORIGINS', 'https://*.railway.app,https://*.r2.dev,https://*.cloudflarestorage.com'));
 
   return [
   'strapi::logger',
@@ -23,8 +34,8 @@ module.exports = ({ env }) => {
         useDefaults: true,
         directives: {
           'connect-src': ["'self'", 'http:', 'https:'],
-          'img-src': ["'self'", 'data:', 'blob:', publicUrl],
-          'media-src': ["'self'", 'data:', 'blob:', publicUrl],
+          'img-src': ["'self'", 'data:', 'blob:', publicUrl, ...mediaHosts],
+          'media-src': ["'self'", 'data:', 'blob:', publicUrl, ...mediaHosts],
           upgradeInsecureRequests: null,
         },
       },

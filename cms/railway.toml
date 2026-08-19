@@ -1,0 +1,10 @@
+# Railway CMS service — set Root Directory to /cms (or Config File Path /cms/railway.toml).
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+healthcheckPath = "/_health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 5

@@ -45,7 +45,8 @@ USER strapi
 
 EXPOSE 1337
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=5 \
-  CMD curl -fsS http://127.0.0.1:1337/_health || exit 1
+# Railway injects PORT; default 1337 for local/docker.
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=5 \
+  CMD curl -fsS http://127.0.0.1:${PORT:-1337}/_health || exit 1
 
-CMD ["npm", "start"]
+CMD npm start

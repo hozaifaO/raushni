@@ -9,7 +9,8 @@ module.exports = ({ env }) => ({
       password: env('DATABASE_PASSWORD'),
       ssl: env.bool('DATABASE_SSL', false)
         ? {
-            rejectUnauthorized: env.bool('DATABASE_SSL_REJECT_UNAUTHORIZED', true),
+            // Neon/pooler often needs false unless you pin the CA.
+            rejectUnauthorized: env.bool('DATABASE_SSL_REJECT_UNAUTHORIZED', false),
           }
         : false,
     },
